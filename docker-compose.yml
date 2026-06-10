@@ -41,5 +41,23 @@ services:
       redis:
         condition: service_healthy
 
+  worker:
+    build:
+      context: .
+      dockerfile: worker.Dockerfile
+    environment:
+      DATABASE_URL: postgresql://aidaily:aidaily_dev@postgres:5432/aidaily
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CRAWLEE_STORAGE_DIR: /tmp/crawlee-storage
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
 volumes:
   postgres_data:
