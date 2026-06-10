@@ -852,22 +852,22 @@ export const env = envSchema.parse(process.env);
 | A6 | BullMQ workers keep process alive automatically | Pitfalls | Based on BullMQ docs -- workers are event-driven. Risk: LOW |
 | A7 | Crawlee default storage directory is `./storage/` | Pitfalls | Based on Crawlee docs. Risk: LOW |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **pnpm vs npm on this machine**
    - What we know: pnpm is not installed; npm 11.4.2 is available
    - What's unclear: Whether to install pnpm or use npm for Phase 1
-   - Recommendation: Install pnpm (`npm install -g pnpm`) as specified in CLAUDE.md, or use npm as fallback. The Docker images can use npm internally regardless.
+   - RESOLVED: Install pnpm (`npm install -g pnpm`) as specified in CLAUDE.md. Docker images can use npm internally regardless. Plan 01-01 Task 1 runs `pnpm init` and `pnpm install`.
 
 2. **Playwright browser binaries in Docker**
    - What we know: Playwright requires browser binaries (Chromium ~400MB)
    - What's unclear: Whether to use `mcr.microsoft.com/playwright` base image or install browsers manually
-   - Recommendation: Use Crawlee's built-in Playwright installation (`npx playwright install chromium`) in the worker Dockerfile. Consider `mcr.microsoft.com/playwright:latest` as base image to avoid download on every build.
+   - RESOLVED: Use Crawlee's built-in Playwright installation (`npx playwright install chromium --with-deps`) in the worker Dockerfile. Plan 01-03 Task 1 worker.Dockerfile includes this step.
 
 3. **Worker as separate Dockerfile vs same image**
    - What we know: Next.js app and BullMQ worker are separate processes
    - What's unclear: Whether to use one Dockerfile with different entrypoints or two Dockerfiles
-   - Recommendation: Two Dockerfiles (Dockerfile for Next.js, worker.Dockerfile for worker). Different base requirements: Next.js needs static build output, worker needs Playwright browsers. Keeps images smaller.
+   - RESOLVED: Two Dockerfiles (Dockerfile for Next.js, worker.Dockerfile for worker). Different base requirements: Next.js needs static build output, worker needs Playwright browsers. Plan 01-01 creates Dockerfile, Plan 01-03 creates worker.Dockerfile.
 
 ## Environment Availability
 
