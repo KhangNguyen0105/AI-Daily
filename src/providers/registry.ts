@@ -1,4 +1,5 @@
 import { ProviderAdapter } from './base';
+import { OpenAIAdapter } from './openai/adapter';
 
 /**
  * Explicit adapter registry.
@@ -28,3 +29,6 @@ export function getAdapter(name: string): ProviderAdapter | undefined {
 export function getAllAdapters(): ProviderAdapter[] {
   return Array.from(adapters.values());
 }
+
+// Register all adapters (D-03: explicit import)
+registerAdapter(new OpenAIAdapter());
