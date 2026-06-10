@@ -114,59 +114,59 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DCOL-01 | — | Pending |
-| DCOL-02 | — | Pending |
-| DCOL-03 | — | Pending |
-| DCOL-04 | — | Pending |
-| DCOL-05 | — | Pending |
-| DCOL-06 | — | Pending |
-| DCOL-07 | — | Pending |
-| PRIC-01 | — | Pending |
-| PRIC-02 | — | Pending |
-| PRIC-03 | — | Pending |
-| PRIC-04 | — | Pending |
-| PRIC-05 | — | Pending |
-| PRIC-06 | — | Pending |
-| COST-01 | — | Pending |
-| COST-02 | — | Pending |
-| COST-03 | — | Pending |
-| COST-04 | — | Pending |
-| COST-05 | — | Pending |
-| COST-06 | — | Pending |
-| MDTL-01 | — | Pending |
-| MDTL-02 | — | Pending |
-| MDTL-03 | — | Pending |
-| MDTL-04 | — | Pending |
-| MDTL-05 | — | Pending |
-| MDTL-06 | — | Pending |
-| CONT-01 | — | Pending |
-| CONT-02 | — | Pending |
-| CONT-03 | — | Pending |
-| CONT-04 | — | Pending |
-| INTL-01 | — | Pending |
-| INTL-02 | — | Pending |
-| INTL-03 | — | Pending |
-| INTL-04 | — | Pending |
-| INTL-05 | — | Pending |
-| ADMN-01 | — | Pending |
-| ADMN-02 | — | Pending |
-| ADMN-03 | — | Pending |
-| ADMN-04 | — | Pending |
-| ADMN-05 | — | Pending |
-| ADMN-06 | — | Pending |
-| ADMN-07 | — | Pending |
-| ADMN-08 | — | Pending |
-| ADMN-09 | — | Pending |
-| FRNT-01 | — | Pending |
-| FRNT-02 | — | Pending |
-| FRNT-03 | — | Pending |
-| FRNT-04 | — | Pending |
+| DCOL-01 | Phase 2 | Pending |
+| DCOL-02 | Phase 2 | Pending |
+| DCOL-03 | Phase 2 | Pending |
+| DCOL-04 | Phase 2 | Pending |
+| DCOL-05 | Phase 2 | Pending |
+| DCOL-06 | Phase 1 | Pending |
+| DCOL-07 | Phase 2 | Pending |
+| PRIC-01 | Phase 3 | Pending |
+| PRIC-02 | Phase 3 | Pending |
+| PRIC-03 | Phase 3 | Pending |
+| PRIC-04 | Phase 3 | Pending |
+| PRIC-05 | Phase 3 | Pending |
+| PRIC-06 | Phase 3 | Pending |
+| COST-01 | Phase 4 | Pending |
+| COST-02 | Phase 4 | Pending |
+| COST-03 | Phase 4 | Pending |
+| COST-04 | Phase 4 | Pending |
+| COST-05 | Phase 4 | Pending |
+| COST-06 | Phase 4 | Pending |
+| MDTL-01 | Phase 5 | Pending |
+| MDTL-02 | Phase 5 | Pending |
+| MDTL-03 | Phase 5 | Pending |
+| MDTL-04 | Phase 5 | Pending |
+| MDTL-05 | Phase 5 | Pending |
+| MDTL-06 | Phase 5 | Pending |
+| CONT-01 | Phase 6 | Pending |
+| CONT-02 | Phase 6 | Pending |
+| CONT-03 | Phase 6 | Pending |
+| CONT-04 | Phase 6 | Pending |
+| INTL-01 | Phase 7 | Pending |
+| INTL-02 | Phase 7 | Pending |
+| INTL-03 | Phase 7 | Pending |
+| INTL-04 | Phase 7 | Pending |
+| INTL-05 | Phase 7 | Pending |
+| ADMN-01 | Phase 8 | Pending |
+| ADMN-02 | Phase 8 | Pending |
+| ADMN-03 | Phase 8 | Pending |
+| ADMN-04 | Phase 8 | Pending |
+| ADMN-05 | Phase 8 | Pending |
+| ADMN-06 | Phase 8 | Pending |
+| ADMN-07 | Phase 8 | Pending |
+| ADMN-08 | Phase 8 | Pending |
+| ADMN-09 | Phase 8 | Pending |
+| FRNT-01 | Phase 1 | Pending |
+| FRNT-02 | Phase 1 | Pending |
+| FRNT-03 | Phase 3 | Pending |
+| FRNT-04 | Phase 3 | Pending |
 
 **Coverage:**
 - v1 requirements: 44 total
-- Mapped to phases: 0 (pending roadmap creation)
-- Unmapped: 44 ⚠️
+- Mapped to phases: 44 (roadmap created)
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-06-10*
-*Last updated: 2026-06-10 after initial definition*
+*Last updated: 2026-06-10 after roadmap creation*
