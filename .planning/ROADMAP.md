@@ -34,7 +34,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. The BullMQ pipeline flow (collect -> extract -> score -> generate) executes end-to-end with test data
   4. The Next.js app serves a public page at localhost:3000 with "AI Daily" branding and no registration/login prompts
   5. Database schema supports all core tables (sources, raw_data, extractions, articles, pipeline_runs, practical_costs)
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 01-01-PLAN.md — Project scaffold: Next.js 16, Docker Compose (PostgreSQL, Redis, app), Drizzle schema with 6 tables, public landing page
+- [ ] 01-02-PLAN.md — Provider adapter pattern: abstract base class, explicit registry, OpenAI adapter with crawl/extract/normalize
+- [ ] 01-03-PLAN.md — BullMQ pipeline: 4 queues with chaining, worker entry point, landing page displays extracted data
 
 ### Phase 2: Data Collection Pipeline
 **Goal**: The system automatically collects, extracts, and scores pricing data from 10+ AI providers daily with confidence scoring and hallucination prevention.
@@ -138,7 +142,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Pipeline Core | 0/0 | Not started | - |
+| 1. Foundation & Pipeline Core | 0/3 | Planning complete | - |
 | 2. Data Collection Pipeline | 0/0 | Not started | - |
 | 3. Pricing Comparison Table | 0/0 | Not started | - |
 | 4. Practical Cost Calculator | 0/0 | Not started | - |
