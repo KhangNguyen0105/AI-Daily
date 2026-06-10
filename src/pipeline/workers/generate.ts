@@ -69,7 +69,7 @@ export function createGenerateWorker(): Worker<GenerateJobData, GenerateJobResul
   });
 
   worker.on('completed', (job) => {
-    console.log(`Generate job ${job.id} completed: article ${job.returnValue.articleId}`);
+    console.log(`Generate job ${job.id} completed: article ${job.returnvalue.articleId}`);
   });
 
   worker.on('failed', (job, err) => {

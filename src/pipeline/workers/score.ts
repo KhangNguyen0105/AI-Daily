@@ -60,7 +60,7 @@ export function createScoreWorker(): Worker<ScoreJobData, ScoreJobResult> {
   });
 
   worker.on('completed', (job) => {
-    console.log(`Score job ${job.id} completed: ${job.returnValue.scored} extractions scored`);
+    console.log(`Score job ${job.id} completed: ${job.returnvalue.scored} extractions scored`);
   });
 
   worker.on('failed', (job, err) => {

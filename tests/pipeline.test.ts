@@ -21,7 +21,7 @@ vi.mock('bullmq', () => {
   const mockWorker = vi.fn().mockImplementation((name: string, handler: any, options: any) => ({
     name,
     handler,
-    options,
+    opts: options,
     on: vi.fn(),
     close: vi.fn(),
   }));
@@ -101,7 +101,8 @@ describe('BullMQ Pipeline Queues', () => {
     const queues = [collectQueue, extractQueue, scoreQueue, generateQueue];
 
     for (const queue of queues) {
-      expect(queue.defaultJobOptions.backoff.type).toBe('exponential');
+      const backoff = queue.defaultJobOptions.backoff as { type: string; delay: number };
+      expect(backoff.type).toBe('exponential');
     }
   });
 
@@ -110,7 +111,8 @@ describe('BullMQ Pipeline Queues', () => {
     const queues = [collectQueue, extractQueue, scoreQueue, generateQueue];
 
     for (const queue of queues) {
-      expect(queue.defaultJobOptions.backoff.delay).toBe(1000);
+      const backoff = queue.defaultJobOptions.backoff as { type: string; delay: number };
+      expect(backoff.delay).toBe(1000);
     }
   });
 });
@@ -158,7 +160,7 @@ describe('Pipeline Workers', () => {
     ];
 
     for (const worker of workers) {
-      expect(worker.options.concurrency).toBe(1);
+      expect((worker as any).opts.concurrency).toBe(1);
     }
   });
 });

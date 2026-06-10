@@ -114,7 +114,7 @@ export function createExtractWorker(): Worker<ExtractJobData, ExtractJobResult> 
   });
 
   worker.on('completed', (job) => {
-    console.log(`Extract job ${job.id} completed: ${job.returnValue.extractionIds.length} extractions`);
+    console.log(`Extract job ${job.id} completed: ${job.returnvalue.extractionIds.length} extractions`);
   });
 
   worker.on('failed', (job, err) => {
