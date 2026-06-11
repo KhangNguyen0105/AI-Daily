@@ -2,7 +2,7 @@ import { getAllAdapters } from '../providers/registry';
 import { collectQueue } from './queues';
 import { db } from '../db/index';
 import { pipelineRuns } from '../db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 
 /**
  * Pipeline run statistics tracked across all stages.
@@ -75,41 +75,48 @@ export async function orchestrateDailyRun(): Promise<number> {
 /**
  * Merge partial stats updates into an existing pipeline run's stats.
  *
+ * WR-06: Uses per-field atomic JSONB updates to avoid TOCTOU race condition.
+ * Each numeric field is incremented in its own atomic jsonb_set operation,
+ * preventing lost updates when multiple workers call this concurrently.
+ *
  * @param pipelineRunId - The pipeline run to update
- * @param updates - Partial stats to merge into the existing stats
+ * @param updates - Partial stats to merge. Numeric values are treated as deltas
+ *                  (increment by value), non-numeric values are replaced.
  */
 export async function updatePipelineStats(
   pipelineRunId: number,
   updates: Partial<PipelineStats>,
 ): Promise<void> {
-  const rows = await db
-    .select()
-    .from(pipelineRuns)
-    .where(eq(pipelineRuns.id, pipelineRunId))
-    .limit(1);
-
-  if (rows.length === 0) {
-    throw new Error(`Pipeline run not found: ${pipelineRunId}`);
-  }
-
-  const currentStats = (rows[0].stats as PipelineStats) ?? ({} as PipelineStats);
-
-  // Additive merge: numeric fields are treated as deltas (increment by value),
-  // non-numeric fields are replaced. This allows workers to pass
-  // { attempted: 1, succeeded: 1 } and have counts accumulate correctly.
-  const merged = { ...currentStats } as Record<string, unknown>;
+  // Process numeric fields with atomic increments using jsonb_set
+  // This is safe under concurrent workers because each UPDATE is atomic
   for (const [key, value] of Object.entries(updates)) {
-    if (typeof value === 'number' && typeof merged[key] === 'number') {
-      merged[key] = (merged[key] as number) + value;
-    } else {
-      merged[key] = value;
+    if (typeof value === 'number') {
+      await db
+        .update(pipelineRuns)
+        .set({
+          stats: sql`jsonb_set(
+            COALESCE(${pipelineRuns.stats}, '{}'::jsonb),
+            ${`{"${key}"}`},
+            to_jsonb(COALESCE((${pipelineRuns.stats} ->> ${key})::int, 0) + ${value})
+          )`,
+          updatedAt: new Date(),
+        })
+        .where(eq(pipelineRuns.id, pipelineRunId));
     }
   }
 
-  await db
-    .update(pipelineRuns)
-    .set({ stats: merged as unknown as PipelineStats, updatedAt: new Date() })
-    .where(eq(pipelineRuns.id, pipelineRunId));
+  // Process non-numeric fields with simple merge
+  const nonNumericEntries = Object.entries(updates).filter(([, v]) => typeof v !== 'number');
+  if (nonNumericEntries.length > 0) {
+    const mergeObj = Object.fromEntries(nonNumericEntries);
+    await db
+      .update(pipelineRuns)
+      .set({
+        stats: sql`COALESCE(${pipelineRuns.stats}, '{}'::jsonb) || ${JSON.stringify(mergeObj)}::jsonb`,
+        updatedAt: new Date(),
+      })
+      .where(eq(pipelineRuns.id, pipelineRunId));
+  }
 }
 
 /**
