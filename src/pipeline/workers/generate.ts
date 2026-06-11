@@ -1,4 +1,5 @@
 import { Worker, Job } from 'bullmq';
+import { redisConnection } from '../connection';
 import { db } from '../../db/index';
 import { articles } from '../../db/schema';
 
@@ -15,14 +16,6 @@ export interface GenerateJobData {
 export interface GenerateJobResult {
   articleId: number;
 }
-
-/**
- * Redis connection configuration.
- */
-const connection = {
-  host: process.env.REDIS_HOST ?? 'localhost',
-  port: parseInt(process.env.REDIS_PORT ?? '6379'),
-};
 
 /**
  * Create the generate worker for the fourth and final pipeline stage.
@@ -60,7 +53,7 @@ export function createGenerateWorker(): Worker<GenerateJobData, GenerateJobResul
 
       return { articleId };
     },
-    { connection, concurrency: 1 }
+    { connection: redisConnection, concurrency: 1 }
   );
 
   // Per Pitfall 1: Error handler prevents silent crashes

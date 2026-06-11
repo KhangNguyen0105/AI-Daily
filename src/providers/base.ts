@@ -30,7 +30,7 @@ export interface ExtractionResult {
   outputPricePer1m: number | null;
   contextWindow: number | null;
   confidence: 'verified' | 'likely' | 'low_confidence';
-  rawEvidence: string;
+  rawEvidence: unknown;
 }
 
 /**

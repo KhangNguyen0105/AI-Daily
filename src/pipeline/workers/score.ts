@@ -1,5 +1,6 @@
 import { Worker, Job } from 'bullmq';
 import { generateQueue } from '../queues';
+import { redisConnection } from '../connection';
 
 /**
  * Job data for the score queue.
@@ -14,14 +15,6 @@ export interface ScoreJobData {
 export interface ScoreJobResult {
   scored: number;
 }
-
-/**
- * Redis connection configuration.
- */
-const connection = {
-  host: process.env.REDIS_HOST ?? 'localhost',
-  port: parseInt(process.env.REDIS_PORT ?? '6379'),
-};
 
 /**
  * Create the score worker for the third pipeline stage.
@@ -39,6 +32,12 @@ export function createScoreWorker(): Worker<ScoreJobData, ScoreJobResult> {
     async (job: Job<ScoreJobData>) => {
       const { extractionIds } = job.data;
 
+      // Guard: skip generate step when there are no extractions (WR-07)
+      if (extractionIds.length === 0) {
+        console.log('Score worker: No extractions to score, skipping generate step');
+        return { scored: 0 };
+      }
+
       // Phase 1: Pass-through scoring
       // Confidence was already set during extraction (D-06)
       // Phase 2 will add real scoring based on source tier and extraction completeness
@@ -51,7 +50,7 @@ export function createScoreWorker(): Worker<ScoreJobData, ScoreJobResult> {
 
       return { scored: extractionIds.length };
     },
-    { connection, concurrency: 1 }
+    { connection: redisConnection, concurrency: 1 }
   );
 
   // Per Pitfall 1: Error handler prevents silent crashes

@@ -1,9 +1,9 @@
 import { Worker, Job } from 'bullmq';
 import { getAdapter } from '../../providers/registry';
 import { extractQueue } from '../queues';
+import { redisConnection } from '../connection';
 import { db } from '../../db/index';
 import { sources, rawData } from '../../db/schema';
-import { eq } from 'drizzle-orm';
 
 /**
  * Job data for the collect queue.
@@ -19,14 +19,6 @@ export interface CollectJobResult {
   rawDataId: number;
   sourceId: number;
 }
-
-/**
- * Redis connection configuration.
- */
-const connection = {
-  host: process.env.REDIS_HOST ?? 'localhost',
-  port: parseInt(process.env.REDIS_PORT ?? '6379'),
-};
 
 /**
  * Create the collect worker for the first pipeline stage.
@@ -57,33 +49,22 @@ export function createCollectWorker(): Worker<CollectJobData, CollectJobResult> 
       // Crawl the provider's pricing page
       const crawlResult = await adapter.crawl();
 
-      // Upsert source (get existing or create new)
-      const existingSource = await db
-        .select()
-        .from(sources)
-        .where(eq(sources.name, providerName))
-        .limit(1);
+      // Atomic upsert source (WR-08: prevents race condition)
+      const inserted = await db
+        .insert(sources)
+        .values({
+          name: providerName,
+          url: crawlResult.url,
+          providerType: providerName,
+          isActive: 1,
+        })
+        .onConflictDoUpdate({
+          target: sources.name,
+          set: { url: crawlResult.url, updatedAt: new Date() },
+        })
+        .returning({ id: sources.id });
 
-      let sourceId: number;
-      if (existingSource.length > 0) {
-        sourceId = existingSource[0].id;
-        // Update the URL and timestamp
-        await db
-          .update(sources)
-          .set({ url: crawlResult.url, updatedAt: new Date() })
-          .where(eq(sources.id, sourceId));
-      } else {
-        const inserted = await db
-          .insert(sources)
-          .values({
-            name: providerName,
-            url: crawlResult.url,
-            providerType: providerName,
-            isActive: 1,
-          })
-          .returning({ id: sources.id });
-        sourceId = inserted[0].id;
-      }
+      const sourceId = inserted[0].id;
 
       // Store raw crawl data
       const insertedRaw = await db
@@ -107,7 +88,7 @@ export function createCollectWorker(): Worker<CollectJobData, CollectJobResult> 
 
       return { rawDataId, sourceId };
     },
-    { connection, concurrency: 1 }
+    { connection: redisConnection, concurrency: 1 }
   );
 
   // Per Pitfall 1: Error handler prevents silent crashes

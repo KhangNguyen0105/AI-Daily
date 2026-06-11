@@ -71,6 +71,12 @@ export class OpenAIAdapter extends ProviderAdapter {
         apiKey: process.env.OPENAI_API_KEY,
       });
 
+      // Truncate HTML to ~100K chars to stay within token limits (WR-03)
+      const maxHtmlLength = 100_000;
+      const truncatedHtml = html.length > maxHtmlLength
+        ? html.slice(0, maxHtmlLength) + '\n<!-- TRUNCATED -->'
+        : html;
+
       const { object } = await generateObject({
         model: openai('gpt-4o'),
         schema: pricingSchema,
@@ -79,7 +85,7 @@ Return an array of models with their name, input price per 1M tokens, output pri
 Only extract models that have explicit pricing listed. Skip models marked as "contact sales" or without pricing.
 
 HTML content:
-${html}`,
+${truncatedHtml}`,
       });
 
       return object.models.map((model) => ({
@@ -89,11 +95,12 @@ ${html}`,
         contextWindow: model.contextWindow,
         // Per D-06: Default confidence for AI-extracted data
         confidence: 'likely' as const,
-        rawEvidence: JSON.stringify(model),
+        rawEvidence: model,
       }));
     } catch (error) {
       console.error('OpenAI extraction failed:', error);
-      return [];
+      // Re-throw so BullMQ retries the job (WR-02)
+      throw error;
     }
   }
 

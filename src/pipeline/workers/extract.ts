@@ -1,6 +1,7 @@
 import { Worker, Job } from 'bullmq';
 import { getAdapter } from '../../providers/registry';
 import { scoreQueue } from '../queues';
+import { redisConnection } from '../connection';
 import { db } from '../../db/index';
 import { rawData, extractions } from '../../db/schema';
 import { eq } from 'drizzle-orm';
@@ -20,14 +21,6 @@ export interface ExtractJobData {
 export interface ExtractJobResult {
   extractionIds: number[];
 }
-
-/**
- * Redis connection configuration.
- */
-const connection = {
-  host: process.env.REDIS_HOST ?? 'localhost',
-  port: parseInt(process.env.REDIS_PORT ?? '6379'),
-};
 
 /**
  * Create the extract worker for the second pipeline stage.
@@ -62,7 +55,10 @@ export function createExtractWorker(): Worker<ExtractJobData, ExtractJobResult> 
       }
 
       const rawRecord = rawRows[0];
-      const evidence = rawRecord.evidence as { html: string };
+      const evidence = rawRecord.evidence as Record<string, unknown>;
+      if (typeof evidence?.html !== 'string' || evidence.html.length === 0) {
+        throw new Error(`Invalid evidence format for rawData ${rawDataId}: missing or empty html field`);
+      }
       const html = evidence.html;
 
       // Get the provider adapter
@@ -90,7 +86,7 @@ export function createExtractWorker(): Worker<ExtractJobData, ExtractJobResult> 
             outputPricePer1m: result.outputPricePer1m,
             contextWindow: result.contextWindow,
             confidence: result.confidence,
-            rawEvidence: result.rawEvidence ? JSON.parse(result.rawEvidence) : null,
+            rawEvidence: result.rawEvidence ?? null,
             collectedAt: new Date(),
           })
           .returning({ id: extractions.id });
@@ -105,7 +101,7 @@ export function createExtractWorker(): Worker<ExtractJobData, ExtractJobResult> 
 
       return { extractionIds };
     },
-    { connection, concurrency: 1 }
+    { connection: redisConnection, concurrency: 1 }
   );
 
   // Per Pitfall 1: Error handler prevents silent crashes

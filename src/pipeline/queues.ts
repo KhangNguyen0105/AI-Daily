@@ -1,13 +1,5 @@
 import { Queue } from 'bullmq';
-
-/**
- * Redis connection configuration for BullMQ queues.
- * Uses environment variables with localhost defaults for development.
- */
-const connection = {
-  host: process.env.REDIS_HOST ?? 'localhost',
-  port: parseInt(process.env.REDIS_PORT ?? '6379'),
-};
+import { redisConnection } from './connection';
 
 /**
  * Create a BullMQ queue with standard configuration.
@@ -19,7 +11,7 @@ const connection = {
  */
 export function createQueue(name: string): Queue {
   return new Queue(name, {
-    connection,
+    connection: redisConnection,
     defaultJobOptions: {
       attempts: 3,
       backoff: {

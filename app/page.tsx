@@ -1,6 +1,9 @@
+import { type InferSelectModel } from 'drizzle-orm';
 import { db } from '@/src/db/index';
 import { extractions } from '@/src/db/schema';
 import { desc } from 'drizzle-orm';
+
+type ExtractionRow = InferSelectModel<typeof extractions>;
 
 /**
  * ISR: Revalidate every 60 seconds.
@@ -8,6 +11,16 @@ import { desc } from 'drizzle-orm';
  * Per D-15: Display extracted data on minimal page.
  */
 export const revalidate = 60;
+
+/**
+ * Sanitize display name to prevent Unicode manipulation attacks (WR-01).
+ * Strips bidirectional override characters and enforces length limit.
+ */
+function sanitizeDisplayName(name: string, maxLength = 100): string {
+  // Strip bidirectional override characters (U+202A-U+202E, U+2066-U+2069)
+  const cleaned = name.replace(/[‪-‮⁦-⁩]/g, '');
+  return cleaned.length > maxLength ? cleaned.slice(0, maxLength) + '...' : cleaned;
+}
 
 /**
  * Confidence badge color mapping.
@@ -51,11 +64,18 @@ function formatContextWindow(tokens: number | null): string {
 export default async function HomePage() {
   // Query latest extractions from PostgreSQL
   // This runs at revalidation time (ISR), not on every request
-  const pricingData = await db
-    .select()
-    .from(extractions)
-    .orderBy(desc(extractions.createdAt))
-    .limit(50);
+  // Wrapped in try-catch to handle build-time when DB is unavailable
+  let pricingData: ExtractionRow[] = [];
+  try {
+    pricingData = await db
+      .select()
+      .from(extractions)
+      .orderBy(desc(extractions.createdAt))
+      .limit(50);
+  } catch {
+    // DB not available during build — show empty state
+    pricingData = [];
+  }
 
   return (
     <main className="min-h-screen bg-white text-gray-900">
@@ -113,7 +133,7 @@ export default async function HomePage() {
                     className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
                   >
                     <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                      {row.modelName}
+                      {sanitizeDisplayName(String(row.modelName ?? 'Unknown'))}
                     </td>
                     <td className="px-4 py-3 text-sm text-right text-gray-700">
                       {formatPrice(row.inputPricePer1m)}
