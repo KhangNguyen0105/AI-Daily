@@ -95,8 +95,11 @@ export function createExtractWorker(): Worker<ExtractJobData, ExtractJobResult> 
       }
 
       // Chain to score stage (D-10: worker-triggered chaining)
+      // Pass rawDataId and sourceId so score worker can run verification
       await scoreQueue.add('score', {
         extractionIds,
+        rawDataId,
+        sourceId,
       });
 
       return { extractionIds };
