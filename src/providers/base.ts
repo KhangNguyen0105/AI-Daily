@@ -55,9 +55,13 @@ export abstract class ProviderAdapter {
 
   /**
    * Normalize extracted data to the standard format.
-   * Subclasses can map confidence levels, adjust pricing, etc.
+   * IN-04: Default implementation returns extractions unchanged.
+   * Only adapters with provider-specific normalization (e.g., DeepSeek, Bedrock)
+   * need to override this method.
    */
-  abstract normalize(extractions: ExtractionResult[]): ExtractionResult[];
+  normalize(extractions: ExtractionResult[]): ExtractionResult[] {
+    return extractions;
+  }
 
   /**
    * Default crawl implementation using Crawlee PlaywrightCrawler.
@@ -84,7 +88,7 @@ export abstract class ProviderAdapter {
 
     await crawler.run([this.config.pricingUrl]);
     if (!result) {
-      throw new Error(`Failed to crawl ${this.config.pricingUrl}`);
+      throw new Error(`Failed to crawl ${this.config.name} pricing page at ${this.config.pricingUrl}`);
     }
     return result;
   }
