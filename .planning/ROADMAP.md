@@ -13,7 +13,7 @@ AI Daily is an automated AI model pricing intelligence platform. The roadmap bui
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation & Pipeline Core** - Project scaffold with working infrastructure and provider adapter pattern
-- [ ] **Phase 2: Data Collection Pipeline** - Automated collection, extraction, scoring, and verification from 10+ providers
+- [x] **Phase 2: Data Collection Pipeline** - Automated collection, extraction, scoring, and verification from 10+ providers
 - [ ] **Phase 3: Pricing Comparison Table** - Sortable/filterable pricing table with confidence badges and source attribution
 - [ ] **Phase 4: Practical Cost Calculator** - Real-world cost scenarios (prompts, coding, documents, agents) with side-by-side comparison
 - [ ] **Phase 5: Model Detail Pages** - Per-model profile with pricing history, promotions, and provider links
@@ -55,9 +55,9 @@ Plans:
 **Plans**: 4 plans
 Plans:
 - [x] 02-01-PLAN.md — 11 provider adapters: Anthropic, Google, Mistral, Cohere, Groq, Together, Perplexity, xAI, Fireworks, DeepSeek, Bedrock + registry integration
-- [ ] 02-02-PLAN.md — Confidence scoring and two-pass verification: source tier types, confidence calculator, evidence-anchored verification
-- [ ] 02-03-PLAN.md — Pipeline orchestrator and score worker: orchestrateDailyRun, real verification in score worker, stats tracking
-- [ ] 02-04-PLAN.md — Daily scheduler and integration: BullMQ repeatable jobs, worker entry wiring, collect worker pipelineRunId propagation
+- [x] 02-02-PLAN.md — Confidence scoring and two-pass verification: source tier types, confidence calculator, evidence-anchored verification
+- [x] 02-03-PLAN.md — Pipeline orchestrator and score worker: orchestrateDailyRun, real verification in score worker, stats tracking
+- [x] 02-04-PLAN.md — Daily scheduler and integration: BullMQ repeatable jobs, worker entry wiring, collect worker pipelineRunId propagation
 
 ### Phase 3: Pricing Comparison Table
 **Goal**: Users can view, sort, filter, and search a comparison table of AI model pricing with source attribution and confidence indicators.
@@ -149,7 +149,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Pipeline Core | 3/3 | Execution complete | 2026-06-10 |
-| 2. Data Collection Pipeline | 1/4 | Executing | - |
+| 2. Data Collection Pipeline | 4/4 | Execution complete | 2026-06-11 |
 | 3. Pricing Comparison Table | 0/0 | Not started | - |
 | 4. Practical Cost Calculator | 0/0 | Not started | - |
 | 5. Model Detail Pages | 0/0 | Not started | - |
