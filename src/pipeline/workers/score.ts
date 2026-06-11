@@ -2,7 +2,7 @@ import { Worker, Job } from 'bullmq';
 import { generateQueue } from '../queues';
 import { redisConnection } from '../connection';
 import { db } from '../../db/index';
-import { rawData, extractions, sources } from '../../db/schema';
+import { rawData, extractions } from '../../db/schema';
 import { eq, inArray } from 'drizzle-orm';
 import { verifyExtraction } from '../verification';
 import { calculateConfidence } from '../confidence';
@@ -88,14 +88,10 @@ export function createScoreWorker(): Worker<ScoreJobData, ScoreJobResult> {
         return { scored: 0, verified: 0, likely: 0, lowConfidence: 0 };
       }
 
-      // Look up source name for tier determination
-      const sourceRows = await db
-        .select()
-        .from(sources)
-        .where(eq(sources.id, sourceId))
-        .limit(1);
-
-      // Default to tier1 -- all providers crawl official pricing pages
+      // IN-05: All providers crawl official pricing pages, so tier is always 'tier1'.
+      // The SourceTier system (tier1/tier2/tier3) is defined in types.ts for future
+      // use when we add non-official sources (API docs, changelogs, aggregators).
+      // When that happens, read the tier from the sources table instead of hardcoding.
       const tier = 'tier1' as const;
 
       // Track confidence distribution
