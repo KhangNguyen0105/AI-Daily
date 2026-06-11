@@ -52,7 +52,12 @@ Plans:
   3. Each extraction receives a confidence score (verified/likely/low-confidence) based on source tier and completeness
   4. Two-pass verification flags and quarantines extractions where the second pass disagrees with the first
   5. A pipeline run completes within 30 minutes and logs structured stats (sources attempted, succeeded, failed)
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [x] 02-01-PLAN.md — 11 provider adapters: Anthropic, Google, Mistral, Cohere, Groq, Together, Perplexity, xAI, Fireworks, DeepSeek, Bedrock + registry integration
+- [ ] 02-02-PLAN.md — Confidence scoring and two-pass verification: source tier types, confidence calculator, evidence-anchored verification
+- [ ] 02-03-PLAN.md — Pipeline orchestrator and score worker: orchestrateDailyRun, real verification in score worker, stats tracking
+- [ ] 02-04-PLAN.md — Daily scheduler and integration: BullMQ repeatable jobs, worker entry wiring, collect worker pipelineRunId propagation
 
 ### Phase 3: Pricing Comparison Table
 **Goal**: Users can view, sort, filter, and search a comparison table of AI model pricing with source attribution and confidence indicators.
@@ -144,7 +149,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Pipeline Core | 3/3 | Execution complete | 2026-06-10 |
-| 2. Data Collection Pipeline | 0/0 | Not started | - |
+| 2. Data Collection Pipeline | 1/4 | Executing | - |
 | 3. Pricing Comparison Table | 0/0 | Not started | - |
 | 4. Practical Cost Calculator | 0/0 | Not started | - |
 | 5. Model Detail Pages | 0/0 | Not started | - |
