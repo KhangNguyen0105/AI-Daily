@@ -180,14 +180,203 @@ No project skills found. Add skills to any of: `.claude/skills/`, `.agents/skill
 <!-- GSD:workflow-start source:GSD defaults -->
 ## GSD Workflow Enforcement
 
-Before using Edit, Write, or other file-changing tools, start work through a GSD command so planning artifacts and execution context stay in sync.
+All repository-changing work must be executed through GSD. Do not use Edit, Write, file-moving, dependency-changing, migration-changing, or formatting tools before entering an appropriate GSD workflow.
 
 Use these entry points:
-- `/gsd-quick` for small fixes, doc updates, and ad-hoc tasks
-- `/gsd-debug` for investigation and bug fixing
-- `/gsd-execute-phase` for planned phase work
+- `/gsd-quick` for small fixes, documentation updates, and ad-hoc tasks
+- `/gsd-debug` for investigation, regression analysis, and bug fixing
+- `/gsd-plan-phase <phase-number>` before starting planned phase work
+- `/gsd-execute-phase <phase-number> --wave <wave-number>` for implementation work
+- `/gsd-code-review <phase-number> --depth=quick` after implementation
+- `/gsd-verify-work <phase-number>` before committing or merging
 
-Do not make direct repo edits outside a GSD workflow unless the user explicitly asks to bypass it.
+For broad tasks, project-wide scans, refactors, security checks, endpoint audits, or unclear bugs, fan out subagents first so multiple areas can be inspected in parallel before implementation.
+
+Do not make direct repo edits outside a GSD workflow unless the user explicitly asks to bypass GSD.
+
+## Git Branching Policy for GSD
+
+The branch hierarchy is:
+
+```text
+main
+└── dev
+    └── phase/<milestone-slug>/phase-<number>-<short-task-slug>
+```
+
+Rules:
+- `main` is stable production.
+- `dev` is the integration branch for completed milestones.
+- Every phase must be implemented on its own phase branch created from the latest `dev`.
+- Never commit directly to `main`.
+- Never commit directly to `dev` for phase implementation work.
+- A phase branch may contain multiple commits if the phase is large.
+- Each completed phase must be committed and pushed to its own remote phase branch.
+- Completed phase branches are merged into `dev` only when the whole milestone is complete and verified.
+- After the milestone is merged into `dev`, merge `dev` into `main`.
+- Do not force-push shared branches unless the user explicitly requests it.
+- Do not push secrets, `.env` files, database dumps, build output, runtime logs, IDE folders, or temporary files.
+
+## Required Start-of-Work Checklist
+
+Before making changes:
+
+```bash
+git status
+git fetch origin
+git checkout dev
+git pull origin dev
+```
+
+If the working tree is dirty before starting:
+1. Stop.
+2. Report the existing modified/untracked files.
+3. Ask whether to preserve, stash, commit, or discard them.
+
+Then create a phase branch from `dev`:
+
+```bash
+git checkout -b phase/<milestone-slug>/phase-<number>-<short-task-slug>
+```
+
+Example:
+
+```bash
+git checkout -b phase/provider-adapters/phase-1-openai-seed-adapter
+```
+
+## Required Phase Workflow
+
+For each phase:
+
+1. Check current status:
+   ```bash
+   /gsd-progress
+   ```
+
+2. Plan the phase:
+   ```bash
+   /gsd-plan-phase <phase-number>
+   ```
+
+3. Execute the phase
+   ```bash
+   /gsd-execute-phase <phase-number>
+   ```
+
+4. Debug if needed:
+   ```bash
+   /gsd-debug
+   ```
+
+5. Review:
+   ```bash
+   /gsd-code-review <phase-number> --depth=deep --fix --auto
+   ```
+
+6. Verify:
+   ```bash
+   /gsd-verify-work <phase-number>
+   ```
+
+7. Commit and push the phase branch:
+   ```bash
+   git status
+   git add <intended-files-only>
+   git commit -m "phase <phase-number>: <clear summary>"
+   git push -u origin phase/<milestone-slug>/phase-<number>-<short-task-slug>
+   ```
+
+After pushing a phase branch, report:
+- Phase number and branch name
+- Root cause or goal
+- Files changed
+- Tests/checks run
+- Remaining risks
+- Whether the phase is ready for milestone merge
+
+## Required Milestone Completion Workflow
+
+When all phases in a milestone are complete, reviewed, verified, committed, and pushed:
+
+1. Merge each completed phase branch into `dev`:
+   ```bash
+   git checkout dev
+   git pull origin dev
+   git merge --no-ff phase/<milestone-slug>/phase-<number>-<short-task-slug>
+   ```
+
+2. Run the full verification suite after all phase branches are merged into `dev`.
+
+3. Push `dev`:
+   ```bash
+   git push origin dev
+   ```
+
+4. Merge `dev` into `main`:
+   ```bash
+   git checkout main
+   git pull origin main
+   git merge --no-ff dev
+   ```
+
+5. Run final production-readiness verification on `main`.
+
+6. Push `main`:
+   ```bash
+   git push origin main
+   ```
+
+After completing the milestone merge, report:
+- Milestone name
+- Phase branches merged
+- Verification results on `dev`
+- Verification results on `main`
+- Final commit hashes for `dev` and `main`
+- Any deployment notes
+
+## Safety Gates
+
+Stop and report before committing, pushing, or merging if:
+- Tests fail.
+- Build fails.
+- Lint/typecheck fails.
+- There are unresolved merge conflicts.
+- A migration is required but not documented.
+- Secrets or sensitive files appear in `git status`.
+- The branch is not based on the latest `dev`.
+- The change affects authentication, authorization, payments, admin access, scheduled jobs, database schema, or production deployment and has not been verified.
+
+## Default Command Sequence
+
+Use this default sequence for normal planned work:
+
+```bash
+/gsd-progress
+/gsd-plan-phase <phase-number>
+/gsd-execute-phase <phase-number> --wave 1
+/gsd-execute-phase <phase-number> --wave 2
+/gsd-code-review <phase-number> --depth=quick
+/gsd-verify-work <phase-number>
+git status
+git add <intended-files-only>
+git commit -m "phase <phase-number>: <clear summary>"
+git push -u origin phase/<milestone-slug>/phase-<number>-<short-task-slug>
+```
+
+At milestone completion:
+
+```bash
+git checkout dev
+git pull origin dev
+git merge --no-ff <completed-phase-branch>
+git push origin dev
+
+git checkout main
+git pull origin main
+git merge --no-ff dev
+git push origin main
+```
 <!-- GSD:workflow-end -->
 
 

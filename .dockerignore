@@ -1,0 +1,9 @@
+node_modules
+.next
+.git
+.planning
+*.md
+.env
+.env.*
+docker-compose.yml
+docker-compose.*.yml

@@ -1,7 +1,10 @@
 allowBuilds:
-  esbuild: set this to true or false
-  msgpackr-extract: set this to true or false
-  sharp: set this to true or false
+  esbuild: true
+  msgpackr-extract: true
+  sharp: true
+  next: true
+  '@next/swc-linux-x64-musl': true
+  '@next/swc-linux-x64-gnu': true
 minimumReleaseAgeExclude:
   - '@ai-sdk/gateway@3.0.127'
   - '@next/env@16.2.9'
