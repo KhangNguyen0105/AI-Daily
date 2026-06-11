@@ -1,6 +1,6 @@
 import { Queue, Worker } from 'bullmq';
 import { redisConnection } from './connection';
-import { orchestrateDailyRun } from './orchestrator';
+import { orchestrateDailyRun, finalizePipelineRun } from './orchestrator';
 
 /**
  * Cron pattern for daily collection at 6:00 AM UTC.
@@ -72,6 +72,14 @@ export function createDailyPipelineWorker(): Worker {
     async (job) => {
       console.log(`Daily pipeline triggered by job ${job.id}`);
       const runId = await orchestrateDailyRun();
+
+      // CR-03: Finalize pipeline run after all collect jobs are enqueued.
+      // TODO: In production, finalization should happen when the last
+      // generate job completes (requires a completion listener or
+      // a separate "pipeline-finish" queue job). For now, we mark
+      // "completed" here to prevent runs from being stuck as "running" forever.
+      await finalizePipelineRun(runId, 'completed');
+
       return { runId };
     },
     { connection: redisConnection, concurrency: 1 },
