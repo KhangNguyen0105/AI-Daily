@@ -6,6 +6,8 @@ import { rawData, extractions, sources } from '../../db/schema';
 import { eq, inArray } from 'drizzle-orm';
 import { verifyExtraction } from '../verification';
 import { calculateConfidence } from '../confidence';
+import { updatePipelineStats } from '../orchestrator';
+import { env } from '../../lib/env';
 import type { ExtractionResult } from '../../providers/base';
 
 /**
@@ -18,6 +20,7 @@ export interface ScoreJobData {
   extractionIds: number[];
   rawDataId: number;
   sourceId: number;
+  pipelineRunId?: number;
 }
 
 /**
@@ -48,7 +51,7 @@ export function createScoreWorker(): Worker<ScoreJobData, ScoreJobResult> {
   const worker = new Worker<ScoreJobData, ScoreJobResult>(
     'score',
     async (job: Job<ScoreJobData>) => {
-      const { extractionIds, rawDataId, sourceId } = job.data;
+      const { extractionIds, rawDataId, sourceId, pipelineRunId } = job.data;
 
       // Guard: skip generate step when there are no extractions (WR-07)
       if (extractionIds.length === 0) {
@@ -116,10 +119,17 @@ export function createScoreWorker(): Worker<ScoreJobData, ScoreJobResult> {
 
         try {
           // Run two-pass verification via LLM
+          // CR-02: Fail fast if OPENAI_API_KEY is missing instead of silently degrading
+          if (!env.OPENAI_API_KEY) {
+            throw new Error(
+              'OPENAI_API_KEY is not set. Verification cannot proceed. ' +
+              'Set the environment variable and restart the worker.'
+            );
+          }
           const verificationResult = await verifyExtraction(
             html,
             [extractionResult],
-            process.env.OPENAI_API_KEY ?? '',
+            env.OPENAI_API_KEY,
           );
 
           // Calculate confidence from source tier + completeness + verification
@@ -164,10 +174,30 @@ export function createScoreWorker(): Worker<ScoreJobData, ScoreJobResult> {
         `Score worker: ${extractionRows.length} extractions scored — ${verifiedCount} verified, ${likelyCount} likely, ${lowConfidenceCount} low_confidence`,
       );
 
-      // Chain to generate stage (D-10: worker-triggered chaining)
-      await generateQueue.add('generate', {
-        extractionIds,
-      });
+      // WR-01: Update pipeline stats with extraction/confidence counts
+      if (pipelineRunId) {
+        await updatePipelineStats(pipelineRunId, {
+          extractions: extractionRows.length,
+          verifiedCount,
+          likelyCount,
+          lowConfidenceCount,
+        });
+      }
+
+      // WR-05: Only chain to generate when at least one extraction has high confidence
+      const highConfidenceCount = verifiedCount + likelyCount;
+      if (highConfidenceCount > 0) {
+        // Chain to generate stage (D-10: worker-triggered chaining)
+        await generateQueue.add('generate', {
+          extractionIds,
+          pipelineRunId,
+        });
+      } else {
+        console.warn(
+          `Score worker: All ${extractionRows.length} extractions are low_confidence. ` +
+          'Skipping article generation to avoid publishing unreliable data.'
+        );
+      }
 
       return {
         scored: extractionRows.length,
