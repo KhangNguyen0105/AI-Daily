@@ -3,14 +3,10 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from './schema';
 
 const connectionString = process.env.DATABASE_URL;
-if (!connectionString) {
-  throw new Error(
-    'DATABASE_URL environment variable is not set. ' +
-    'Copy .env.example to .env and configure your database connection.'
-  );
-}
 
 export const db = drizzle({
-  connection: { connectionString },
+  connection: {
+    connectionString: connectionString ?? 'postgresql://localhost:5432/placeholder',
+  },
   schema,
 });
