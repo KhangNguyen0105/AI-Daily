@@ -20,7 +20,7 @@ export const confidenceEnum = pgEnum('confidence', [
 // Sources table - provider information
 export const sources = pgTable('sources', {
   id: serial('id').primaryKey(),
-  name: varchar('name', { length: 255 }).notNull(),
+  name: varchar('name', { length: 255 }).notNull().unique(),
   url: text('url').notNull(),
   providerType: varchar('provider_type', { length: 100 }).notNull(),
   isActive: integer('is_active').default(1).notNull(),
