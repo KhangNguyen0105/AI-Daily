@@ -13,6 +13,7 @@ export interface ExtractJobData {
   rawDataId: number;
   providerName: string;
   sourceId: number;
+  pipelineRunId?: number;
 }
 
 /**
@@ -41,7 +42,7 @@ export function createExtractWorker(): Worker<ExtractJobData, ExtractJobResult> 
   const worker = new Worker<ExtractJobData, ExtractJobResult>(
     'extract',
     async (job: Job<ExtractJobData>) => {
-      const { rawDataId, providerName, sourceId } = job.data;
+      const { rawDataId, providerName, sourceId, pipelineRunId } = job.data;
 
       // Fetch raw HTML from database
       const rawRows = await db
@@ -96,10 +97,12 @@ export function createExtractWorker(): Worker<ExtractJobData, ExtractJobResult> 
 
       // Chain to score stage (D-10: worker-triggered chaining)
       // Pass rawDataId and sourceId so score worker can run verification
+      // WR-01: Propagate pipelineRunId for downstream stats tracking
       await scoreQueue.add('score', {
         extractionIds,
         rawDataId,
         sourceId,
+        pipelineRunId,
       });
 
       return { extractionIds };
