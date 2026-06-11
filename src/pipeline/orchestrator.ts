@@ -93,11 +93,22 @@ export async function updatePipelineStats(
   }
 
   const currentStats = (rows[0].stats as PipelineStats) ?? ({} as PipelineStats);
-  const merged: PipelineStats = { ...currentStats, ...updates };
+
+  // Additive merge: numeric fields are treated as deltas (increment by value),
+  // non-numeric fields are replaced. This allows workers to pass
+  // { attempted: 1, succeeded: 1 } and have counts accumulate correctly.
+  const merged = { ...currentStats } as Record<string, unknown>;
+  for (const [key, value] of Object.entries(updates)) {
+    if (typeof value === 'number' && typeof merged[key] === 'number') {
+      merged[key] = (merged[key] as number) + value;
+    } else {
+      merged[key] = value;
+    }
+  }
 
   await db
     .update(pipelineRuns)
-    .set({ stats: merged, updatedAt: new Date() })
+    .set({ stats: merged as unknown as PipelineStats, updatedAt: new Date() })
     .where(eq(pipelineRuns.id, pipelineRunId));
 }
 

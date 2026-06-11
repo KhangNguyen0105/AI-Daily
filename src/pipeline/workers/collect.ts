@@ -4,20 +4,26 @@ import { extractQueue } from '../queues';
 import { redisConnection } from '../connection';
 import { db } from '../../db/index';
 import { sources, rawData } from '../../db/schema';
+import { updatePipelineStats } from '../orchestrator';
 
 /**
  * Job data for the collect queue.
+ * pipelineRunId is passed from the orchestrator so the collect worker
+ * can update pipeline stats as providers complete.
  */
 export interface CollectJobData {
   providerName: string;
+  pipelineRunId?: number;
 }
 
 /**
  * Return data from the collect worker.
+ * pipelineRunId is passed through for downstream stages.
  */
 export interface CollectJobResult {
   rawDataId: number;
   sourceId: number;
+  pipelineRunId?: number;
 }
 
 /**
@@ -31,6 +37,7 @@ export interface CollectJobResult {
  * 3. Upserts the source in the sources table
  * 4. Stores raw HTML in rawData table
  * 5. Chains to extractQueue with rawDataId
+ * 6. Updates pipeline stats (attempted/succeeded/failed)
  *
  * @returns BullMQ Worker instance for the 'collect' queue
  */
@@ -38,7 +45,7 @@ export function createCollectWorker(): Worker<CollectJobData, CollectJobResult> 
   const worker = new Worker<CollectJobData, CollectJobResult>(
     'collect',
     async (job: Job<CollectJobData>) => {
-      const { providerName } = job.data;
+      const { providerName, pipelineRunId } = job.data;
 
       // Get the provider adapter
       const adapter = getAdapter(providerName);
@@ -80,13 +87,23 @@ export function createCollectWorker(): Worker<CollectJobData, CollectJobResult> 
       const rawDataId = insertedRaw[0].id;
 
       // Chain to extract stage (D-10: worker-triggered chaining)
+      // Propagate pipelineRunId for downstream stats tracking
       await extractQueue.add('extract', {
         rawDataId,
         providerName,
         sourceId,
+        pipelineRunId,
       });
 
-      return { rawDataId, sourceId };
+      // Update pipeline stats: provider succeeded
+      if (pipelineRunId) {
+        await updatePipelineStats(pipelineRunId, {
+          attempted: 1,
+          succeeded: 1,
+        });
+      }
+
+      return { rawDataId, sourceId, pipelineRunId };
     },
     { connection: redisConnection, concurrency: 1 }
   );
@@ -102,6 +119,15 @@ export function createCollectWorker(): Worker<CollectJobData, CollectJobResult> 
 
   worker.on('failed', (job, err) => {
     console.error(`Collect job ${job?.id} failed:`, err.message);
+
+    // Update pipeline stats: provider failed
+    // Use .catch() to prevent error handler from throwing
+    if (job?.data.pipelineRunId) {
+      updatePipelineStats(job.data.pipelineRunId, {
+        attempted: 1,
+        failed: 1,
+      }).catch(() => {});
+    }
   });
 
   return worker;
