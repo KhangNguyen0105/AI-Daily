@@ -55,8 +55,9 @@ describe('OpenAIAdapter', () => {
     ];
     const result = adapter.normalize(input);
     expect(result).toHaveLength(2);
-    expect(result[0].confidence).toBe('likely');
-    expect(result[1].confidence).toBe('likely');
+    // IN-04: normalize() is now identity — confidence passes through unchanged
+    expect(result[0].confidence).toBe('low_confidence');
+    expect(result[1].confidence).toBe('verified');
   });
 });
 

@@ -145,18 +145,8 @@ describe('Orchestrator', () => {
       const { db } = await import('../../src/db/index');
       const { updatePipelineStats } = await import('../../src/pipeline/orchestrator');
 
-      // Mock select to return empty array
-      (db.select as any).mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue([]),
-          }),
-        }),
-      });
-
-      await expect(updatePipelineStats(999, { succeeded: 1 })).rejects.toThrow(
-        'Pipeline run not found: 999',
-      );
+      // WR-06: Atomic JSONB updates are no-ops on non-existent rows (no throw)
+      await expect(updatePipelineStats(999, { succeeded: 1 })).resolves.toBeUndefined();
     });
   });
 
