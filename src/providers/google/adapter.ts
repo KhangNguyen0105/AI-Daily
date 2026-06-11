@@ -1,55 +1,27 @@
-import { PlaywrightCrawler } from 'crawlee';
 import { generateObject } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
-import { z } from 'zod';
 import { ProviderAdapter } from '../base';
-import type { CrawlResult, ExtractionResult } from '../base';
+import type { ExtractionResult } from '../base';
+import { pricingSchema } from '../schemas';
+import { env } from '../../lib/env';
 import { googleConfig } from './config';
 
-const pricingSchema = z.object({
-  models: z.array(
-    z.object({
-      modelName: z.string(),
-      inputPricePer1m: z.number(),
-      outputPricePer1m: z.number(),
-      contextWindow: z.number(),
-    })
-  ),
-});
+/**
+ * Google provider adapter.
+ *
+ * CR-05: Uses validated env module instead of raw process.env.
+ * IN-01: Uses base class crawl() implementation.
+ * IN-02: Uses shared pricingSchema from schemas.ts.
+ * IN-03: OpenAI client created once at module level.
+ * IN-04: Uses base class default normalize().
+ */
+const openai = createOpenAI({ apiKey: env.OPENAI_API_KEY });
 
 export class GoogleAdapter extends ProviderAdapter {
   config = googleConfig;
 
-  async crawl(): Promise<CrawlResult> {
-    let result: CrawlResult | null = null;
-
-    const crawler = new PlaywrightCrawler({
-      maxRequestsPerCrawl: 1,
-      headless: true,
-      async requestHandler({ page, request, log }) {
-        log.info(`Crawling ${request.loadedUrl ?? request.url}`);
-        const html = await page.content();
-        result = {
-          url: request.loadedUrl ?? request.url,
-          html,
-          crawledAt: new Date(),
-        };
-      },
-    });
-
-    await crawler.run([this.config.pricingUrl]);
-    if (!result) {
-      throw new Error('Failed to crawl Google AI pricing page');
-    }
-    return result;
-  }
-
   async extract(html: string): Promise<ExtractionResult[]> {
     try {
-      const openai = createOpenAI({
-        apiKey: process.env.OPENAI_API_KEY,
-      });
-
       const maxHtmlLength = 100_000;
       const truncatedHtml = html.length > maxHtmlLength
         ? html.slice(0, maxHtmlLength) + '\n<!-- TRUNCATED -->'
@@ -80,12 +52,5 @@ ${truncatedHtml}`,
       console.error('Google extraction failed:', error);
       throw error;
     }
-  }
-
-  normalize(extractions: ExtractionResult[]): ExtractionResult[] {
-    return extractions.map((e) => ({
-      ...e,
-      confidence: 'likely' as const,
-    }));
   }
 }
