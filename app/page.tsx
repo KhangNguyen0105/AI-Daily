@@ -2,6 +2,7 @@ import { type InferSelectModel } from 'drizzle-orm';
 import { db } from '@/src/db/index';
 import { extractions } from '@/src/db/schema';
 import { desc } from 'drizzle-orm';
+import { formatPrice, formatContextWindow, sanitizeDisplayName, getConfidenceColor } from '@/app/lib/pricing-utils';
 
 type ExtractionRow = InferSelectModel<typeof extractions>;
 
@@ -11,50 +12,6 @@ type ExtractionRow = InferSelectModel<typeof extractions>;
  * Per D-15: Display extracted data on minimal page.
  */
 export const revalidate = 60;
-
-/**
- * Sanitize display name to prevent Unicode manipulation attacks (WR-01).
- * Strips bidirectional override characters and enforces length limit.
- */
-function sanitizeDisplayName(name: string, maxLength = 100): string {
-  // Strip bidirectional override characters (U+202A-U+202E, U+2066-U+2069)
-  const cleaned = name.replace(/[‪-‮⁦-⁩]/g, '');
-  return cleaned.length > maxLength ? cleaned.slice(0, maxLength) + '...' : cleaned;
-}
-
-/**
- * Confidence badge color mapping.
- */
-function getConfidenceColor(confidence: string): string {
-  switch (confidence) {
-    case 'verified':
-      return 'bg-green-100 text-green-800';
-    case 'likely':
-      return 'bg-yellow-100 text-yellow-800';
-    case 'low_confidence':
-      return 'bg-red-100 text-red-800';
-    default:
-      return 'bg-gray-100 text-gray-800';
-  }
-}
-
-/**
- * Format price for display.
- */
-function formatPrice(price: number | null): string {
-  if (price === null || price === undefined) return 'N/A';
-  return `$${price.toFixed(2)}`;
-}
-
-/**
- * Format context window for display.
- */
-function formatContextWindow(tokens: number | null): string {
-  if (tokens === null || tokens === undefined) return 'N/A';
-  if (tokens >= 1_000_000) return `${(tokens / 1_000_000).toFixed(0)}M`;
-  if (tokens >= 1_000) return `${(tokens / 1_000).toFixed(0)}K`;
-  return tokens.toString();
-}
 
 /**
  * Public landing page displaying AI model pricing data.
