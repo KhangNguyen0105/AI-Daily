@@ -71,7 +71,11 @@ Plans:
   3. User can search across model names and providers via full-text search
   4. Each pricing row shows a confidence badge (green/yellow/red) and links to its source with a last-updated timestamp
   5. The table is responsive on mobile browsers and displays "Last updated: [date]" for data freshness
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 03-01-PLAN.md — Data layer + interactive table: Drizzle JOIN query, utility functions, @tanstack/react-table with sorting, confidence badges
+- [ ] 03-02-PLAN.md — Search, filters, provider logos: global text search, provider dropdown, free tier checkbox, SVG logos, model family grouping
+- [ ] 03-03-PLAN.md — Source attribution, mobile responsive: source links, last-updated timestamps, responsive column visibility, mobile layout
 **UI hint**: yes
 
 ### Phase 4: Practical Cost Calculator
@@ -151,7 +155,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 |-------|----------------|--------|-----------|
 | 1. Foundation & Pipeline Core | 3/3 | Execution complete | 2026-06-10 |
 | 2. Data Collection Pipeline | 4/4 | Execution complete | 2026-06-11 |
-| 3. Pricing Comparison Table | 0/0 | Not started | - |
+| 3. Pricing Comparison Table | 0/3 | Planning complete | - |
 | 4. Practical Cost Calculator | 0/0 | Not started | - |
 | 5. Model Detail Pages | 0/0 | Not started | - |
 | 6. Daily Content Engine | 0/0 | Not started | - |
