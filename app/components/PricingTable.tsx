@@ -1,16 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useDeferredValue, useMemo, useCallback } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
   getSortedRowModel,
+  getFilteredRowModel,
   createColumnHelper,
   flexRender,
   type SortingState,
   type Column,
 } from '@tanstack/react-table';
 import { formatPrice, formatContextWindow, sanitizeDisplayName, getConfidenceColor, getModelFamily } from '@/app/lib/pricing-utils';
+import { getProviderLogo, getUniqueProviders } from '@/app/lib/provider-metadata';
 
 /**
  * Row type matching the shape passed from the server component.
@@ -44,21 +46,135 @@ function SortIndicator({ column }: { column: Column<PricingRow, unknown> }) {
 }
 
 /**
- * Interactive client-side pricing table with @tanstack/react-table sorting.
- * Renders extraction data with provider name, model, family, prices,
- * context window, and confidence badge.
+ * Provider logo component: renders a 24x24 logo image or a fallback initial circle.
+ */
+function ProviderLogo({ name }: { name: string }) {
+  const logoPath = getProviderLogo(name);
+  const displayName = sanitizeDisplayName(name ?? 'Unknown');
+  const initial = displayName.charAt(0).toUpperCase();
+
+  if (logoPath) {
+    return (
+      <img
+        src={logoPath}
+        alt={`${displayName} logo`}
+        width={24}
+        height={24}
+        className="rounded-full mr-2 inline-block align-middle"
+      />
+    );
+  }
+
+  // Fallback: colored circle with initial letter
+  return (
+    <span
+      className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-400 text-white text-xs font-semibold mr-2 align-middle"
+      aria-hidden="true"
+    >
+      {initial}
+    </span>
+  );
+}
+
+/**
+ * Interactive client-side pricing table with search, filters, provider logos,
+ * and model family grouping. Uses @tanstack/react-table for sorting and
+ * global/column filtering.
  *
  * Per PRIC-01: Comparison table with sortable columns.
+ * Per PRIC-02: Model family grouping.
+ * Per PRIC-03: Provider logos.
+ * Per PRIC-04: Search, provider filter, price range, context window, free tier.
  * Per D-01: Client component receiving data from server via props.
  */
 export function PricingTable({ data, lastUpdated }: { data: PricingRow[]; lastUpdated: Date | null }) {
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [globalFilter, setGlobalFilter] = useState('');
+  const [providerFilter, setProviderFilter] = useState('');
+  const [freeTierOnly, setFreeTierOnly] = useState(false);
+  const [inputPriceMin, setInputPriceMin] = useState('');
+  const [inputPriceMax, setInputPriceMax] = useState('');
+  const [outputPriceMin, setOutputPriceMin] = useState('');
+  const [outputPriceMax, setOutputPriceMax] = useState('');
+  const [contextWindowMin, setContextWindowMin] = useState('');
+  const [contextWindowMax, setContextWindowMax] = useState('');
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
-  const columns = [
+  // Deferred search value for performance (debounce without external dependency)
+  const deferredGlobalFilter = useDeferredValue(globalFilter);
+
+  // Unique providers for the dropdown
+  const uniqueProviders = useMemo(() => getUniqueProviders(data), [data]);
+
+  // Pre-filter pipeline (applied before useReactTable)
+  const preFilteredData = useMemo(() => {
+    let result = data;
+
+    // 1. Free tier filter
+    if (freeTierOnly) {
+      result = result.filter((row) => {
+        const inputFree = row.inputPricePer1m === 0 || row.inputPricePer1m === null;
+        const outputFree = row.outputPricePer1m === 0 || row.outputPricePer1m === null;
+        return inputFree && outputFree;
+      });
+    }
+
+    // 2. Price range filter (input price)
+    const inputMin = inputPriceMin !== '' ? parseFloat(inputPriceMin) : null;
+    const inputMax = inputPriceMax !== '' ? parseFloat(inputPriceMax) : null;
+    if (inputMin !== null || inputMax !== null) {
+      result = result.filter((row) => {
+        if (row.inputPricePer1m === null) return true; // null values pass through
+        if (inputMin !== null && row.inputPricePer1m < inputMin) return false;
+        if (inputMax !== null && row.inputPricePer1m > inputMax) return false;
+        return true;
+      });
+    }
+
+    // 3. Price range filter (output price)
+    const outputMin = outputPriceMin !== '' ? parseFloat(outputPriceMin) : null;
+    const outputMax = outputPriceMax !== '' ? parseFloat(outputPriceMax) : null;
+    if (outputMin !== null || outputMax !== null) {
+      result = result.filter((row) => {
+        if (row.outputPricePer1m === null) return true; // null values pass through
+        if (outputMin !== null && row.outputPricePer1m < outputMin) return false;
+        if (outputMax !== null && row.outputPricePer1m > outputMax) return false;
+        return true;
+      });
+    }
+
+    // 4. Context window filter
+    const ctxMin = contextWindowMin !== '' ? parseFloat(contextWindowMin) : null;
+    const ctxMax = contextWindowMax !== '' ? parseFloat(contextWindowMax) : null;
+    if (ctxMin !== null || ctxMax !== null) {
+      result = result.filter((row) => {
+        if (row.contextWindow === null) return true; // null values pass through
+        if (ctxMin !== null && row.contextWindow < ctxMin) return false;
+        if (ctxMax !== null && row.contextWindow > ctxMax) return false;
+        return true;
+      });
+    }
+
+    return result;
+  }, [data, freeTierOnly, inputPriceMin, inputPriceMax, outputPriceMin, outputPriceMax, contextWindowMin, contextWindowMax]);
+
+  // Provider column filter function
+  const providerColumnFilterFn = useCallback(
+    (row: { getValue: (id: string) => string | null }) => {
+      if (!providerFilter) return true;
+      const sourceName = row.getValue('sourceName') as string | null;
+      return sourceName === providerFilter;
+    },
+    [providerFilter]
+  );
+
+  const columns = useMemo(() => [
     columnHelper.accessor('sourceName', {
       header: 'Provider',
+      filterFn: providerColumnFilterFn as any,
       cell: (info) => (
-        <span className="text-sm text-gray-700">
+        <span className="text-sm text-gray-700 flex items-center">
+          <ProviderLogo name={info.getValue() ?? 'Unknown'} />
           {sanitizeDisplayName(info.getValue() ?? 'Unknown')}
         </span>
       ),
@@ -116,16 +232,52 @@ export function PricingTable({ data, lastUpdated }: { data: PricingRow[]; lastUp
         </span>
       ),
     }),
-  ];
+  ], [providerColumnFilterFn]);
 
   const table = useReactTable({
-    data,
+    data: preFilteredData,
     columns,
-    state: { sorting },
+    state: {
+      sorting,
+      globalFilter: deferredGlobalFilter,
+      columnFilters: providerFilter ? [{ id: 'sourceName', value: providerFilter }] : [],
+    },
     onSortingChange: setSorting,
+    onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    globalFilterFn: 'includesString',
   });
+
+  const filteredRowCount = table.getRowModel().rows.length;
+  const totalRowCount = data.length;
+
+  /**
+   * Reset all filters to defaults.
+   */
+  const clearFilters = useCallback(() => {
+    setGlobalFilter('');
+    setProviderFilter('');
+    setFreeTierOnly(false);
+    setInputPriceMin('');
+    setInputPriceMax('');
+    setOutputPriceMin('');
+    setOutputPriceMax('');
+    setContextWindowMin('');
+    setContextWindowMax('');
+  }, []);
+
+  const hasActiveFilters =
+    globalFilter !== '' ||
+    providerFilter !== '' ||
+    freeTierOnly ||
+    inputPriceMin !== '' ||
+    inputPriceMax !== '' ||
+    outputPriceMin !== '' ||
+    outputPriceMax !== '' ||
+    contextWindowMin !== '' ||
+    contextWindowMax !== '';
 
   return (
     <div>
@@ -142,55 +294,207 @@ export function PricingTable({ data, lastUpdated }: { data: PricingRow[]; lastUp
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
-            <thead>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id} className="bg-gray-50 border-b-2 border-gray-200">
-                  {headerGroup.headers.map((header) => (
-                    <th
-                      key={header.id}
-                      className={`px-4 py-3 text-sm font-semibold text-gray-700 cursor-pointer select-none hover:bg-gray-100 transition-colors ${
-                        header.id === 'inputPricePer1m' || header.id === 'outputPricePer1m' || header.id === 'contextWindow'
-                          ? 'text-right'
-                          : header.id === 'confidence'
-                          ? 'text-center'
-                          : 'text-left'
-                      }`}
-                      onClick={header.column.getToggleSortingHandler()}
-                    >
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                      <SortIndicator column={header.column} />
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
-            <tbody>
-              {table.getRowModel().rows.map((row) => (
-                <tr
-                  key={row.id}
-                  className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+        <>
+          {/* Filter bar */}
+          <div className="mb-4 space-y-3">
+            {/* Top row: search + provider + free tier + clear */}
+            <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+              <div className="flex-1 w-full">
+                <input
+                  type="text"
+                  placeholder="Search models or providers..."
+                  value={globalFilter}
+                  onChange={(e) => setGlobalFilter(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  aria-label="Search models or providers"
+                />
+              </div>
+
+              <select
+                value={providerFilter}
+                onChange={(e) => setProviderFilter(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[160px]"
+                aria-label="Filter by provider"
+              >
+                <option value="">All Providers</option>
+                {uniqueProviders.map((provider) => (
+                  <option key={provider} value={provider}>
+                    {provider}
+                  </option>
+                ))}
+              </select>
+
+              <label className="flex items-center gap-2 text-sm text-gray-700 whitespace-nowrap cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={freeTierOnly}
+                  onChange={(e) => setFreeTierOnly(e.target.checked)}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                Free tier only
+              </label>
+
+              {hasActiveFilters && (
+                <button
+                  onClick={clearFilters}
+                  className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors whitespace-nowrap"
+                  aria-label="Clear all filters"
                 >
-                  {row.getVisibleCells().map((cell) => (
-                    <td
-                      key={cell.id}
-                      className={`px-4 py-3 ${
-                        cell.column.id === 'inputPricePer1m' || cell.column.id === 'outputPricePer1m' || cell.column.id === 'contextWindow'
-                          ? 'text-right'
-                          : cell.column.id === 'confidence'
-                          ? 'text-center'
-                          : ''
-                      }`}
-                    >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  Clear filters
+                </button>
+              )}
+            </div>
+
+            {/* Advanced filters toggle */}
+            <button
+              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+              className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+              aria-expanded={showAdvancedFilters}
+            >
+              <span className="text-xs">{showAdvancedFilters ? '▲' : '▼'}</span>
+              Advanced Filters
+            </button>
+
+            {/* Advanced filters: price range + context window */}
+            {showAdvancedFilters && (
+              <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-end p-3 bg-gray-50 rounded-md">
+                <fieldset className="flex flex-col gap-1">
+                  <legend className="text-xs font-medium text-gray-500 uppercase tracking-wide">Input Price ($/1M)</legend>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      placeholder="Min"
+                      value={inputPriceMin}
+                      onChange={(e) => setInputPriceMin(e.target.value)}
+                      className="w-24 px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      min="0"
+                      step="0.01"
+                      aria-label="Input price minimum"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Max"
+                      value={inputPriceMax}
+                      onChange={(e) => setInputPriceMax(e.target.value)}
+                      className="w-24 px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      min="0"
+                      step="0.01"
+                      aria-label="Input price maximum"
+                    />
+                  </div>
+                </fieldset>
+
+                <fieldset className="flex flex-col gap-1">
+                  <legend className="text-xs font-medium text-gray-500 uppercase tracking-wide">Output Price ($/1M)</legend>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      placeholder="Min"
+                      value={outputPriceMin}
+                      onChange={(e) => setOutputPriceMin(e.target.value)}
+                      className="w-24 px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      min="0"
+                      step="0.01"
+                      aria-label="Output price minimum"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Max"
+                      value={outputPriceMax}
+                      onChange={(e) => setOutputPriceMax(e.target.value)}
+                      className="w-24 px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      min="0"
+                      step="0.01"
+                      aria-label="Output price maximum"
+                    />
+                  </div>
+                </fieldset>
+
+                <fieldset className="flex flex-col gap-1">
+                  <legend className="text-xs font-medium text-gray-500 uppercase tracking-wide">Context Window (tokens)</legend>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      placeholder="Min"
+                      value={contextWindowMin}
+                      onChange={(e) => setContextWindowMin(e.target.value)}
+                      className="w-28 px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      min="0"
+                      step="1000"
+                      aria-label="Context window minimum"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Max"
+                      value={contextWindowMax}
+                      onChange={(e) => setContextWindowMax(e.target.value)}
+                      className="w-28 px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      min="0"
+                      step="1000"
+                      aria-label="Context window maximum"
+                    />
+                  </div>
+                </fieldset>
+              </div>
+            )}
+          </div>
+
+          {/* Row count indicator */}
+          <p className="text-sm text-gray-500 mb-3">
+            Showing {filteredRowCount} of {totalRowCount} models
+          </p>
+
+          {/* Table */}
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <tr key={headerGroup.id} className="bg-gray-50 border-b-2 border-gray-200">
+                    {headerGroup.headers.map((header) => (
+                      <th
+                        key={header.id}
+                        className={`px-4 py-3 text-sm font-semibold text-gray-700 cursor-pointer select-none hover:bg-gray-100 transition-colors ${
+                          header.id === 'inputPricePer1m' || header.id === 'outputPricePer1m' || header.id === 'contextWindow'
+                            ? 'text-right'
+                            : header.id === 'confidence'
+                            ? 'text-center'
+                            : 'text-left'
+                        }`}
+                        onClick={header.column.getToggleSortingHandler()}
+                      >
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                        <SortIndicator column={header.column} />
+                      </th>
+                    ))}
+                  </tr>
+                ))}
+              </thead>
+              <tbody>
+                {table.getRowModel().rows.map((row) => (
+                  <tr
+                    key={row.id}
+                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <td
+                        key={cell.id}
+                        className={`px-4 py-3 ${
+                          cell.column.id === 'inputPricePer1m' || cell.column.id === 'outputPricePer1m' || cell.column.id === 'contextWindow'
+                            ? 'text-right'
+                            : cell.column.id === 'confidence'
+                            ? 'text-center'
+                            : ''
+                        }`}
+                      >
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </div>
   );
