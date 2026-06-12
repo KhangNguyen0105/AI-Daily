@@ -1,6 +1,7 @@
 import { db } from '@/src/db/index';
 import { extractions, sources } from '@/src/db/schema';
 import { eq, desc } from 'drizzle-orm';
+import { format } from 'date-fns';
 import { PricingTable, type PricingRow } from '@/app/components/PricingTable';
 
 /**
@@ -65,6 +66,9 @@ export default async function HomePage() {
           Understand what AI models actually cost in real-world usage — not
           per-token abstractions, but practical examples like prompts, coding
           tasks, document processing, and agent sessions.
+        </p>
+        <p className="mt-3 text-sm text-gray-500">
+          Last updated: {lastUpdated ? format(lastUpdated, 'MMM d, yyyy h:mm a') : 'Unknown'}
         </p>
       </div>
 

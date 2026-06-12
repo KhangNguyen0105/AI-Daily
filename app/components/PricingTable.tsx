@@ -11,8 +11,18 @@ import {
   type SortingState,
   type Column,
 } from '@tanstack/react-table';
+import { format } from 'date-fns';
 import { formatPrice, formatContextWindow, sanitizeDisplayName, getConfidenceColor, getModelFamily } from '@/app/lib/pricing-utils';
 import { getProviderLogo, getUniqueProviders } from '@/app/lib/provider-metadata';
+
+/**
+ * Tooltip text explaining each confidence level.
+ */
+const CONFIDENCE_TOOLTIPS: Record<string, string> = {
+  verified: 'Verified: Data confirmed by multiple sources or official documentation',
+  likely: 'Likely: Data from a single reliable source',
+  low_confidence: 'Low confidence: Data may be incomplete or unverified',
+};
 
 /**
  * Row type matching the shape passed from the server component.
@@ -227,10 +237,46 @@ export function PricingTable({ data, lastUpdated }: { data: PricingRow[]; lastUp
           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getConfidenceColor(
             info.getValue()
           )}`}
+          title={CONFIDENCE_TOOLTIPS[info.getValue()] ?? info.getValue()}
         >
           {info.getValue()}
         </span>
       ),
+    }),
+    columnHelper.accessor('sourceUrl', {
+      id: 'source',
+      header: 'Source',
+      enableSorting: false,
+      cell: (info) => {
+        const url = info.getValue();
+        const row = info.row.original;
+        if (url) {
+          return (
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-blue-600 hover:text-blue-800 underline"
+            >
+              {row.sourceName ?? 'View source'}
+            </a>
+          );
+        }
+        return <span className="text-sm text-gray-400">{'—'}</span>;
+      },
+    }),
+    columnHelper.accessor('collectedAt', {
+      header: 'Collected',
+      cell: (info) => {
+        const date = info.getValue();
+        if (!date) return <span className="text-sm text-gray-400">{'—'}</span>;
+        return (
+          <span className="text-sm text-gray-600">
+            {format(new Date(date), 'MMM d, yyyy')}
+          </span>
+        );
+      },
+      sortingFn: 'datetime',
     }),
   ], [providerColumnFilterFn]);
 
@@ -283,7 +329,7 @@ export function PricingTable({ data, lastUpdated }: { data: PricingRow[]; lastUp
     <div>
       {lastUpdated && (
         <p className="text-sm text-gray-500 mb-4 text-center">
-          Last updated: {new Date(lastUpdated).toLocaleString()}
+          Last updated: {format(new Date(lastUpdated), 'MMM d, yyyy h:mm a')}
         </p>
       )}
 
