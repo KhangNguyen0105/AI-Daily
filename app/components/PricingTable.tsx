@@ -43,6 +43,42 @@ export interface PricingRow {
 const columnHelper = createColumnHelper<PricingRow>();
 
 /**
+ * Responsive column visibility classes.
+ * Provider, Model, Input, Output, Confidence: always visible.
+ * Family, Context Window: hidden below md.
+ * Source: hidden below lg.
+ * Collected: hidden below xl.
+ */
+function getColumnResponsiveClass(columnId: string): string {
+  switch (columnId) {
+    case 'family':
+    case 'contextWindow':
+      return 'hidden md:table-cell';
+    case 'source':
+      return 'hidden lg:table-cell';
+    case 'collectedAt':
+      return 'hidden xl:table-cell';
+    default:
+      return '';
+  }
+}
+
+/**
+ * Minimum column widths to prevent excessive collapse on small screens.
+ */
+function getColumnMinWidth(columnId: string): string {
+  switch (columnId) {
+    case 'modelName':
+      return 'min-w-[120px]';
+    case 'inputPricePer1m':
+    case 'outputPricePer1m':
+      return 'min-w-[80px]';
+    default:
+      return '';
+  }
+}
+
+/**
  * Sort indicator arrow for column headers.
  */
 function SortIndicator({ column }: { column: Column<PricingRow, unknown> }) {
@@ -344,7 +380,7 @@ export function PricingTable({ data, lastUpdated }: { data: PricingRow[]; lastUp
           {/* Filter bar */}
           <div className="mb-4 space-y-3">
             {/* Top row: search + provider + free tier + clear */}
-            <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+            <div className="flex flex-col md:flex-row gap-3 items-start md:items-center">
               <div className="flex-1 w-full">
                 <input
                   type="text"
@@ -403,7 +439,7 @@ export function PricingTable({ data, lastUpdated }: { data: PricingRow[]; lastUp
 
             {/* Advanced filters: price range + context window */}
             {showAdvancedFilters && (
-              <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-end p-3 bg-gray-50 rounded-md">
+              <div className="flex flex-col md:flex-row gap-3 items-start md:items-end p-3 bg-gray-50 rounded-md">
                 <fieldset className="flex flex-col gap-1">
                   <legend className="text-xs font-medium text-gray-500 uppercase tracking-wide">Input Price ($/1M)</legend>
                   <div className="flex gap-2">
@@ -499,7 +535,7 @@ export function PricingTable({ data, lastUpdated }: { data: PricingRow[]; lastUp
                     {headerGroup.headers.map((header) => (
                       <th
                         key={header.id}
-                        className={`px-4 py-3 text-sm font-semibold text-gray-700 cursor-pointer select-none hover:bg-gray-100 transition-colors ${
+                        className={`px-4 py-3 text-sm font-semibold text-gray-700 cursor-pointer select-none hover:bg-gray-100 transition-colors sticky top-0 z-10 bg-gray-50 ${getColumnResponsiveClass(header.id)} ${getColumnMinWidth(header.id)} ${
                           header.id === 'inputPricePer1m' || header.id === 'outputPricePer1m' || header.id === 'contextWindow'
                             ? 'text-right'
                             : header.id === 'confidence'
@@ -524,7 +560,7 @@ export function PricingTable({ data, lastUpdated }: { data: PricingRow[]; lastUp
                     {row.getVisibleCells().map((cell) => (
                       <td
                         key={cell.id}
-                        className={`px-4 py-3 ${
+                        className={`px-4 py-3 ${getColumnResponsiveClass(cell.column.id)} ${getColumnMinWidth(cell.column.id)} ${
                           cell.column.id === 'inputPricePer1m' || cell.column.id === 'outputPricePer1m' || cell.column.id === 'contextWindow'
                             ? 'text-right'
                             : cell.column.id === 'confidence'
