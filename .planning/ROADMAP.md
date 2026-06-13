@@ -92,7 +92,11 @@ Plans:
   3. User can see cost to "Summarize a 100-page document" for each model with input/output token breakdown
   4. User can see cost per "1 coding-agent session" for each model with input/output token breakdown
   5. User can compare practical costs side-by-side across multiple models ranked cheapest to most expensive
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 04-01-PLAN.md — Cost scenario definitions and calculation utilities: COST_SCENARIOS, calculatePracticalCost, calculateScenarioCosts
+- [ ] 04-02-PLAN.md — CostCalculator client component: scenario tabs, ranked model list, input/output breakdown, cheapest-model highlight
+- [ ] 04-03-PLAN.md — Landing page integration: CostCalculator section below PricingTable, shared currency state between components
 **UI hint**: yes
 
 ### Phase 5: Model Detail Pages
@@ -159,7 +163,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 1. Foundation & Pipeline Core | 3/3 | Execution complete | 2026-06-10 |
 | 2. Data Collection Pipeline | 4/4 | Execution complete | 2026-06-11 |
 | 3. Pricing Comparison Table | 4/4 | Complete   | 2026-06-13 |
-| 4. Practical Cost Calculator | 0/0 | Not started | - |
+| 4. Practical Cost Calculator | 0/3 | Planned | - |
 | 5. Model Detail Pages | 0/0 | Not started | - |
 | 6. Daily Content Engine | 0/0 | Not started | - |
 | 7. Intelligence & Analytics | 0/0 | Not started | - |
