@@ -1,74 +1,74 @@
-# Phase 3 UAT: Pricing Comparison Table
+---
+status: complete
+phase: 03-pricing-comparison-table
+source: 03-01-SUMMARY.md, 03-02-SUMMARY.md, 03-03-SUMMARY.md, 03-04-SUMMARY.md
+started: 2026-06-13T14:00:00Z
+updated: 2026-06-13T14:30:00Z
+---
 
-**Date:** 2026-06-13
-**Tester:** Claude (automated verification)
-**Status:** ✅ PASS
+## Current Test
 
-## Success Criteria Verification
+[testing complete]
 
-| # | Criteria | Result | Evidence |
-|---|----------|--------|----------|
-| 1 | User can view a table of all models with input/output pricing per 1M tokens and context window | ✅ PASS | `PricingTable.tsx` renders table with all columns; `page.tsx` fetches via Drizzle JOIN |
-| 2 | User can sort by any column (price, context window, provider) and filter by provider, price range, and free tier availability | ✅ PASS | @tanstack/react-table with sorting; pre-filter pipeline for price range, free tier, context window |
-| 3 | User can search across model names and providers via full-text search | ✅ PASS | Global filter with `useDeferredValue` for performance |
-| 4 | Each pricing row shows a confidence badge (green/yellow/red) and links to its source with a last-updated timestamp | ✅ PASS | `getConfidenceColor()` returns Tailwind classes; source links with `rel="noopener noreferrer"` |
-| 5 | The table is responsive on mobile browsers and displays "Last updated: [date]" for data freshness | ✅ PASS | Responsive column visibility classes (hidden md:table-cell, etc.); date-fns format |
-| 6 | User can toggle the pricing display between USD and VND, and all price columns automatically convert and update in place | ✅ PASS | Currency toggle button group; `formatCurrencyPrice()` delegates to formatPrice (USD) or formatVND (VND) |
+## Tests
 
-## Test Results
+### 1. Provider Logos Display
+expected: Open the pricing table at localhost:3000. Each row should show a provider logo image next to the provider name. Providers without a logo file should display a colored initial circle (first letter of provider name). Logos should have consistent 6x6 sizing with rounded corners.
+result: pass
 
-- **Total tests:** 186 (all phases combined)
-- **Phase 3 tests:** 59/59 PASS
-- **Build:** ✅ Compiles successfully
-- **TypeScript:** ✅ No errors
+### 2. Global Search
+expected: Type a model name (e.g., "GPT-4") in the search box. The table should filter in real-time to show only matching rows. The filtered row count should update (e.g., "Showing 3 of 34 models"). Clearing the search should restore all rows.
+result: pass
 
-## Features Verified
+### 3. Provider Dropdown Filter
+expected: Click the "All Providers" dropdown. It should list all unique providers from the data. Select one provider (e.g., "OpenAI"). The table should filter to show only that provider's models. The row count should update accordingly.
+result: pass
 
-### Data Layer
-- `app/page.tsx` — Server component with Drizzle LEFT JOIN query (extractions + sources)
-- ISR with 60-second revalidation for fresh data
-- Date serialization round-trip works correctly
+### 4. Active Filter Summary
+expected: Apply at least one filter (search, provider, or price range). An "Filters" section should appear below the filter bar showing active filter pills (e.g., "Provider: OpenAI ×"). Click the × on a pill to remove that filter. Click "Clear all" to remove all filters at once.
+result: pass
 
-### Pricing Table
-- `app/components/PricingTable.tsx` — Client component with full interactivity
-- Sorting: all columns sortable with visual indicators (▲/▼)
-- Filtering: provider dropdown, price range (min/max), context window range, free tier checkbox
-- Search: global text search with deferred value for performance
-- Provider logos: SVG logos in `public/logos/` with fallback initial circles
-- Model family grouping: `getModelFamily()` derives family from model name prefix
+### 5. Currency Toggle USD→VND
+expected: Click the "₫ VND" button in the currency toggle. All price columns should convert from USD to VND using the dynamic exchange rate from the database. Price headers should change from "($/1M)" to "(₫/1M)". VND values should show dot thousands separator and ₫ symbol (e.g., "1.275.000 ₫").
+result: pass
 
-### Currency Toggle (PRIC-07)
-- `app/lib/pricing-utils.ts` — `USD_VND_RATE` (25500), `convertToVND`, `formatVND`, `formatCurrencyPrice`
-- Toggle button group in filter bar (USD/VND)
-- Active button: `bg-blue-600 text-white`
-- Price column headers change: `($/1M)` ↔ `(₫/1M)`
-- VND formatting: `toLocaleString('vi-VN')` with dot thousands separator and ₫ symbol
+### 6. Currency Toggle VND→USD
+expected: With VND active, click the "$ USD" button. All prices should convert back to USD format (e.g., "$50.00"). The toggle should highlight the active button with blue background.
+result: pass
 
-### Source Attribution
-- Source links with URL scheme validation (http/https only — CR-01 fix)
-- "Collected" column with date-fns formatting
-- Confidence badges with tooltips explaining each level
+### 7. Exchange Rate Fallback Chain
+expected: The system fetches USD/VND rate from open.er-api.com during the daily pipeline. If the API is down, it uses the most recent rate from the exchange_rates DB table. If the table is empty, it falls back to the hardcoded rate of 25,500. The frontend always receives a valid rate via page.tsx server component.
+result: pass
 
-### Mobile Responsiveness
-- Column visibility breakpoints: Family/Context (md), Source (lg), Collected (xl)
-- Minimum column widths to prevent excessive collapse
-- Sticky table header for horizontal scrolling
+### 8. Confidence Badges
+expected: Each row should show a confidence badge (green "high", yellow "medium", or red "low"). Hovering over a badge should show a tooltip explaining what the confidence level means.
+result: pass
 
-### Security (Code Review Fixes)
-- CR-01: XSS via unsanitized sourceUrl — FIXED (URL scheme validation)
-- WR-01: Incomplete Unicode sanitization — FIXED (zero-width, format chars, tag chars)
-- WR-02: Redundant type assertion — FIXED (removed `as PricingRow[]`)
-- WR-03: NaN handling — FIXED (Number.isNaN guard in formatPrice/formatVND)
+### 9. Source Links
+expected: Each row should have a clickable source link. Clicking should open the source URL in a new tab. URLs should only be http/https (no javascript: or other schemes).
+result: pass
 
-## Files Verified
+### 10. Mobile Responsiveness
+expected: Resize the browser to a mobile width (< 768px). The table should hide the Family and Context columns. Further narrowing (< 640px) should hide Source column. The table should remain horizontally scrollable with a sticky header.
+result: pass
 
-- `app/lib/pricing-utils.ts` — 10 exported functions/constants
-- `app/components/PricingTable.tsx` — 603 lines, full interactive table
-- `app/lib/provider-metadata.ts` — Logo paths and unique provider extraction
-- `app/page.tsx` — Server component with Drizzle query
-- `tests/pricing-utils.test.ts` — 59 unit tests
-- `tests/provider-metadata.test.ts` — Provider metadata tests
+### 11. Sorting
+expected: Click any column header (e.g., "Model" or "Input Price"). The table should sort by that column with an arrow indicator (▲ ascending). Click again to reverse sort (▼ descending).
+result: pass
 
-## Conclusion
+### 12. Pagination Controls
+expected: If there are more than 50 models, pagination controls should appear below the table showing "Page 1 of N" with Previous/Next buttons. Clicking "Next" should advance to page 2. Changing filters should reset to page 1.
+result: pass
 
-Phase 3 pricing comparison table is complete. All 6 success criteria are met, all tests pass, and the code review findings have been fixed. The table provides a fully interactive, responsive, and secure pricing comparison experience with USD/VND currency toggle.
+## Summary
+
+total: 12
+passed: 12
+issues: 0
+pending: 0
+skipped: 0
+blocked: 0
+
+## Gaps
+
+[issues fixed - see code changes above]
