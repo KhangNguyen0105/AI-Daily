@@ -5,6 +5,10 @@ import {
   sanitizeDisplayName,
   getConfidenceColor,
   getModelFamily,
+  USD_VND_RATE,
+  convertToVND,
+  formatVND,
+  formatCurrencyPrice,
 } from '../app/lib/pricing-utils';
 
 describe('formatPrice', () => {
@@ -78,7 +82,7 @@ describe('sanitizeDisplayName', () => {
     const longName = 'a'.repeat(150);
     const result = sanitizeDisplayName(longName);
     expect(result).toHaveLength(103); // 100 + "..."
-    expect(result).toEndWith('...');
+    expect(result.endsWith('...')).toBe(true);
   });
 
   it('does not truncate short names', () => {
@@ -168,5 +172,101 @@ describe('getModelFamily', () => {
   it('is case-insensitive', () => {
     expect(getModelFamily('GPT-4o')).toBe('GPT-4');
     expect(getModelFamily('Claude-3-opus')).toBe('Claude 3');
+  });
+});
+
+describe('USD_VND_RATE', () => {
+  it('is 25500', () => {
+    expect(USD_VND_RATE).toBe(25500);
+  });
+});
+
+describe('convertToVND', () => {
+  it('returns 25500 for 1', () => {
+    expect(convertToVND(1)).toBe(25500);
+  });
+
+  it('returns 0 for 0', () => {
+    expect(convertToVND(0)).toBe(0);
+  });
+
+  it('returns null for null', () => {
+    expect(convertToVND(null)).toBeNull();
+  });
+
+  it('returns undefined for undefined', () => {
+    expect(convertToVND(undefined)).toBeUndefined();
+  });
+
+  it('returns 89250 for 3.5', () => {
+    expect(convertToVND(3.5)).toBe(89250);
+  });
+});
+
+describe('formatVND', () => {
+  it('returns "N/A" for null', () => {
+    expect(formatVND(null)).toBe('N/A');
+  });
+
+  it('returns "N/A" for undefined', () => {
+    expect(formatVND(undefined)).toBe('N/A');
+  });
+
+  it('returns "0 ₫" for 0', () => {
+    expect(formatVND(0)).toBe('0 ₫');
+  });
+
+  it('returns "25.500 ₫" for 25500', () => {
+    expect(formatVND(25500)).toBe('25.500 ₫');
+  });
+
+  it('returns "89.250 ₫" for 89250', () => {
+    expect(formatVND(89250)).toBe('89.250 ₫');
+  });
+
+  it('returns "1.000.000 ₫" for 1000000', () => {
+    expect(formatVND(1000000)).toBe('1.000.000 ₫');
+  });
+
+  it('returns "1.234.567 ₫" for 1234567', () => {
+    expect(formatVND(1234567)).toBe('1.234.567 ₫');
+  });
+});
+
+describe('formatCurrencyPrice', () => {
+  it('returns "N/A" for null with usd', () => {
+    expect(formatCurrencyPrice(null, 'usd')).toBe('N/A');
+  });
+
+  it('returns "N/A" for null with vnd', () => {
+    expect(formatCurrencyPrice(null, 'vnd')).toBe('N/A');
+  });
+
+  it('returns "$3.50" for 3.5 with usd', () => {
+    expect(formatCurrencyPrice(3.5, 'usd')).toBe('$3.50');
+  });
+
+  it('returns "89.250 ₫" for 3.5 with vnd', () => {
+    expect(formatCurrencyPrice(3.5, 'vnd')).toBe('89.250 ₫');
+  });
+
+  it('returns "$0.00" for 0 with usd', () => {
+    expect(formatCurrencyPrice(0, 'usd')).toBe('$0.00');
+  });
+
+  it('returns "0 ₫" for 0 with vnd', () => {
+    expect(formatCurrencyPrice(0, 'vnd')).toBe('0 ₫');
+  });
+
+  it('returns "$0.0025" for 0.0025 with usd', () => {
+    expect(formatCurrencyPrice(0.0025, 'usd')).toBe('$0.0025');
+  });
+
+  it('returns "64 ₫" for 0.0025 with vnd', () => {
+    expect(formatCurrencyPrice(0.0025, 'vnd')).toBe('64 ₫');
+  });
+
+  it('returns "N/A" for undefined with usd', () => {
+    expect(formatCurrencyPrice(undefined, 'usd')).toBe('N/A');
   });
 });
