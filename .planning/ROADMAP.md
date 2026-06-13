@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation & Pipeline Core** - Project scaffold with working infrastructure and provider adapter pattern
 - [x] **Phase 2: Data Collection Pipeline** - Automated collection, extraction, scoring, and verification from 10+ providers
-- [ ] **Phase 3: Pricing Comparison Table** - Sortable/filterable pricing table with confidence badges and source attribution
+- [x] **Phase 3: Pricing Comparison Table** - Sortable/filterable pricing table with confidence badges and source attribution
 - [ ] **Phase 4: Practical Cost Calculator** - Real-world cost scenarios (prompts, coding, documents, agents) with side-by-side comparison
 - [ ] **Phase 5: Model Detail Pages** - Per-model profile with pricing history, promotions, and provider links
 - [ ] **Phase 6: Daily Content Engine** - Auto-generated daily articles with chronological archive
@@ -61,21 +61,24 @@ Plans:
 - [x] 02-04-PLAN.md — Daily scheduler and integration: BullMQ repeatable jobs, worker entry wiring, collect worker pipelineRunId propagation
 
 ### Phase 3: Pricing Comparison Table
-**Goal**: Users can view, sort, filter, and search a comparison table of AI model pricing with source attribution and confidence indicators.
+**Goal**: Users can view, sort, filter, and search a comparison table of AI model pricing with source attribution, confidence indicators, and the ability to toggle display currency between USD and VND.
 **Mode:** mvp
 **Depends on**: Phase 2
-**Requirements**: PRIC-01, PRIC-02, PRIC-03, PRIC-04, PRIC-05, PRIC-06, FRNT-03, FRNT-04
+**Requirements**: PRIC-01, PRIC-02, PRIC-03, PRIC-04, PRIC-05, PRIC-06, PRIC-07, FRNT-03, FRNT-04
 **Success Criteria** (what must be TRUE):
   1. User can view a table of all models with input/output pricing per 1M tokens and context window
   2. User can sort by any column (price, context window, provider) and filter by provider, price range, and free tier availability
   3. User can search across model names and providers via full-text search
   4. Each pricing row shows a confidence badge (green/yellow/red) and links to its source with a last-updated timestamp
   5. The table is responsive on mobile browsers and displays "Last updated: [date]" for data freshness
-**Plans**: 3 plans
+  6. User can toggle the pricing display between USD and VND, and all price columns automatically convert and update in place
+**Status**: 3/4 plans complete (03-04 pending)
+**Plans**: 4 plans
 Plans:
-- [ ] 03-01-PLAN.md — Data layer + interactive table: Drizzle JOIN query, utility functions, @tanstack/react-table with sorting, confidence badges
-- [ ] 03-02-PLAN.md — Search, filters, provider logos: global text search, provider dropdown, free tier checkbox, SVG logos, model family grouping
-- [ ] 03-03-PLAN.md — Source attribution, mobile responsive: source links, last-updated timestamps, responsive column visibility, mobile layout
+- [x] 03-01-PLAN.md — Data layer + interactive table: Drizzle JOIN query, utility functions, @tanstack/react-table with sorting, confidence badges
+- [x] 03-02-PLAN.md — Search, filters, provider logos: global text search, provider dropdown, free tier checkbox, SVG logos, model family grouping
+- [x] 03-03-PLAN.md — Source attribution, mobile responsive: source links, last-updated timestamps, responsive column visibility, mobile layout
+- [x] 03-04-PLAN.md — USD/VND currency toggle: currency conversion utilities, VND formatting, toggle UI in PricingTable
 **UI hint**: yes
 
 ### Phase 4: Practical Cost Calculator
@@ -155,7 +158,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 |-------|----------------|--------|-----------|
 | 1. Foundation & Pipeline Core | 3/3 | Execution complete | 2026-06-10 |
 | 2. Data Collection Pipeline | 4/4 | Execution complete | 2026-06-11 |
-| 3. Pricing Comparison Table | 0/3 | Planning complete | - |
+| 3. Pricing Comparison Table | 4/4 | Complete   | 2026-06-13 |
 | 4. Practical Cost Calculator | 0/0 | Not started | - |
 | 5. Model Detail Pages | 0/0 | Not started | - |
 | 6. Daily Content Engine | 0/0 | Not started | - |

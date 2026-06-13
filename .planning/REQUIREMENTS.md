@@ -25,6 +25,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **PRIC-04**: User can filter by provider, price range, context window, and free tier availability
 - [ ] **PRIC-05**: Each pricing data point links to its source with a last-updated timestamp
 - [ ] **PRIC-06**: Each pricing data point displays a confidence badge (green/yellow/red)
+- [x] **PRIC-07**: User can toggle the pricing display between USD and VND, with all price columns automatically converting and updating
 
 ### Practical Cost Visualization
 
@@ -127,6 +128,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PRIC-04 | Phase 3 | Pending |
 | PRIC-05 | Phase 3 | Pending |
 | PRIC-06 | Phase 3 | Pending |
+| PRIC-07 | Phase 3 | Complete |
 | COST-01 | Phase 4 | Pending |
 | COST-02 | Phase 4 | Pending |
 | COST-03 | Phase 4 | Pending |

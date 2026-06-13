@@ -115,17 +115,15 @@ export function createScoreWorker(): Worker<ScoreJobData, ScoreJobResult> {
 
         try {
           // Run two-pass verification via LLM
-          // CR-02: Fail fast if OPENAI_API_KEY is missing instead of silently degrading
-          if (!env.OPENAI_API_KEY) {
+          // CR-02: Fail fast if no AI provider is configured
+          if (!env.MIMO_API_KEY && !env.OPENAI_API_KEY) {
             throw new Error(
-              'OPENAI_API_KEY is not set. Verification cannot proceed. ' +
-              'Set the environment variable and restart the worker.'
+              'No AI provider configured. Set MIMO_API_KEY or OPENAI_API_KEY in .env'
             );
           }
           const verificationResult = await verifyExtraction(
             html,
             [extractionResult],
-            env.OPENAI_API_KEY,
           );
 
           // Calculate confidence from source tier + completeness + verification

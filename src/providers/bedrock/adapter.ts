@@ -1,9 +1,8 @@
 import { generateObject } from 'ai';
-import { createOpenAI } from '@ai-sdk/openai';
 import { ProviderAdapter } from '../base';
 import type { ExtractionResult } from '../base';
 import { pricingSchema } from '../schemas';
-import { env } from '../../lib/env';
+import { getAIModel } from '../../lib/ai-client';
 import { bedrockConfig } from './config';
 
 /**
@@ -13,9 +12,8 @@ import { bedrockConfig } from './config';
  * CR-06: Removed dangerous price < 0.01 heuristic. Trust LLM extraction output.
  * IN-01: Uses base class crawl() implementation.
  * IN-02: Uses shared pricingSchema from schemas.ts.
- * IN-03: OpenAI client created once at module level.
+ * IN-03: Uses shared AI client (Mimo or OpenAI).
  */
-const openai = createOpenAI({ apiKey: env.OPENAI_API_KEY });
 
 export class BedrockAdapter extends ProviderAdapter {
   config = bedrockConfig;
@@ -28,7 +26,7 @@ export class BedrockAdapter extends ProviderAdapter {
         : html;
 
       const { object } = await generateObject({
-        model: openai('gpt-4o'),
+        model: getAIModel(),
         schema: pricingSchema,
         prompt: `Extract Amazon Bedrock model pricing from this HTML page.
 Look for models from multiple providers available through Bedrock (Anthropic, Meta, Cohere, AI21, Mistral, etc.).

@@ -7,8 +7,8 @@ vi.mock('ai', () => ({
   generateObject: vi.fn(),
 }));
 
-vi.mock('@ai-sdk/openai', () => ({
-  createOpenAI: vi.fn(() => (model: string) => model),
+vi.mock('../../src/lib/ai-client', () => ({
+  getAIModel: vi.fn(() => 'mock-model'),
 }));
 
 import { compareResults, verifyExtraction } from '../../src/pipeline/verification';
@@ -238,7 +238,6 @@ describe('verifyExtraction', () => {
     const result = await verifyExtraction(
       '<html>pricing page</html>',
       pass1AllFields,
-      'test-api-key',
     );
     expect(result.verified).toBe(true);
     expect(result.disagreements).toEqual([]);
@@ -258,7 +257,6 @@ describe('verifyExtraction', () => {
     const result = await verifyExtraction(
       '<html>pricing page</html>',
       pass1AllFields,
-      'test-api-key',
     );
     expect(result.verified).toBe(false);
     expect(result.disagreements.length).toBeGreaterThan(0);
@@ -268,7 +266,7 @@ describe('verifyExtraction', () => {
     vi.mocked(generateObject).mockRejectedValue(new Error('API rate limit'));
 
     await expect(
-      verifyExtraction('<html>pricing</html>', pass1AllFields, 'bad-key'),
+      verifyExtraction('<html>pricing</html>', pass1AllFields),
     ).rejects.toThrow('API rate limit');
   });
 });
