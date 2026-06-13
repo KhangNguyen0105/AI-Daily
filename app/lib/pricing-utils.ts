@@ -10,7 +10,7 @@
  * Uses up to 4 decimal places for values < $0.01, otherwise 2 decimal places.
  */
 export function formatPrice(price: number | null | undefined): string {
-  if (price === null || price === undefined) return 'N/A';
+  if (price === null || price === undefined || Number.isNaN(price)) return 'N/A';
   if (price === 0) return '$0.00';
   if (price < 0.01) return `$${price.toFixed(4)}`;
   return `$${price.toFixed(2)}`;
@@ -30,13 +30,21 @@ export function formatContextWindow(tokens: number | null | undefined): string {
 
 /**
  * Sanitize display name to prevent Unicode manipulation attacks (WR-01).
- * Strips bidirectional override characters (U+202A-U+202E) and
- * bidirectional isolate characters (U+2066-U+2069).
+ * Strips bidirectional override characters (U+202A-U+202E),
+ * bidirectional isolate characters (U+2066-U+2069),
+ * zero-width characters (U+200B-U+200D, U+FEFF),
+ * other format characters (U+00AD, U+034F, U+061C, U+180E),
+ * tag characters (U+E0001-U+E007F),
+ * and excessive combining marks (3+ consecutive).
  * Enforces a maximum length with "..." truncation.
  */
 export function sanitizeDisplayName(name: string, maxLength = 100): string {
-  // Strip bidirectional override characters (U+202A-U+202E, U+2066-U+2069)
-  const cleaned = name.replace(/[‪-‮⁦-⁩]/g, '');
+  const cleaned = name
+    .replace(/[‪-‮⁦-⁩]/g, '')    // bidi overrides + isolates
+    .replace(/[​-‍﻿]/g, '')            // zero-width characters
+    .replace(/[­͏؜᠎]/g, '')       // other format chars
+    .replace(/[\u{E0001}-\u{E007F}]/gu, '')           // tag characters
+    .replace(/[̀-ͯ]{3,}/g, '');             // excessive combining marks (3+)
   return cleaned.length > maxLength ? cleaned.slice(0, maxLength) + '...' : cleaned;
 }
 
@@ -65,10 +73,10 @@ export const USD_VND_RATE = 25500;
 
 /**
  * Convert a USD price to VND.
- * Returns null/undefined as-is (passthrough for missing data).
+ * Returns null for null/undefined inputs (collapses undefined to null).
  */
-export function convertToVND(price: number | null | undefined): number | null | undefined {
-  if (price === null || price === undefined) return price;
+export function convertToVND(price: number | null | undefined): number | null {
+  if (price === null || price === undefined) return null;
   return price * USD_VND_RATE;
 }
 
@@ -78,7 +86,7 @@ export function convertToVND(price: number | null | undefined): number | null | 
  * Returns "N/A" for null/undefined.
  */
 export function formatVND(priceInVND: number | null | undefined): string {
-  if (priceInVND === null || priceInVND === undefined) return 'N/A';
+  if (priceInVND === null || priceInVND === undefined || Number.isNaN(priceInVND)) return 'N/A';
   const rounded = Math.round(priceInVND);
   return `${rounded.toLocaleString('vi-VN')} ₫`;
 }

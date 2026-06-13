@@ -194,8 +194,8 @@ describe('convertToVND', () => {
     expect(convertToVND(null)).toBeNull();
   });
 
-  it('returns undefined for undefined', () => {
-    expect(convertToVND(undefined)).toBeUndefined();
+  it('returns null for undefined (collapses to null)', () => {
+    expect(convertToVND(undefined)).toBeNull();
   });
 
   it('returns 89250 for 3.5', () => {
