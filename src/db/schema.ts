@@ -20,7 +20,7 @@ export const confidenceEnum = pgEnum('confidence', [
 // Sources table - provider information
 export const sources = pgTable('sources', {
   id: serial('id').primaryKey(),
-  name: varchar('name', { length: 255 }).notNull(),
+  name: varchar('name', { length: 255 }).notNull().unique(),
   url: text('url').notNull(),
   providerType: varchar('provider_type', { length: 100 }).notNull(),
   isActive: integer('is_active').default(1).notNull(),
@@ -80,6 +80,16 @@ export const pipelineRuns = pgTable('pipeline_runs', {
   stats: jsonb('stats'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// Exchange rates table - daily USD/VND rates fetched from external API
+export const exchangeRates = pgTable('exchange_rates', {
+  id: serial('id').primaryKey(),
+  fromCurrency: varchar('from_currency', { length: 3 }).notNull(),
+  toCurrency: varchar('to_currency', { length: 3 }).notNull(),
+  rate: real('rate').notNull(),
+  fetchedAt: timestamp('fetched_at').defaultNow().notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
 // Practical costs table - real-world cost examples

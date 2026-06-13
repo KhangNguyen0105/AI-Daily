@@ -1,5 +1,16 @@
 import { ProviderAdapter } from './base';
 import { OpenAIAdapter } from './openai/adapter';
+import { AnthropicAdapter } from './anthropic/adapter';
+import { GoogleAdapter } from './google/adapter';
+import { MistralAdapter } from './mistral/adapter';
+import { CohereAdapter } from './cohere/adapter';
+import { GroqAdapter } from './groq/adapter';
+import { TogetherAdapter } from './together/adapter';
+import { PerplexityAdapter } from './perplexity/adapter';
+import { XAIAdapter } from './xai/adapter';
+import { FireworksAdapter } from './fireworks/adapter';
+import { DeepSeekAdapter } from './deepseek/adapter';
+import { BedrockAdapter } from './bedrock/adapter';
 
 /**
  * Explicit adapter registry.
@@ -32,3 +43,14 @@ export function getAllAdapters(): ProviderAdapter[] {
 
 // Register all adapters (D-03: explicit import)
 registerAdapter(new OpenAIAdapter());
+registerAdapter(new AnthropicAdapter());
+registerAdapter(new GoogleAdapter());
+registerAdapter(new MistralAdapter());
+registerAdapter(new CohereAdapter());
+registerAdapter(new GroqAdapter());
+registerAdapter(new TogetherAdapter());
+registerAdapter(new PerplexityAdapter());
+registerAdapter(new XAIAdapter());
+registerAdapter(new FireworksAdapter());
+registerAdapter(new DeepSeekAdapter());
+registerAdapter(new BedrockAdapter());

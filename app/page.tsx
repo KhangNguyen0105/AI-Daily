@@ -1,9 +1,9 @@
-import { type InferSelectModel } from 'drizzle-orm';
 import { db } from '@/src/db/index';
-import { extractions } from '@/src/db/schema';
-import { desc } from 'drizzle-orm';
-
-type ExtractionRow = InferSelectModel<typeof extractions>;
+import { extractions, sources } from '@/src/db/schema';
+import { eq, desc } from 'drizzle-orm';
+import { format } from 'date-fns';
+import { PricingTable, type PricingRow } from '@/app/components/PricingTable';
+import { getLatestExchangeRate, FALLBACK_RATE } from '@/src/pipeline/exchange-rate-worker';
 
 /**
  * ISR: Revalidate every 60 seconds.
@@ -13,82 +13,64 @@ type ExtractionRow = InferSelectModel<typeof extractions>;
 export const revalidate = 60;
 
 /**
- * Sanitize display name to prevent Unicode manipulation attacks (WR-01).
- * Strips bidirectional override characters and enforces length limit.
- */
-function sanitizeDisplayName(name: string, maxLength = 100): string {
-  // Strip bidirectional override characters (U+202A-U+202E, U+2066-U+2069)
-  const cleaned = name.replace(/[‪-‮⁦-⁩]/g, '');
-  return cleaned.length > maxLength ? cleaned.slice(0, maxLength) + '...' : cleaned;
-}
-
-/**
- * Confidence badge color mapping.
- */
-function getConfidenceColor(confidence: string): string {
-  switch (confidence) {
-    case 'verified':
-      return 'bg-green-100 text-green-800';
-    case 'likely':
-      return 'bg-yellow-100 text-yellow-800';
-    case 'low_confidence':
-      return 'bg-red-100 text-red-800';
-    default:
-      return 'bg-gray-100 text-gray-800';
-  }
-}
-
-/**
- * Format price for display.
- */
-function formatPrice(price: number | null): string {
-  if (price === null || price === undefined) return 'N/A';
-  return `$${price.toFixed(2)}`;
-}
-
-/**
- * Format context window for display.
- */
-function formatContextWindow(tokens: number | null): string {
-  if (tokens === null || tokens === undefined) return 'N/A';
-  if (tokens >= 1_000_000) return `${(tokens / 1_000_000).toFixed(0)}M`;
-  if (tokens >= 1_000) return `${(tokens / 1_000).toFixed(0)}K`;
-  return tokens.toString();
-}
-
-/**
  * Public landing page displaying AI model pricing data.
  * Per D-15: End-to-end means display on minimal page.
  * Per FRNT-01: Read-only public site, no auth prompts.
+ * Per PRIC-01: Interactive comparison table with sortable columns.
  */
 export default async function HomePage() {
-  // Query latest extractions from PostgreSQL
-  // This runs at revalidation time (ISR), not on every request
-  // Wrapped in try-catch to handle build-time when DB is unavailable
-  let pricingData: ExtractionRow[] = [];
+  // JOIN extractions with sources to get provider names
+  // Per D-01: Server component fetches data, passes to client component
+  let pricingData: PricingRow[] = [];
+  let lastUpdated: Date | null = null;
+  let exchangeRate: number = FALLBACK_RATE;
+
   try {
-    pricingData = await db
-      .select()
+    const rows = await db
+      .select({
+        id: extractions.id,
+        modelName: extractions.modelName,
+        inputPricePer1m: extractions.inputPricePer1m,
+        outputPricePer1m: extractions.outputPricePer1m,
+        contextWindow: extractions.contextWindow,
+        confidence: extractions.confidence,
+        collectedAt: extractions.collectedAt,
+        sourceName: sources.name,
+        sourceUrl: sources.url,
+      })
       .from(extractions)
-      .orderBy(desc(extractions.createdAt))
-      .limit(50);
+      .leftJoin(sources, eq(extractions.sourceId, sources.id))
+      .orderBy(desc(extractions.collectedAt));
+
+    pricingData = rows.map((row) => ({
+      ...row,
+      collectedAt: new Date(row.collectedAt),
+    }));
+
+    // Compute lastUpdated as the most recent collectedAt
+    if (pricingData.length > 0) {
+      lastUpdated = pricingData[0].collectedAt;
+    }
   } catch {
     // DB not available during build — show empty state
     pricingData = [];
   }
 
+  // Fetch exchange rate separately — failure shouldn't hide pricing data
+  try {
+    exchangeRate = await getLatestExchangeRate();
+  } catch {
+    // Exchange rate table may not exist yet — use fallback
+    exchangeRate = FALLBACK_RATE;
+  }
+
   return (
     <main className="min-h-screen bg-white text-gray-900">
       {/* AI Daily Branding */}
-      <div className="flex flex-col items-center justify-center py-16 px-4">
-        <h1 className="text-5xl font-bold tracking-tight">AI Daily</h1>
-        <p className="mt-4 text-xl text-gray-600">
-          AI Model Pricing Intelligence
-        </p>
-        <p className="mt-2 text-gray-500 max-w-md text-center">
-          Understand what AI models actually cost in real-world usage — not
-          per-token abstractions, but practical examples like prompts, coding
-          tasks, document processing, and agent sessions.
+      <div className="flex flex-col items-center justify-center py-8 px-4">
+        <h1 className="text-3xl font-bold tracking-tight">AI Daily</h1>
+        <p className="mt-2 text-sm text-gray-500">
+          Last updated: {lastUpdated ? format(lastUpdated, 'MMM d, yyyy h:mm a') : 'Unknown'}
         </p>
       </div>
 
@@ -98,67 +80,7 @@ export default async function HomePage() {
           Latest Pricing Data
         </h2>
 
-        {pricingData.length === 0 ? (
-          <div className="text-center py-12 bg-gray-50 rounded-lg">
-            <p className="text-gray-500 text-lg">
-              No pricing data collected yet. Pipeline will run shortly.
-            </p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="bg-gray-50 border-b-2 border-gray-200">
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                    Model
-                  </th>
-                  <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">
-                    Input ($/1M tokens)
-                  </th>
-                  <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">
-                    Output ($/1M tokens)
-                  </th>
-                  <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">
-                    Context Window
-                  </th>
-                  <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700">
-                    Confidence
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {pricingData.map((row) => (
-                  <tr
-                    key={row.id}
-                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                      {sanitizeDisplayName(String(row.modelName ?? 'Unknown'))}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-right text-gray-700">
-                      {formatPrice(row.inputPricePer1m)}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-right text-gray-700">
-                      {formatPrice(row.outputPricePer1m)}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-right text-gray-700">
-                      {formatContextWindow(row.contextWindow)}
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getConfidenceColor(
-                          row.confidence
-                        )}`}
-                      >
-                        {row.confidence}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <PricingTable data={pricingData} exchangeRate={exchangeRate} />
       </div>
     </main>
   );

@@ -1,7 +1,7 @@
 import { generateObject } from 'ai';
-import { createOpenAI } from '@ai-sdk/openai';
 import { z } from 'zod';
 import type { ExtractionResult } from '../providers/base';
+import { getAIModel } from '../lib/ai-client';
 
 // --- Exported types ---
 
@@ -31,6 +31,7 @@ export interface Disagreement {
 // --- Constants ---
 
 const TOLERANCE = 0.001; // 0.1% relative tolerance
+const ABSOLUTE_TOLERANCE = 0.0001; // $0.0001 per 1M tokens — floor for near-zero prices
 const MAX_HTML_LENGTH = 100_000;
 
 // --- Zod schema for LLM structured output ---
@@ -159,13 +160,17 @@ export function compareResults(
 }
 
 /**
- * Check if two values are within 0.1% relative tolerance.
- * Uses the larger absolute value as the reference to handle near-zero cases.
+ * Check if two values are within tolerance.
+ * For very small values (near-zero prices), uses an absolute tolerance floor
+ * to avoid false disagreements on free-tier or very cheap models.
+ * For larger values, uses 0.1% relative tolerance.
  */
 function withinTolerance(a: number, b: number): boolean {
+  const diff = Math.abs(a - b);
+  // For very small differences, use absolute tolerance (handles near-zero prices)
+  if (diff <= ABSOLUTE_TOLERANCE) return true;
   const maxAbs = Math.max(Math.abs(a), Math.abs(b));
   if (maxAbs === 0) return true; // both zero
-  const diff = Math.abs(a - b);
   return diff / maxAbs <= TOLERANCE;
 }
 
@@ -177,20 +182,16 @@ function withinTolerance(a: number, b: number): boolean {
  *
  * @param html - The raw HTML source (truncated to 100K chars)
  * @param pass1Results - Results from the first extraction pass
- * @param apiKey - OpenAI API key for the verification model
  * @returns VerificationResult with disagreements and pass2 results
  */
 export async function verifyExtraction(
   html: string,
   pass1Results: ExtractionResult[],
-  apiKey: string,
 ): Promise<VerificationResult> {
   const truncatedHtml = html.slice(0, MAX_HTML_LENGTH);
 
-  const openai = createOpenAI({ apiKey });
-
   const { object } = await generateObject({
-    model: openai('gpt-4o'),
+    model: getAIModel(),
     schema: verificationSchema,
     prompt: `You are a verification auditor. Given the following HTML source and previously extracted pricing data, verify EACH data point by finding the exact supporting quote in the source. If a data point cannot be verified from the source text, mark supported: false and set the value to the previously extracted value. Only include models that appear in the previously extracted data. Prices must be per 1M tokens in USD.
 

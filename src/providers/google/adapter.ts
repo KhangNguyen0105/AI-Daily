@@ -1,0 +1,54 @@
+import { generateObject } from 'ai';
+import { ProviderAdapter } from '../base';
+import type { ExtractionResult } from '../base';
+import { pricingSchema } from '../schemas';
+import { getAIModel } from '../../lib/ai-client';
+import { googleConfig } from './config';
+
+/**
+ * Google provider adapter.
+ *
+ * CR-05: Uses validated env module instead of raw process.env.
+ * IN-01: Uses base class crawl() implementation.
+ * IN-02: Uses shared pricingSchema from schemas.ts.
+ * IN-03: Uses shared AI client (Mimo or OpenAI).
+ * IN-04: Uses base class default normalize().
+ */
+
+export class GoogleAdapter extends ProviderAdapter {
+  config = googleConfig;
+
+  async extract(html: string): Promise<ExtractionResult[]> {
+    try {
+      const maxHtmlLength = 100_000;
+      const truncatedHtml = html.length > maxHtmlLength
+        ? html.slice(0, maxHtmlLength) + '\n<!-- TRUNCATED -->'
+        : html;
+
+      const { object } = await generateObject({
+        model: getAIModel(),
+        schema: pricingSchema,
+        prompt: `Extract Gemini model pricing from this HTML page.
+Look for model names like gemini-2.0-flash, gemini-1.5-pro, gemini-1.5-flash, etc.
+Note tiered pricing if present and extract the standard tier.
+Extract input and output prices per million tokens and context window size.
+Only extract models with explicit pricing. Skip models without pricing.
+
+HTML content:
+${truncatedHtml}`,
+      });
+
+      return object.models.map((model) => ({
+        modelName: model.modelName,
+        inputPricePer1m: model.inputPricePer1m,
+        outputPricePer1m: model.outputPricePer1m,
+        contextWindow: model.contextWindow,
+        confidence: 'likely' as const,
+        rawEvidence: model,
+      }));
+    } catch (error) {
+      console.error('Google extraction failed:', error);
+      throw error;
+    }
+  }
+}
