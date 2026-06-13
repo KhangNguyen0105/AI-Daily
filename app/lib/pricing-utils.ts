@@ -58,6 +58,45 @@ export function getConfidenceColor(confidence: string): string {
 }
 
 /**
+ * Hardcoded exchange rate: 1 USD = 25,500 VND.
+ * Per PRIC-07: v1 uses a fixed rate. Will be replaced with live rates in future.
+ */
+export const USD_VND_RATE = 25500;
+
+/**
+ * Convert a USD price to VND.
+ * Returns null/undefined as-is (passthrough for missing data).
+ */
+export function convertToVND(price: number | null | undefined): number | null | undefined {
+  if (price === null || price === undefined) return price;
+  return price * USD_VND_RATE;
+}
+
+/**
+ * Format a VND value for display.
+ * Uses Vietnamese number formatting (dot as thousands separator) with dong symbol.
+ * Returns "N/A" for null/undefined.
+ */
+export function formatVND(priceInVND: number | null | undefined): string {
+  if (priceInVND === null || priceInVND === undefined) return 'N/A';
+  const rounded = Math.round(priceInVND);
+  return `${rounded.toLocaleString('vi-VN')} ₫`;
+}
+
+/**
+ * Format a price in the specified currency.
+ * Single entry point for PricingTable price rendering.
+ * - 'usd': delegates to existing formatPrice()
+ * - 'vnd': converts to VND then formats with formatVND()
+ */
+export function formatCurrencyPrice(price: number | null | undefined, currency: 'usd' | 'vnd'): string {
+  if (currency === 'vnd') {
+    return formatVND(convertToVND(price));
+  }
+  return formatPrice(price);
+}
+
+/**
  * Derive model family from model name prefix.
  * Per PRIC-02: Model family grouping for the pricing table.
  * Matches against known prefixes in priority order (more specific first).
