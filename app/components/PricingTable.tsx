@@ -143,7 +143,7 @@ function ProviderLogo({ name }: { name: string }) {
  * Per PRIC-04: Search, provider filter, price range, context window, free tier.
  * Per D-01: Client component receiving data from server via props.
  */
-export function PricingTable({ data, exchangeRate }: { data: PricingRow[]; exchangeRate?: number }) {
+export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }: { data: PricingRow[]; exchangeRate?: number; currency?: 'usd' | 'vnd'; onCurrencyChange?: (currency: 'usd' | 'vnd') => void }) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState('');
   const [providerFilter, setProviderFilter] = useState('');
@@ -155,7 +155,9 @@ export function PricingTable({ data, exchangeRate }: { data: PricingRow[]; excha
   const [contextWindowMin, setContextWindowMin] = useState('');
   const [contextWindowMax, setContextWindowMax] = useState('');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
-  const [currency, setCurrency] = useState<'usd' | 'vnd'>('usd');
+  const [internalCurrency, setInternalCurrency] = useState<'usd' | 'vnd'>('usd');
+  const effectiveCurrency = currency ?? internalCurrency;
+  const handleCurrencyChange = onCurrencyChange ?? setInternalCurrency;
   const [pageSize] = useState(50);
 
   // Deferred search value for performance (debounce without external dependency)
@@ -255,18 +257,18 @@ export function PricingTable({ data, exchangeRate }: { data: PricingRow[]; excha
       ),
     }),
     columnHelper.accessor('inputPricePer1m', {
-      header: currency === 'usd' ? 'Input ($/1M)' : 'Input (₫/1M)',
+      header: effectiveCurrency === 'usd' ? 'Input ($/1M)' : 'Input (₫/1M)',
       cell: (info) => (
         <span className="text-sm text-right text-gray-700 block">
-          {formatCurrencyPrice(info.getValue(), currency, exchangeRate)}
+          {formatCurrencyPrice(info.getValue(), effectiveCurrency, exchangeRate)}
         </span>
       ),
     }),
     columnHelper.accessor('outputPricePer1m', {
-      header: currency === 'usd' ? 'Output ($/1M)' : 'Output (₫/1M)',
+      header: effectiveCurrency === 'usd' ? 'Output ($/1M)' : 'Output (₫/1M)',
       cell: (info) => (
         <span className="text-sm text-right text-gray-700 block">
-          {formatCurrencyPrice(info.getValue(), currency, exchangeRate)}
+          {formatCurrencyPrice(info.getValue(), effectiveCurrency, exchangeRate)}
         </span>
       ),
     }),
@@ -334,7 +336,7 @@ export function PricingTable({ data, exchangeRate }: { data: PricingRow[]; excha
       },
       sortingFn: 'datetime',
     }),
-  ], [providerColumnFilterFn, currency, exchangeRate]);
+  ], [providerColumnFilterFn, effectiveCurrency, exchangeRate]);
 
   const columnFilters = useMemo(
     () => (providerFilter ? [{ id: 'sourceName' as const, value: providerFilter }] : []),
@@ -425,9 +427,9 @@ export function PricingTable({ data, exchangeRate }: { data: PricingRow[]; excha
               <div className="flex" role="group" aria-label="Toggle currency">
                 <button
                   type="button"
-                  onClick={() => setCurrency('usd')}
+                  onClick={() => handleCurrencyChange('usd')}
                   className={`px-3 py-2 text-sm font-medium rounded-l-md border transition-colors ${
-                    currency === 'usd'
+                    effectiveCurrency === 'usd'
                       ? 'bg-blue-600 text-white border-blue-600'
                       : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                   }`}
@@ -436,9 +438,9 @@ export function PricingTable({ data, exchangeRate }: { data: PricingRow[]; excha
                 </button>
                 <button
                   type="button"
-                  onClick={() => setCurrency('vnd')}
+                  onClick={() => handleCurrencyChange('vnd')}
                   className={`px-3 py-2 text-sm font-medium rounded-r-md border-t border-b border-r transition-colors ${
-                    currency === 'vnd'
+                    effectiveCurrency === 'vnd'
                       ? 'bg-blue-600 text-white border-blue-600'
                       : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                   }`}

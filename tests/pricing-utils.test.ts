@@ -9,7 +9,10 @@ import {
   convertToVND,
   formatVND,
   formatCurrencyPrice,
+  calculatePracticalCost,
+  calculateScenarioCosts,
 } from '../app/lib/pricing-utils';
+import type { PricingRow } from '../app/components/PricingTable';
 
 describe('formatPrice', () => {
   it('returns "N/A" for null', () => {
@@ -300,5 +303,178 @@ describe('formatCurrencyPrice', () => {
 
   it('falls back to default rate when rate is undefined', () => {
     expect(formatCurrencyPrice(1, 'vnd', undefined)).toBe('25.500 ₫');
+  });
+});
+
+describe('calculatePracticalCost', () => {
+  const validModel: PricingRow = {
+    id: 1,
+    modelName: 'gpt-4o',
+    inputPricePer1m: 2.5,
+    outputPricePer1m: 10.0,
+    contextWindow: 128000,
+    confidence: 'verified',
+    collectedAt: new Date('2026-06-01'),
+    sourceName: 'OpenAI',
+    sourceUrl: 'https://openai.com',
+  };
+
+  it('returns correct cost breakdown for valid pricing', () => {
+    const result = calculatePracticalCost(validModel, 10_000, 20_000);
+    expect(result).not.toBeNull();
+    expect(result!.inputCost).toBe(0.025);   // (10000/1M) * 2.5
+    expect(result!.outputCost).toBe(0.2);     // (20000/1M) * 10.0
+    expect(result!.totalCost).toBe(0.225);
+  });
+
+  it('preserves model metadata in result', () => {
+    const result = calculatePracticalCost(validModel, 10_000, 20_000);
+    expect(result!.modelId).toBe(1);
+    expect(result!.modelName).toBe('gpt-4o');
+    expect(result!.sourceName).toBe('OpenAI');
+    expect(result!.confidence).toBe('verified');
+    expect(result!.inputPricePer1m).toBe(2.5);
+    expect(result!.outputPricePer1m).toBe(10.0);
+  });
+
+  it('returns null when inputPricePer1m is null', () => {
+    const model: PricingRow = { ...validModel, inputPricePer1m: null };
+    expect(calculatePracticalCost(model, 10_000, 20_000)).toBeNull();
+  });
+
+  it('returns null when outputPricePer1m is null', () => {
+    const model: PricingRow = { ...validModel, outputPricePer1m: null };
+    expect(calculatePracticalCost(model, 10_000, 20_000)).toBeNull();
+  });
+
+  it('returns null when both prices are null', () => {
+    const model: PricingRow = { ...validModel, inputPricePer1m: null, outputPricePer1m: null };
+    expect(calculatePracticalCost(model, 10_000, 20_000)).toBeNull();
+  });
+
+  it('returns zero costs when prices are zero', () => {
+    const model: PricingRow = { ...validModel, inputPricePer1m: 0, outputPricePer1m: 0 };
+    const result = calculatePracticalCost(model, 10_000, 20_000);
+    expect(result).not.toBeNull();
+    expect(result!.inputCost).toBe(0);
+    expect(result!.outputCost).toBe(0);
+    expect(result!.totalCost).toBe(0);
+  });
+
+  it('computes exact values for known inputs', () => {
+    // $3 per 1M input, $15 per 1M output, 65000 in, 5000 out
+    const model: PricingRow = { ...validModel, inputPricePer1m: 3, outputPricePer1m: 15 };
+    const result = calculatePracticalCost(model, 65_000, 5_000);
+    expect(result!.inputCost).toBeCloseTo(0.195);
+    expect(result!.outputCost).toBeCloseTo(0.075);
+    expect(result!.totalCost).toBeCloseTo(0.27);
+  });
+});
+
+describe('calculateScenarioCosts', () => {
+  const models: PricingRow[] = [
+    {
+      id: 1,
+      modelName: 'expensive-model',
+      inputPricePer1m: 10,
+      outputPricePer1m: 30,
+      contextWindow: 128000,
+      confidence: 'verified',
+      collectedAt: new Date('2026-06-01'),
+      sourceName: 'Provider A',
+      sourceUrl: 'https://a.com',
+    },
+    {
+      id: 2,
+      modelName: 'cheap-model',
+      inputPricePer1m: 0.5,
+      outputPricePer1m: 1.5,
+      contextWindow: 64000,
+      confidence: 'likely',
+      collectedAt: new Date('2026-06-01'),
+      sourceName: 'Provider B',
+      sourceUrl: 'https://b.com',
+    },
+    {
+      id: 3,
+      modelName: 'mid-model',
+      inputPricePer1m: 3,
+      outputPricePer1m: 10,
+      contextWindow: 200000,
+      confidence: 'verified',
+      collectedAt: new Date('2026-06-01'),
+      sourceName: 'Provider C',
+      sourceUrl: 'https://c.com',
+    },
+  ];
+
+  it('sorts results by totalCost ascending (cheapest first)', () => {
+    const result = calculateScenarioCosts(models, 10_000, 20_000);
+    expect(result).toHaveLength(3);
+    expect(result[0].modelName).toBe('cheap-model');
+    expect(result[1].modelName).toBe('mid-model');
+    expect(result[2].modelName).toBe('expensive-model');
+  });
+
+  it('excludes models with null inputPricePer1m', () => {
+    const withNull = [...models, {
+      id: 4,
+      modelName: 'no-input-price',
+      inputPricePer1m: null,
+      outputPricePer1m: 10,
+      contextWindow: 128000,
+      confidence: 'verified' as const,
+      collectedAt: new Date('2026-06-01'),
+      sourceName: 'Provider D',
+      sourceUrl: 'https://d.com',
+    }];
+    const result = calculateScenarioCosts(withNull, 10_000, 20_000);
+    expect(result).toHaveLength(3);
+    expect(result.find((r) => r.modelName === 'no-input-price')).toBeUndefined();
+  });
+
+  it('excludes models with null outputPricePer1m', () => {
+    const withNull = [...models, {
+      id: 5,
+      modelName: 'no-output-price',
+      inputPricePer1m: 5,
+      outputPricePer1m: null,
+      contextWindow: 128000,
+      confidence: 'verified' as const,
+      collectedAt: new Date('2026-06-01'),
+      sourceName: 'Provider E',
+      sourceUrl: 'https://e.com',
+    }];
+    const result = calculateScenarioCosts(withNull, 10_000, 20_000);
+    expect(result).toHaveLength(3);
+    expect(result.find((r) => r.modelName === 'no-output-price')).toBeUndefined();
+  });
+
+  it('returns empty array when all models have null pricing', () => {
+    const nullModels: PricingRow[] = [
+      {
+        id: 1,
+        modelName: 'null-model',
+        inputPricePer1m: null,
+        outputPricePer1m: null,
+        contextWindow: 128000,
+        confidence: 'verified',
+        collectedAt: new Date('2026-06-01'),
+        sourceName: 'Provider',
+        sourceUrl: 'https://example.com',
+      },
+    ];
+    const result = calculateScenarioCosts(nullModels, 10_000, 20_000);
+    expect(result).toHaveLength(0);
+  });
+
+  it('preserves metadata for each model in results', () => {
+    const result = calculateScenarioCosts(models, 10_000, 20_000);
+    const cheap = result.find((r) => r.modelName === 'cheap-model')!;
+    expect(cheap.modelId).toBe(2);
+    expect(cheap.sourceName).toBe('Provider B');
+    expect(cheap.confidence).toBe('likely');
+    expect(cheap.inputPricePer1m).toBe(0.5);
+    expect(cheap.outputPricePer1m).toBe(1.5);
   });
 });

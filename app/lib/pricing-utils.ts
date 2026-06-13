@@ -4,6 +4,8 @@
  * Extracted from app/page.tsx per D-01 (server/client split).
  */
 
+import type { PricingRow } from '@/app/components/PricingTable';
+
 /**
  * Format price per 1M tokens for display.
  * Returns "N/A" for null/undefined.
@@ -133,4 +135,72 @@ export function getModelFamily(modelName: string): string {
   if (name.startsWith('qwen')) return 'Qwen';
 
   return 'Other';
+}
+
+/**
+ * Result of a practical cost calculation for a single model.
+ * Breaks down total cost into input and output components.
+ */
+export interface PracticalCost {
+  modelId: number;
+  modelName: string;
+  sourceName: string | null;
+  confidence: 'verified' | 'likely' | 'low_confidence';
+  inputPricePer1m: number;
+  outputPricePer1m: number;
+  inputCost: number;
+  outputCost: number;
+  totalCost: number;
+}
+
+/**
+ * Calculate the practical cost of using a model for a specific token workload.
+ * Returns null if the model has missing pricing data (input or output price is null).
+ *
+ * @param model - PricingRow with per-1M-token prices
+ * @param inputTokens - Total input tokens for the scenario
+ * @param outputTokens - Total output tokens for the scenario
+ */
+export function calculatePracticalCost(
+  model: PricingRow,
+  inputTokens: number,
+  outputTokens: number,
+): PracticalCost | null {
+  if (model.inputPricePer1m === null || model.outputPricePer1m === null) {
+    return null;
+  }
+
+  const inputCost = (inputTokens / 1_000_000) * model.inputPricePer1m;
+  const outputCost = (outputTokens / 1_000_000) * model.outputPricePer1m;
+
+  return {
+    modelId: model.id,
+    modelName: model.modelName,
+    sourceName: model.sourceName,
+    confidence: model.confidence,
+    inputPricePer1m: model.inputPricePer1m,
+    outputPricePer1m: model.outputPricePer1m,
+    inputCost,
+    outputCost,
+    totalCost: inputCost + outputCost,
+  };
+}
+
+/**
+ * Calculate practical costs for all models with valid pricing.
+ * Filters out models with null pricing, sorts by totalCost ascending (cheapest first).
+ *
+ * @param models - Array of PricingRow objects
+ * @param inputTokens - Total input tokens for the scenario
+ * @param outputTokens - Total output tokens for the scenario
+ */
+export function calculateScenarioCosts(
+  models: PricingRow[],
+  inputTokens: number,
+  outputTokens: number,
+): PracticalCost[] {
+  return models
+    .map((model) => calculatePracticalCost(model, inputTokens, outputTokens))
+    .filter((result): result is PracticalCost => result !== null)
+    .sort((a, b) => a.totalCost - b.totalCost);
 }
