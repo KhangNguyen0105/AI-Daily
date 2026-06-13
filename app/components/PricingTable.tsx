@@ -10,6 +10,7 @@ import {
   flexRender,
   type SortingState,
   type Column,
+  type FilterFn,
 } from '@tanstack/react-table';
 import { format } from 'date-fns';
 import { formatPrice, formatContextWindow, sanitizeDisplayName, getConfidenceColor, getModelFamily } from '@/app/lib/pricing-utils';
@@ -86,7 +87,7 @@ function SortIndicator({ column }: { column: Column<PricingRow, unknown> }) {
   if (!sorted) return <span className="ml-1 text-gray-300">&#8597;</span>;
   return (
     <span className="ml-1 text-gray-700">
-      {sorted === 'asc' ? '&#9650;' : '&#9660;'}
+      {sorted === 'asc' ? '▲' : '▼'}
     </span>
   );
 }
@@ -133,7 +134,7 @@ function ProviderLogo({ name }: { name: string }) {
  * Per PRIC-04: Search, provider filter, price range, context window, free tier.
  * Per D-01: Client component receiving data from server via props.
  */
-export function PricingTable({ data, lastUpdated }: { data: PricingRow[]; lastUpdated: Date | null }) {
+export function PricingTable({ data }: { data: PricingRow[] }) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState('');
   const [providerFilter, setProviderFilter] = useState('');
@@ -159,9 +160,7 @@ export function PricingTable({ data, lastUpdated }: { data: PricingRow[]; lastUp
     // 1. Free tier filter
     if (freeTierOnly) {
       result = result.filter((row) => {
-        const inputFree = row.inputPricePer1m === 0 || row.inputPricePer1m === null;
-        const outputFree = row.outputPricePer1m === 0 || row.outputPricePer1m === null;
-        return inputFree && outputFree;
+        return row.inputPricePer1m === 0 && row.outputPricePer1m === 0;
       });
     }
 
@@ -204,9 +203,9 @@ export function PricingTable({ data, lastUpdated }: { data: PricingRow[]; lastUp
     return result;
   }, [data, freeTierOnly, inputPriceMin, inputPriceMax, outputPriceMin, outputPriceMax, contextWindowMin, contextWindowMax]);
 
-  // Provider column filter function
+  // Provider column filter function (matches TanStack FilterFn signature)
   const providerColumnFilterFn = useCallback(
-    (row: { getValue: (id: string) => string | null }) => {
+    (row: { getValue: (id: string) => unknown }, _columnId: string) => {
       if (!providerFilter) return true;
       const sourceName = row.getValue('sourceName') as string | null;
       return sourceName === providerFilter;
@@ -217,7 +216,7 @@ export function PricingTable({ data, lastUpdated }: { data: PricingRow[]; lastUp
   const columns = useMemo(() => [
     columnHelper.accessor('sourceName', {
       header: 'Provider',
-      filterFn: providerColumnFilterFn as any,
+      filterFn: providerColumnFilterFn as FilterFn<PricingRow>,
       cell: (info) => (
         <span className="text-sm text-gray-700 flex items-center">
           <ProviderLogo name={info.getValue() ?? 'Unknown'} />
@@ -363,12 +362,6 @@ export function PricingTable({ data, lastUpdated }: { data: PricingRow[]; lastUp
 
   return (
     <div>
-      {lastUpdated && (
-        <p className="text-sm text-gray-500 mb-4 text-center">
-          Last updated: {format(new Date(lastUpdated), 'MMM d, yyyy h:mm a')}
-        </p>
-      )}
-
       {data.length === 0 ? (
         <div className="text-center py-12 bg-gray-50 rounded-lg">
           <p className="text-gray-500 text-lg">
