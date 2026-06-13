@@ -43,7 +43,7 @@ export default async function HomePage() {
     pricingData = rows.map((row) => ({
       ...row,
       collectedAt: new Date(row.collectedAt),
-    })) as PricingRow[];
+    }));
 
     // Compute lastUpdated as the most recent collectedAt
     if (pricingData.length > 0) {
