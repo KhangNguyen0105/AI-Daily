@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation & Pipeline Core** - Project scaffold with working infrastructure and provider adapter pattern
 - [x] **Phase 2: Data Collection Pipeline** - Automated collection, extraction, scoring, and verification from 10+ providers
-- [ ] **Phase 3: Pricing Comparison Table** - Sortable/filterable pricing table with confidence badges and source attribution
+- [x] **Phase 3: Pricing Comparison Table** - Sortable/filterable pricing table with confidence badges and source attribution
 - [ ] **Phase 4: Practical Cost Calculator** - Real-world cost scenarios (prompts, coding, documents, agents) with side-by-side comparison
 - [ ] **Phase 5: Model Detail Pages** - Per-model profile with pricing history, promotions, and provider links
 - [ ] **Phase 6: Daily Content Engine** - Auto-generated daily articles with chronological archive
@@ -71,11 +71,12 @@ Plans:
   3. User can search across model names and providers via full-text search
   4. Each pricing row shows a confidence badge (green/yellow/red) and links to its source with a last-updated timestamp
   5. The table is responsive on mobile browsers and displays "Last updated: [date]" for data freshness
+**Status**: ✅ COMPLETE (verified 2026-06-12, 164/164 tests pass)
 **Plans**: 3 plans
 Plans:
-- [ ] 03-01-PLAN.md — Data layer + interactive table: Drizzle JOIN query, utility functions, @tanstack/react-table with sorting, confidence badges
-- [ ] 03-02-PLAN.md — Search, filters, provider logos: global text search, provider dropdown, free tier checkbox, SVG logos, model family grouping
-- [ ] 03-03-PLAN.md — Source attribution, mobile responsive: source links, last-updated timestamps, responsive column visibility, mobile layout
+- [x] 03-01-PLAN.md — Data layer + interactive table: Drizzle JOIN query, utility functions, @tanstack/react-table with sorting, confidence badges
+- [x] 03-02-PLAN.md — Search, filters, provider logos: global text search, provider dropdown, free tier checkbox, SVG logos, model family grouping
+- [x] 03-03-PLAN.md — Source attribution, mobile responsive: source links, last-updated timestamps, responsive column visibility, mobile layout
 **UI hint**: yes
 
 ### Phase 4: Practical Cost Calculator
