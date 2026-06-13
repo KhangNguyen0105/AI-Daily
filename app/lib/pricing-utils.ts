@@ -67,17 +67,20 @@ export function getConfidenceColor(confidence: string): string {
 
 /**
  * Hardcoded exchange rate: 1 USD = 25,500 VND.
- * Per PRIC-07: v1 uses a fixed rate. Will be replaced with live rates in future.
+ * Used as fallback when dynamic rate is unavailable.
+ * Per PRIC-07: Dynamic rate fetched daily via exchange-rate-worker.
  */
 export const USD_VND_RATE = 25500;
 
 /**
  * Convert a USD price to VND.
  * Returns null for null/undefined inputs (collapses undefined to null).
+ * @param price - USD price to convert
+ * @param rate - Exchange rate (optional, defaults to USD_VND_RATE)
  */
-export function convertToVND(price: number | null | undefined): number | null {
+export function convertToVND(price: number | null | undefined, rate?: number): number | null {
   if (price === null || price === undefined) return null;
-  return price * USD_VND_RATE;
+  return price * (rate ?? USD_VND_RATE);
 }
 
 /**
@@ -96,10 +99,13 @@ export function formatVND(priceInVND: number | null | undefined): string {
  * Single entry point for PricingTable price rendering.
  * - 'usd': delegates to existing formatPrice()
  * - 'vnd': converts to VND then formats with formatVND()
+ * @param price - Price in USD
+ * @param currency - Target currency
+ * @param rate - Exchange rate (optional, defaults to USD_VND_RATE)
  */
-export function formatCurrencyPrice(price: number | null | undefined, currency: 'usd' | 'vnd'): string {
+export function formatCurrencyPrice(price: number | null | undefined, currency: 'usd' | 'vnd', rate?: number): string {
   if (currency === 'vnd') {
-    return formatVND(convertToVND(price));
+    return formatVND(convertToVND(price, rate));
   }
   return formatPrice(price);
 }

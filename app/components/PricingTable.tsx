@@ -6,6 +6,7 @@ import {
   getCoreRowModel,
   getSortedRowModel,
   getFilteredRowModel,
+  getPaginationRowModel,
   createColumnHelper,
   flexRender,
   type SortingState,
@@ -15,6 +16,14 @@ import {
 import { format } from 'date-fns';
 import { formatPrice, formatContextWindow, sanitizeDisplayName, getConfidenceColor, getModelFamily, formatCurrencyPrice } from '@/app/lib/pricing-utils';
 import { getProviderLogo, getUniqueProviders } from '@/app/lib/provider-metadata';
+
+// Factory functions: create once at module level, not per render.
+// TanStack Table docs recommend this to avoid re-creating on every render.
+// Type parameters erased at runtime; using PricingRow interface defined below.
+const coreRowModel = getCoreRowModel();
+const sortedRowModel = getSortedRowModel();
+const filteredRowModel = getFilteredRowModel();
+const paginationRowModel = getPaginationRowModel();
 
 /**
  * Tooltip text explaining each confidence level.
@@ -134,7 +143,7 @@ function ProviderLogo({ name }: { name: string }) {
  * Per PRIC-04: Search, provider filter, price range, context window, free tier.
  * Per D-01: Client component receiving data from server via props.
  */
-export function PricingTable({ data }: { data: PricingRow[] }) {
+export function PricingTable({ data, exchangeRate }: { data: PricingRow[]; exchangeRate?: number }) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState('');
   const [providerFilter, setProviderFilter] = useState('');
@@ -147,6 +156,7 @@ export function PricingTable({ data }: { data: PricingRow[] }) {
   const [contextWindowMax, setContextWindowMax] = useState('');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [currency, setCurrency] = useState<'usd' | 'vnd'>('usd');
+  const [pageSize] = useState(50);
 
   // Deferred search value for performance (debounce without external dependency)
   const deferredGlobalFilter = useDeferredValue(globalFilter);
@@ -248,7 +258,7 @@ export function PricingTable({ data }: { data: PricingRow[] }) {
       header: currency === 'usd' ? 'Input ($/1M)' : 'Input (₫/1M)',
       cell: (info) => (
         <span className="text-sm text-right text-gray-700 block">
-          {formatCurrencyPrice(info.getValue(), currency)}
+          {formatCurrencyPrice(info.getValue(), currency, exchangeRate)}
         </span>
       ),
     }),
@@ -256,7 +266,7 @@ export function PricingTable({ data }: { data: PricingRow[] }) {
       header: currency === 'usd' ? 'Output ($/1M)' : 'Output (₫/1M)',
       cell: (info) => (
         <span className="text-sm text-right text-gray-700 block">
-          {formatCurrencyPrice(info.getValue(), currency)}
+          {formatCurrencyPrice(info.getValue(), currency, exchangeRate)}
         </span>
       ),
     }),
@@ -324,25 +334,40 @@ export function PricingTable({ data }: { data: PricingRow[] }) {
       },
       sortingFn: 'datetime',
     }),
-  ], [providerColumnFilterFn, currency]);
+  ], [providerColumnFilterFn, currency, exchangeRate]);
 
-  const table = useReactTable({
-    data: preFilteredData,
-    columns,
-    state: {
-      sorting,
-      globalFilter: deferredGlobalFilter,
-      columnFilters: providerFilter ? [{ id: 'sourceName', value: providerFilter }] : [],
-    },
-    onSortingChange: setSorting,
-    onGlobalFilterChange: setGlobalFilter,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    globalFilterFn: 'includesString',
-  });
+  const columnFilters = useMemo(
+    () => (providerFilter ? [{ id: 'sourceName' as const, value: providerFilter }] : []),
+    [providerFilter]
+  );
 
-  const filteredRowCount = table.getRowModel().rows.length;
+  const tableOptions = useMemo(
+    () => ({
+      data: preFilteredData,
+      columns,
+      state: {
+        sorting,
+        globalFilter: deferredGlobalFilter,
+        columnFilters,
+      },
+      onSortingChange: setSorting,
+      onGlobalFilterChange: setGlobalFilter,
+      getCoreRowModel: coreRowModel,
+      getSortedRowModel: sortedRowModel,
+      getFilteredRowModel: filteredRowModel,
+      getPaginationRowModel: paginationRowModel,
+      initialState: {
+        pagination: { pageSize },
+      },
+      globalFilterFn: 'includesString' as const,
+      autoResetPageIndex: true,
+    }),
+    [preFilteredData, columns, sorting, deferredGlobalFilter, columnFilters, pageSize]
+  );
+
+  const table = useReactTable(tableOptions);
+
+  const filteredRowCount = table.getFilteredRowModel().rows.length;
   const totalRowCount = data.length;
 
   /**
@@ -557,7 +582,7 @@ export function PricingTable({ data }: { data: PricingRow[] }) {
           </p>
 
           {/* Table */}
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto" style={{ maxHeight: '70vh' }}>
             <table className="w-full border-collapse">
               <thead>
                 {table.getHeaderGroups().map((headerGroup) => (
@@ -605,6 +630,29 @@ export function PricingTable({ data }: { data: PricingRow[] }) {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* Pagination controls */}
+          <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-200">
+            <p className="text-sm text-gray-500">
+              Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount() || 1}
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+                className="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Previous
+              </button>
+              <button
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+                className="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Next
+              </button>
+            </div>
           </div>
         </>
       )}

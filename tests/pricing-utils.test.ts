@@ -201,6 +201,22 @@ describe('convertToVND', () => {
   it('returns 89250 for 3.5', () => {
     expect(convertToVND(3.5)).toBe(89250);
   });
+
+  it('uses custom rate when provided', () => {
+    expect(convertToVND(1, 26000)).toBe(26000);
+  });
+
+  it('uses custom rate for 3.5', () => {
+    expect(convertToVND(3.5, 26000)).toBe(91000);
+  });
+
+  it('falls back to USD_VND_RATE when rate is undefined', () => {
+    expect(convertToVND(1, undefined)).toBe(25500);
+  });
+
+  it('returns null for null with custom rate', () => {
+    expect(convertToVND(null, 26000)).toBeNull();
+  });
 });
 
 describe('formatVND', () => {
@@ -268,5 +284,21 @@ describe('formatCurrencyPrice', () => {
 
   it('returns "N/A" for undefined with usd', () => {
     expect(formatCurrencyPrice(undefined, 'usd')).toBe('N/A');
+  });
+
+  it('uses custom rate for vnd conversion', () => {
+    expect(formatCurrencyPrice(1, 'vnd', 26000)).toBe('26.000 ₫');
+  });
+
+  it('uses custom rate for 3.5 vnd', () => {
+    expect(formatCurrencyPrice(3.5, 'vnd', 26000)).toBe('91.000 ₫');
+  });
+
+  it('ignores rate for usd currency', () => {
+    expect(formatCurrencyPrice(3.5, 'usd', 26000)).toBe('$3.50');
+  });
+
+  it('falls back to default rate when rate is undefined', () => {
+    expect(formatCurrencyPrice(1, 'vnd', undefined)).toBe('25.500 ₫');
   });
 });

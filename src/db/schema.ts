@@ -82,6 +82,16 @@ export const pipelineRuns = pgTable('pipeline_runs', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
+// Exchange rates table - daily USD/VND rates fetched from external API
+export const exchangeRates = pgTable('exchange_rates', {
+  id: serial('id').primaryKey(),
+  fromCurrency: varchar('from_currency', { length: 3 }).notNull(),
+  toCurrency: varchar('to_currency', { length: 3 }).notNull(),
+  rate: real('rate').notNull(),
+  fetchedAt: timestamp('fetched_at').defaultNow().notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
 // Practical costs table - real-world cost examples
 export const practicalCosts = pgTable('practical_costs', {
   id: serial('id').primaryKey(),

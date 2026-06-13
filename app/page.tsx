@@ -3,6 +3,7 @@ import { extractions, sources } from '@/src/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { format } from 'date-fns';
 import { PricingTable, type PricingRow } from '@/app/components/PricingTable';
+import { getLatestExchangeRate, FALLBACK_RATE } from '@/src/pipeline/exchange-rate-worker';
 
 /**
  * ISR: Revalidate every 60 seconds.
@@ -22,6 +23,7 @@ export default async function HomePage() {
   // Per D-01: Server component fetches data, passes to client component
   let pricingData: PricingRow[] = [];
   let lastUpdated: Date | null = null;
+  let exchangeRate: number = FALLBACK_RATE;
 
   try {
     const rows = await db
@@ -54,20 +56,20 @@ export default async function HomePage() {
     pricingData = [];
   }
 
+  // Fetch exchange rate separately — failure shouldn't hide pricing data
+  try {
+    exchangeRate = await getLatestExchangeRate();
+  } catch {
+    // Exchange rate table may not exist yet — use fallback
+    exchangeRate = FALLBACK_RATE;
+  }
+
   return (
     <main className="min-h-screen bg-white text-gray-900">
       {/* AI Daily Branding */}
-      <div className="flex flex-col items-center justify-center py-16 px-4">
-        <h1 className="text-5xl font-bold tracking-tight">AI Daily</h1>
-        <p className="mt-4 text-xl text-gray-600">
-          AI Model Pricing Intelligence
-        </p>
-        <p className="mt-2 text-gray-500 max-w-md text-center">
-          Understand what AI models actually cost in real-world usage — not
-          per-token abstractions, but practical examples like prompts, coding
-          tasks, document processing, and agent sessions.
-        </p>
-        <p className="mt-3 text-sm text-gray-500">
+      <div className="flex flex-col items-center justify-center py-8 px-4">
+        <h1 className="text-3xl font-bold tracking-tight">AI Daily</h1>
+        <p className="mt-2 text-sm text-gray-500">
           Last updated: {lastUpdated ? format(lastUpdated, 'MMM d, yyyy h:mm a') : 'Unknown'}
         </p>
       </div>
@@ -78,7 +80,7 @@ export default async function HomePage() {
           Latest Pricing Data
         </h2>
 
-        <PricingTable data={pricingData} />
+        <PricingTable data={pricingData} exchangeRate={exchangeRate} />
       </div>
     </main>
   );
