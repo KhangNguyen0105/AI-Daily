@@ -2,7 +2,8 @@ import { db } from '@/src/db/index';
 import { extractions, sources } from '@/src/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { format } from 'date-fns';
-import { PricingTable, type PricingRow } from '@/app/components/PricingTable';
+import { type PricingRow } from '@/app/components/PricingTable';
+import { HomePageClient } from '@/app/components/HomePageClient';
 import { getLatestExchangeRate, FALLBACK_RATE } from '@/src/pipeline/exchange-rate-worker';
 
 /**
@@ -75,13 +76,7 @@ export default async function HomePage() {
       </div>
 
       {/* Pricing Data Section */}
-      <div className="max-w-6xl mx-auto px-4 pb-16">
-        <h2 className="text-2xl font-semibold mb-6 text-center">
-          Latest Pricing Data
-        </h2>
-
-        <PricingTable data={pricingData} exchangeRate={exchangeRate} />
-      </div>
+      <HomePageClient data={pricingData} exchangeRate={exchangeRate} />
     </main>
   );
 }
