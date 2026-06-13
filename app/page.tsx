@@ -78,7 +78,7 @@ export default async function HomePage() {
           Latest Pricing Data
         </h2>
 
-        <PricingTable data={pricingData} lastUpdated={lastUpdated} />
+        <PricingTable data={pricingData} />
       </div>
     </main>
   );
