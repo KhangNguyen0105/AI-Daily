@@ -13,7 +13,7 @@ import {
   type FilterFn,
 } from '@tanstack/react-table';
 import { format } from 'date-fns';
-import { formatPrice, formatContextWindow, sanitizeDisplayName, getConfidenceColor, getModelFamily } from '@/app/lib/pricing-utils';
+import { formatPrice, formatContextWindow, sanitizeDisplayName, getConfidenceColor, getModelFamily, formatCurrencyPrice } from '@/app/lib/pricing-utils';
 import { getProviderLogo, getUniqueProviders } from '@/app/lib/provider-metadata';
 
 /**
@@ -146,6 +146,7 @@ export function PricingTable({ data }: { data: PricingRow[] }) {
   const [contextWindowMin, setContextWindowMin] = useState('');
   const [contextWindowMax, setContextWindowMax] = useState('');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [currency, setCurrency] = useState<'usd' | 'vnd'>('usd');
 
   // Deferred search value for performance (debounce without external dependency)
   const deferredGlobalFilter = useDeferredValue(globalFilter);
@@ -242,18 +243,18 @@ export function PricingTable({ data }: { data: PricingRow[] }) {
       ),
     }),
     columnHelper.accessor('inputPricePer1m', {
-      header: 'Input ($/1M)',
+      header: currency === 'usd' ? 'Input ($/1M)' : 'Input (₫/1M)',
       cell: (info) => (
         <span className="text-sm text-right text-gray-700 block">
-          {formatPrice(info.getValue())}
+          {formatCurrencyPrice(info.getValue(), currency)}
         </span>
       ),
     }),
     columnHelper.accessor('outputPricePer1m', {
-      header: 'Output ($/1M)',
+      header: currency === 'usd' ? 'Output ($/1M)' : 'Output (₫/1M)',
       cell: (info) => (
         <span className="text-sm text-right text-gray-700 block">
-          {formatPrice(info.getValue())}
+          {formatCurrencyPrice(info.getValue(), currency)}
         </span>
       ),
     }),
@@ -313,7 +314,7 @@ export function PricingTable({ data }: { data: PricingRow[] }) {
       },
       sortingFn: 'datetime',
     }),
-  ], [providerColumnFilterFn]);
+  ], [providerColumnFilterFn, currency]);
 
   const table = useReactTable({
     data: preFilteredData,
@@ -383,6 +384,32 @@ export function PricingTable({ data }: { data: PricingRow[] }) {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   aria-label="Search models or providers"
                 />
+              </div>
+
+              {/* Currency toggle */}
+              <div className="flex" role="group" aria-label="Toggle currency">
+                <button
+                  type="button"
+                  onClick={() => setCurrency('usd')}
+                  className={`px-3 py-2 text-sm font-medium rounded-l-md border transition-colors ${
+                    currency === 'usd'
+                      ? 'bg-blue-600 text-white border-blue-600'
+                      : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  USD
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCurrency('vnd')}
+                  className={`px-3 py-2 text-sm font-medium rounded-r-md border-t border-b border-r transition-colors ${
+                    currency === 'vnd'
+                      ? 'bg-blue-600 text-white border-blue-600'
+                      : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  VND
+                </button>
               </div>
 
               <select
