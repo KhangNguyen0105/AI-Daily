@@ -1,9 +1,8 @@
 import { generateObject } from 'ai';
-import { createOpenAI } from '@ai-sdk/openai';
 import { ProviderAdapter } from '../base';
 import type { ExtractionResult } from '../base';
 import { pricingSchema } from '../schemas';
-import { env } from '../../lib/env';
+import { getAIModel } from '../../lib/ai-client';
 import { mistralConfig } from './config';
 
 /**
@@ -12,10 +11,9 @@ import { mistralConfig } from './config';
  * CR-05: Uses validated env module instead of raw process.env.
  * IN-01: Uses base class crawl() implementation.
  * IN-02: Uses shared pricingSchema from schemas.ts.
- * IN-03: OpenAI client created once at module level.
+ * IN-03: Uses shared AI client (Mimo or OpenAI).
  * IN-04: Uses base class default normalize().
  */
-const openai = createOpenAI({ apiKey: env.OPENAI_API_KEY });
 
 export class MistralAdapter extends ProviderAdapter {
   config = mistralConfig;
@@ -28,7 +26,7 @@ export class MistralAdapter extends ProviderAdapter {
         : html;
 
       const { object } = await generateObject({
-        model: openai('gpt-4o'),
+        model: getAIModel(),
         schema: pricingSchema,
         prompt: `Extract Mistral model pricing from this HTML page.
 Look for model names like mistral-large, mistral-small, codestral, pixtral, etc.

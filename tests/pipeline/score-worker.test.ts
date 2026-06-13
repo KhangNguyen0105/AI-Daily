@@ -74,6 +74,7 @@ vi.mock('../../src/pipeline/confidence', () => ({
 }));
 
 // Mock env
+process.env.MIMO_API_KEY = 'test-mimo-key';
 process.env.OPENAI_API_KEY = 'test-key';
 
 describe('Score Worker', () => {
@@ -226,7 +227,6 @@ describe('Score Worker', () => {
       expect(verifyExtraction).toHaveBeenCalledWith(
         '<html>pricing data</html>',
         [expect.objectContaining({ modelName: 'gpt-4o' })],
-        'test-key',
       );
     });
   });

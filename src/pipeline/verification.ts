@@ -1,7 +1,7 @@
 import { generateObject } from 'ai';
-import { createOpenAI } from '@ai-sdk/openai';
 import { z } from 'zod';
 import type { ExtractionResult } from '../providers/base';
+import { getAIModel } from '../lib/ai-client';
 
 // --- Exported types ---
 
@@ -182,20 +182,16 @@ function withinTolerance(a: number, b: number): boolean {
  *
  * @param html - The raw HTML source (truncated to 100K chars)
  * @param pass1Results - Results from the first extraction pass
- * @param apiKey - OpenAI API key for the verification model
  * @returns VerificationResult with disagreements and pass2 results
  */
 export async function verifyExtraction(
   html: string,
   pass1Results: ExtractionResult[],
-  apiKey: string,
 ): Promise<VerificationResult> {
   const truncatedHtml = html.slice(0, MAX_HTML_LENGTH);
 
-  const openai = createOpenAI({ apiKey });
-
   const { object } = await generateObject({
-    model: openai('gpt-4o'),
+    model: getAIModel(),
     schema: verificationSchema,
     prompt: `You are a verification auditor. Given the following HTML source and previously extracted pricing data, verify EACH data point by finding the exact supporting quote in the source. If a data point cannot be verified from the source text, mark supported: false and set the value to the previously extracted value. Only include models that appear in the previously extracted data. Prices must be per 1M tokens in USD.
 
