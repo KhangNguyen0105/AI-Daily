@@ -67,7 +67,7 @@ export function getModelFamily(modelName: string): string {
   const name = modelName.toLowerCase();
 
   // Order matters: more specific prefixes before general ones
-  if (name.startsWith('claude-3.5') || name.startsWith('claude-3.5')) return 'Claude 3.5';
+  if (name.startsWith('claude-3.5') || name.startsWith('claude-3.6')) return 'Claude 3.5';
   if (name.startsWith('claude-3')) return 'Claude 3';
   if (name.startsWith('claude-2')) return 'Claude 2';
   if (name.startsWith('gpt-4')) return 'GPT-4';
