@@ -233,6 +233,8 @@ export function PricingTable({ data }: { data: PricingRow[] }) {
         </span>
       ),
     }),
+    // Family column: derives family from the same modelName field used by the Model column.
+    // Uses id: 'family' to differentiate the two accessors on the same data field.
     columnHelper.accessor('modelName', {
       id: 'family',
       header: 'Family',
@@ -287,6 +289,14 @@ export function PricingTable({ data }: { data: PricingRow[] }) {
         const url = info.getValue();
         const row = info.row.original;
         if (url) {
+          try {
+            const parsed = new URL(url);
+            if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+              return <span className="text-sm text-gray-400">{row.sourceName ?? '—'}</span>;
+            }
+          } catch {
+            return <span className="text-sm text-gray-400">{row.sourceName ?? '—'}</span>;
+          }
           return (
             <a
               href={url}
