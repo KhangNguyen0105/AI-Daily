@@ -1,0 +1,53 @@
+'use client';
+
+import {
+  formatCurrencyPrice,
+  formatContextWindow,
+} from '@/app/lib/pricing-utils';
+
+interface PricingGridProps {
+  inputPrice: number | null;
+  outputPrice: number | null;
+  contextWindow: number | null;
+  currency: 'usd' | 'vnd';
+  exchangeRate: number;
+}
+
+const cards = [
+  { label: 'Input $/1M', key: 'input' as const },
+  { label: 'Output $/1M', key: 'output' as const },
+  { label: 'Context Window', key: 'context' as const },
+];
+
+export function PricingGrid({
+  inputPrice,
+  outputPrice,
+  contextWindow,
+  currency,
+  exchangeRate,
+}: PricingGridProps) {
+  function getValue(key: 'input' | 'output' | 'context'): string {
+    switch (key) {
+      case 'input':
+        return formatCurrencyPrice(inputPrice, currency, exchangeRate);
+      case 'output':
+        return formatCurrencyPrice(outputPrice, currency, exchangeRate);
+      case 'context':
+        return formatContextWindow(contextWindow);
+    }
+  }
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {cards.map((card) => (
+        <div
+          key={card.key}
+          className="bg-white border rounded-lg p-6 text-center"
+        >
+          <p className="text-sm text-gray-500 mb-2">{card.label}</p>
+          <p className="text-2xl font-bold">{getValue(card.key)}</p>
+        </div>
+      ))}
+    </div>
+  );
+}

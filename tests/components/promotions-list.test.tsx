@@ -29,7 +29,7 @@ describe('PromotionsList', () => {
     render(<PromotionsList promotions={promotions} />);
 
     expect(screen.getByText('Free tier with 10K tokens/day')).toBeDefined();
-    expect(screen.getByText('10K tokens/day')).toBeDefined();
+    expect(screen.getByText(/Credits:.*10K tokens\/day/)).toBeDefined();
     // Active promotions should have green border
     const promotionEl = screen.getByText('Free tier with 10K tokens/day').closest('[class*="green"]');
     expect(promotionEl).not.toBeNull();

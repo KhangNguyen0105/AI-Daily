@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { PriceHistoryChart } from '../../app/components/PriceHistoryChart';
 
@@ -31,7 +31,7 @@ describe('PriceHistoryChart', () => {
   });
 
   it('renders chart when 2+ data points exist', () => {
-    render(
+    const { container } = render(
       <PriceHistoryChart
         data={[
           {
@@ -48,16 +48,16 @@ describe('PriceHistoryChart', () => {
       />
     );
 
-    // Recharts renders SVG when chart is present
-    expect(screen.getByText('Price history will appear after multiple data collections.')).toBeNull();
-    // Check that the chart container exists (Recharts renders an SVG)
-    const svgElement = document.querySelector('svg');
-    expect(svgElement).not.toBeNull();
+    // Should NOT show empty state
+    expect(screen.queryByText('Price history will appear after multiple data collections.')).toBeNull();
+    // Recharts ResponsiveContainer renders with the recharts-responsive-container class
+    const chartContainer = container.querySelector('.recharts-responsive-container');
+    expect(chartContainer).not.toBeNull();
   });
 
   it('filters out data points with null prices', () => {
-    // 3 points but one has null prices — should show empty state (only 2 valid)
-    render(
+    // 3 points but one has null prices — should still show chart (2 valid)
+    const { container } = render(
       <PriceHistoryChart
         data={[
           {
@@ -80,7 +80,8 @@ describe('PriceHistoryChart', () => {
     );
 
     // Should still render chart since 2 valid points remain
-    const svgElement = document.querySelector('svg');
-    expect(svgElement).not.toBeNull();
+    expect(screen.queryByText('Price history will appear after multiple data collections.')).toBeNull();
+    const chartContainer = container.querySelector('.recharts-responsive-container');
+    expect(chartContainer).not.toBeNull();
   });
 });
