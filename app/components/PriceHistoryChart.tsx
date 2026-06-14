@@ -24,15 +24,23 @@ export function PriceHistoryChart({ data }: { data: HistoryPoint[] }) {
       (point) => point.inputPricePer1m !== null || point.outputPricePer1m !== null
     )
     .map((point) => ({
-      date: format(new Date(point.collectedAt), 'MMM d'),
+      date: format(point.collectedAt, 'MMM d'),
       input: point.inputPricePer1m,
       output: point.outputPricePer1m,
     }));
 
-  if (chartData.length < 2) {
+  if (chartData.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
-        Price history will appear after multiple data collections.
+        No pricing data available yet.
+      </div>
+    );
+  }
+
+  if (chartData.length === 1) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        Only 1 data point collected. Price history chart will appear after the next collection.
       </div>
     );
   }

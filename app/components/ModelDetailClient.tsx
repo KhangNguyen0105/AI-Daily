@@ -81,7 +81,7 @@ export function ModelDetailClient({
           </span>
 
           <span className="text-sm text-gray-500">
-            Collected {format(new Date(model.collectedAt), 'MMM d, yyyy h:mm a')}
+            Collected {format(model.collectedAt, 'MMM d, yyyy h:mm a')}
           </span>
         </div>
       </div>
@@ -148,7 +148,7 @@ export function ModelDetailClient({
           <div>
             <dt className="text-sm text-gray-500">First Collected</dt>
             <dd className="text-lg font-medium">
-              {format(new Date(model.collectedAt), 'MMM d, yyyy')}
+              {format(model.collectedAt, 'MMM d, yyyy')}
             </dd>
           </div>
         </dl>
@@ -161,13 +161,15 @@ export function ModelDetailClient({
       </section>
 
       {/* Provider Links */}
-      <section className="border-b py-8">
-        <h2 className="text-xl font-semibold mb-4">Provider Resources</h2>
-        <ProviderLinks
-          providerName={model.sourceName ?? ''}
-          sourceUrl={model.sourceUrl}
-        />
-      </section>
+      {(model.sourceName || model.sourceUrl) && (
+        <section className="border-b py-8">
+          <h2 className="text-xl font-semibold mb-4">Provider Resources</h2>
+          <ProviderLinks
+            providerName={model.sourceName ?? ''}
+            sourceUrl={model.sourceUrl}
+          />
+        </section>
+      )}
 
       {/* Digest Mentions (placeholder until Phase 6) */}
       <section className="py-8">

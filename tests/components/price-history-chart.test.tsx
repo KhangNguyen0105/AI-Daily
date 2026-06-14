@@ -18,7 +18,7 @@ describe('PriceHistoryChart', () => {
     );
 
     expect(
-      screen.getByText('Price history will appear after multiple data collections.')
+      screen.getByText('Only 1 data point collected. Price history chart will appear after the next collection.')
     ).toBeDefined();
   });
 
@@ -26,7 +26,7 @@ describe('PriceHistoryChart', () => {
     render(<PriceHistoryChart data={[]} />);
 
     expect(
-      screen.getByText('Price history will appear after multiple data collections.')
+      screen.getByText('No pricing data available yet.')
     ).toBeDefined();
   });
 
@@ -49,7 +49,8 @@ describe('PriceHistoryChart', () => {
     );
 
     // Should NOT show empty state
-    expect(screen.queryByText('Price history will appear after multiple data collections.')).toBeNull();
+    expect(screen.queryByText('No pricing data available yet.')).toBeNull();
+    expect(screen.queryByText('Only 1 data point collected. Price history chart will appear after the next collection.')).toBeNull();
     // Recharts ResponsiveContainer renders with the recharts-responsive-container class
     const chartContainer = container.querySelector('.recharts-responsive-container');
     expect(chartContainer).not.toBeNull();

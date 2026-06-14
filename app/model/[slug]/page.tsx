@@ -60,50 +60,76 @@ export default async function ModelDetailPage({
 
   const { modelName, sourceId } = resolved;
 
-  // Fetch latest extraction (JOIN with sources for provider name/URL)
-  const [latest] = await db
-    .select({
-      id: extractions.id,
-      modelName: extractions.modelName,
-      inputPricePer1m: extractions.inputPricePer1m,
-      outputPricePer1m: extractions.outputPricePer1m,
-      contextWindow: extractions.contextWindow,
-      confidence: extractions.confidence,
-      collectedAt: extractions.collectedAt,
-      sourceId: extractions.sourceId,
-      sourceName: sources.name,
-      sourceUrl: sources.url,
-    })
-    .from(extractions)
-    .leftJoin(sources, eq(extractions.sourceId, sources.id))
-    .where(
-      and(
-        eq(extractions.modelName, modelName),
-        eq(extractions.sourceId, sourceId),
-      ),
-    )
-    .orderBy(desc(extractions.collectedAt))
-    .limit(1);
+  // Fetch latest extraction and price history
+  let latest: {
+    id: number;
+    modelName: string;
+    inputPricePer1m: number | null;
+    outputPricePer1m: number | null;
+    contextWindow: number | null;
+    confidence: 'verified' | 'likely' | 'low_confidence';
+    collectedAt: Date;
+    sourceId: number;
+    sourceName: string | null;
+    sourceUrl: string | null;
+  };
+  let history: Array<{
+    collectedAt: Date;
+    inputPricePer1m: number | null;
+    outputPricePer1m: number | null;
+  }>;
 
-  if (!latest) {
+  try {
+    const [latestRow] = await db
+      .select({
+        id: extractions.id,
+        modelName: extractions.modelName,
+        inputPricePer1m: extractions.inputPricePer1m,
+        outputPricePer1m: extractions.outputPricePer1m,
+        contextWindow: extractions.contextWindow,
+        confidence: extractions.confidence,
+        collectedAt: extractions.collectedAt,
+        sourceId: extractions.sourceId,
+        sourceName: sources.name,
+        sourceUrl: sources.url,
+      })
+      .from(extractions)
+      .leftJoin(sources, eq(extractions.sourceId, sources.id))
+      .where(
+        and(
+          eq(extractions.modelName, modelName),
+          eq(extractions.sourceId, sourceId),
+        ),
+      )
+      .orderBy(desc(extractions.collectedAt))
+      .limit(1);
+
+    if (!latestRow) {
+      notFound();
+    }
+
+    latest = latestRow;
+
+    // Fetch price history (most recent 90 extractions for this model + source, D-05, D-06, D-08)
+    history = await db
+      .select({
+        collectedAt: extractions.collectedAt,
+        inputPricePer1m: extractions.inputPricePer1m,
+        outputPricePer1m: extractions.outputPricePer1m,
+      })
+      .from(extractions)
+      .where(
+        and(
+          eq(extractions.modelName, modelName),
+          eq(extractions.sourceId, sourceId),
+        ),
+      )
+      .orderBy(desc(extractions.collectedAt))
+      .limit(90);
+  } catch (err) {
+    console.error('[ModelDetailPage] Failed to fetch model data:', err instanceof Error ? err.message : err);
     notFound();
   }
-
-  // Fetch price history (all extractions for this model + source, D-05, D-06, D-08)
-  const history = await db
-    .select({
-      collectedAt: extractions.collectedAt,
-      inputPricePer1m: extractions.inputPricePer1m,
-      outputPricePer1m: extractions.outputPricePer1m,
-    })
-    .from(extractions)
-    .where(
-      and(
-        eq(extractions.modelName, modelName),
-        eq(extractions.sourceId, sourceId),
-      ),
-    )
-    .orderBy(extractions.collectedAt);
 
   // Fetch promotions (table may not exist yet — graceful fallback, D-09)
   let activePromotions: Array<{
@@ -128,8 +154,8 @@ export default async function ModelDetailPage({
       type: row.type,
       description: row.description,
       credits: row.credits,
-      startDate: row.startDate ? new Date(row.startDate) : null,
-      endDate: row.endDate ? new Date(row.endDate) : null,
+      startDate: row.startDate,
+      endDate: row.endDate,
       sourceUrl: row.sourceUrl,
     }));
   } catch {
@@ -144,15 +170,13 @@ export default async function ModelDetailPage({
     // Exchange rate table may not exist yet — use fallback
   }
 
-  // Convert dates for client component
+  // Data is already in correct shape for the client component
   const modelData = {
     ...latest,
-    collectedAt: new Date(latest.collectedAt),
   };
 
   const historyData = history.map((point) => ({
     ...point,
-    collectedAt: new Date(point.collectedAt),
   }));
 
   return (

@@ -35,8 +35,8 @@ export async function resolveSlug(slug: string): Promise<{
         return { modelName: row.modelName, sourceId: row.sourceId };
       }
     }
-  } catch {
-    // DB unavailable — return null
+  } catch (err) {
+    console.error('[resolveSlug] Failed:', err instanceof Error ? err.message : err);
   }
 
   return null;

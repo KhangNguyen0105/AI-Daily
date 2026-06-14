@@ -1,6 +1,7 @@
 'use client';
 
 import { getProviderLinks } from '@/app/lib/provider-links';
+import { isSafeUrl } from '@/app/lib/url-utils';
 
 interface ProviderLinksProps {
   providerName: string;
@@ -46,7 +47,7 @@ export function ProviderLinks({ providerName, sourceUrl }: ProviderLinksProps) {
           )}
         </>
       )}
-      {sourceUrl && (
+      {sourceUrl && isSafeUrl(sourceUrl) && (
         <a
           href={sourceUrl}
           target="_blank"

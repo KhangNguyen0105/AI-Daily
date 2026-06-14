@@ -13,11 +13,14 @@ interface PricingGridProps {
   exchangeRate: number;
 }
 
-const cards = [
-  { label: 'Input $/1M', key: 'input' as const },
-  { label: 'Output $/1M', key: 'output' as const },
-  { label: 'Context Window', key: 'context' as const },
-];
+function getCards(currency: 'usd' | 'vnd') {
+  const symbol = currency === 'vnd' ? '₫' : '$';
+  return [
+    { label: `Input ${symbol}/1M`, key: 'input' as const },
+    { label: `Output ${symbol}/1M`, key: 'output' as const },
+    { label: 'Context Window', key: 'context' as const },
+  ];
+}
 
 export function PricingGrid({
   inputPrice,
@@ -39,7 +42,7 @@ export function PricingGrid({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      {cards.map((card) => (
+      {getCards(currency).map((card) => (
         <div
           key={card.key}
           className="bg-white border rounded-lg p-6 text-center"

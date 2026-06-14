@@ -1,6 +1,7 @@
 'use client';
 
 import { format } from 'date-fns';
+import { isSafeUrl } from '@/app/lib/url-utils';
 
 export interface PromotionData {
   id: number;
@@ -84,7 +85,7 @@ export function PromotionsList({
             {dateRange && (
               <p className="text-xs text-gray-500 mb-2">{dateRange}</p>
             )}
-            {promo.sourceUrl && (
+            {promo.sourceUrl && isSafeUrl(promo.sourceUrl) && (
               <a
                 href={promo.sourceUrl}
                 target="_blank"

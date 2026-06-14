@@ -7,7 +7,7 @@ import {
   timestamp,
   jsonb,
   pgEnum,
-  real,
+  doublePrecision,
 } from 'drizzle-orm/pg-core';
 
 // Confidence scoring enum (D-06)
@@ -51,8 +51,8 @@ export const extractions = pgTable('extractions', {
     .references(() => sources.id)
     .notNull(),
   modelName: varchar('model_name', { length: 255 }).notNull(),
-  inputPricePer1m: real('input_price_per_1m'),
-  outputPricePer1m: real('output_price_per_1m'),
+  inputPricePer1m: doublePrecision('input_price_per_1m'),
+  outputPricePer1m: doublePrecision('output_price_per_1m'),
   contextWindow: integer('context_window'),
   confidence: confidenceEnum('confidence').notNull(),
   rawEvidence: jsonb('raw_evidence'),
@@ -87,7 +87,7 @@ export const exchangeRates = pgTable('exchange_rates', {
   id: serial('id').primaryKey(),
   fromCurrency: varchar('from_currency', { length: 3 }).notNull(),
   toCurrency: varchar('to_currency', { length: 3 }).notNull(),
-  rate: real('rate').notNull(),
+  rate: doublePrecision('rate').notNull(),
   fetchedAt: timestamp('fetched_at').defaultNow().notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
@@ -125,7 +125,7 @@ export const practicalCosts = pgTable('practical_costs', {
   scenarioName: varchar('scenario_name', { length: 255 }).notNull(),
   inputTokens: integer('input_tokens').notNull(),
   outputTokens: integer('output_tokens').notNull(),
-  estimatedCost: real('estimated_cost').notNull(),
+  estimatedCost: doublePrecision('estimated_cost').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
