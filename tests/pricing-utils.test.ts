@@ -309,6 +309,7 @@ describe('formatCurrencyPrice', () => {
 describe('calculatePracticalCost', () => {
   const validModel: PricingRow = {
     id: 1,
+    sourceId: 1,
     modelName: 'gpt-4o',
     inputPricePer1m: 2.5,
     outputPricePer1m: 10.0,
@@ -375,6 +376,7 @@ describe('calculateScenarioCosts', () => {
   const models: PricingRow[] = [
     {
       id: 1,
+      sourceId: 1,
       modelName: 'expensive-model',
       inputPricePer1m: 10,
       outputPricePer1m: 30,
@@ -386,6 +388,7 @@ describe('calculateScenarioCosts', () => {
     },
     {
       id: 2,
+      sourceId: 2,
       modelName: 'cheap-model',
       inputPricePer1m: 0.5,
       outputPricePer1m: 1.5,
@@ -397,6 +400,7 @@ describe('calculateScenarioCosts', () => {
     },
     {
       id: 3,
+      sourceId: 3,
       modelName: 'mid-model',
       inputPricePer1m: 3,
       outputPricePer1m: 10,
@@ -454,6 +458,7 @@ describe('calculateScenarioCosts', () => {
     const nullModels: PricingRow[] = [
       {
         id: 1,
+        sourceId: 1,
         modelName: 'null-model',
         inputPricePer1m: null,
         outputPricePer1m: null,

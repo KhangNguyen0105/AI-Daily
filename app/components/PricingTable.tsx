@@ -40,6 +40,7 @@ const CONFIDENCE_TOOLTIPS: Record<string, string> = {
  */
 export interface PricingRow {
   id: number;
+  sourceId: number;
   modelName: string;
   inputPricePer1m: number | null;
   outputPricePer1m: number | null;

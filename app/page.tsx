@@ -30,6 +30,7 @@ export default async function HomePage() {
     const rows = await db
       .select({
         id: extractions.id,
+        sourceId: extractions.sourceId,
         modelName: extractions.modelName,
         inputPricePer1m: extractions.inputPricePer1m,
         outputPricePer1m: extractions.outputPricePer1m,

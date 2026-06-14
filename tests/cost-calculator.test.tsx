@@ -10,6 +10,7 @@ function createMockData(): PricingRow[] {
   return [
     {
       id: 1,
+      sourceId: 1,
       modelName: 'gpt-4o-mini',
       inputPricePer1m: 0.15,
       outputPricePer1m: 0.6,
@@ -21,6 +22,7 @@ function createMockData(): PricingRow[] {
     },
     {
       id: 2,
+      sourceId: 2,
       modelName: 'claude-3.5-sonnet',
       inputPricePer1m: 3,
       outputPricePer1m: 15,
@@ -32,6 +34,7 @@ function createMockData(): PricingRow[] {
     },
     {
       id: 3,
+      sourceId: 1,
       modelName: 'gpt-4o',
       inputPricePer1m: 2.5,
       outputPricePer1m: 10,
@@ -43,6 +46,7 @@ function createMockData(): PricingRow[] {
     },
     {
       id: 4,
+      sourceId: 3,
       modelName: 'gemini-2.0-flash',
       inputPricePer1m: 0.1,
       outputPricePer1m: 0.4,
@@ -60,6 +64,7 @@ function createDataWithNulls(): PricingRow[] {
   return [
     {
       id: 1,
+      sourceId: 1,
       modelName: 'gpt-4o-mini',
       inputPricePer1m: 0.15,
       outputPricePer1m: 0.6,
@@ -71,6 +76,7 @@ function createDataWithNulls(): PricingRow[] {
     },
     {
       id: 2,
+      sourceId: 4,
       modelName: 'unknown-model',
       inputPricePer1m: null,
       outputPricePer1m: 10,
@@ -82,6 +88,7 @@ function createDataWithNulls(): PricingRow[] {
     },
     {
       id: 3,
+      sourceId: 4,
       modelName: 'another-null',
       inputPricePer1m: 5,
       outputPricePer1m: null,
@@ -183,6 +190,7 @@ describe('CostCalculator', () => {
       const data: PricingRow[] = [
         {
           id: 1,
+          sourceId: 1,
           modelName: 'null-model',
           inputPricePer1m: null,
           outputPricePer1m: null,
