@@ -452,19 +452,19 @@ export function DigestArticle({ content }: { content: string }) {
 
 **Important finding:** The SideNav component referenced in D-21 does NOT exist in `app/components/`. The Stitch integration summary (03-STITCH-INTEGRATION-SUMMARY.md) documents its creation, but the file is not present in the working tree. The planner must either create a simple navigation component or adapt D-21 to use a different navigation approach (e.g., top nav bar, inline links on pages).
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **SideNav existence:** The Stitch integration summary mentions SideNav.tsx was created, but it does not exist in app/components/. Was it reverted? Should Phase 6 create it, or should D-21 be adapted?
+1. **SideNav existence:** The Stitch integration summary mentions SideNav.tsx was created, but it does not exist in app/components/. Was it reverted? Should Phase 6 create it, or should D-21 be adapted? **RESOLVED:** Plans create a TopNav component instead.
    - What we know: The summary says it was created with 240px fixed sidebar, navigation links, AI Daily branding.
    - What's unclear: Why it's not in the working tree. Whether to recreate it or use a simpler approach.
    - Recommendation: Create a simple top navigation bar with links to Home, Daily Digest, and (future) admin. This is simpler than a full SideNav and works on mobile.
 
-2. **AI provider env vars:** The current env.ts has MIMO_API_KEY and OPENAI_API_KEY. D-11 wants `AI_PROVIDER` and `AI_FALLBACK_PROVIDER` env vars. Should these be added to env.ts?
+2. **AI provider env vars:** The current env.ts has MIMO_API_KEY and OPENAI_API_KEY. D-11 wants `AI_PROVIDER` and `AI_FALLBACK_PROVIDER` env vars. Should these be added to env.ts? **RESOLVED:** Plan 06-01 adds AI_PROVIDER and AI_FALLBACK_PROVIDER to env.ts.
    - What we know: env.ts uses Zod validation. MIMO_API_KEY is the current primary.
    - What's unclear: Whether to add new env vars or reuse existing ones.
    - Recommendation: Add AI_PROVIDER and AI_FALLBACK_PROVIDER to env.ts with defaults. Map 'anthropic' to ANTHROPIC_API_KEY, 'openai' to OPENAI_API_KEY, 'mimo' to MIMO_API_KEY.
 
-3. **Article prompt template:** D-06 says to feed extractions, promotions, and confidence scores into the prompt. How much context fits within token limits?
+3. **Article prompt template:** D-06 says to feed extractions, promotions, and confidence scores into the prompt. How much context fits within token limits? **RESOLVED:** Plan 06-02 uses compact diff format (changed models only) to stay under 2K tokens.
    - What we know: 30+ providers, potentially hundreds of extractions per day.
    - What's unclear: Whether to summarize extractions before sending to LLM or send raw.
    - Recommendation: Summarize extractions into a compact diff format (changed models only, not all models). This keeps the prompt under 2K tokens.

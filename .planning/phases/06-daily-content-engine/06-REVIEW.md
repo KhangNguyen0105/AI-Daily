@@ -50,17 +50,26 @@ status: issues_found
 
 ## Summary
 
-| Severity | Count |
-|----------|-------|
-| Critical | 3 |
-| Warning | 6 |
-| Info | 5 |
-| **Total** | **14** |
+| Severity | Found | Fixed | Skipped |
+|----------|-------|-------|---------|
+| Critical | 3 | 2 | 1 (false positive) |
+| Warning | 6 | 6 | 0 |
+| Info | 5 | 3 | 2 (documented/low priority) |
+| **Total** | **14** | **11** | **3** |
 
-**Key concerns:**
-1. **C-01 is the highest priority.** The default `AI_PROVIDER=anthropic` configuration will crash on any deployment that does not have `ANTHROPIC_API_KEY` set. Since the codebase primarily uses MIMO, the default should either be changed to `'mimo'` or `ANTHROPIC_API_KEY` must be added to the env schema.
-2. **C-03 means the generate worker has effectively zero test coverage.** The 5 tests verify nothing beyond function existence. The core pipeline logic is untested.
-3. **W-01 means the MIMO provider path in article-generator is untested** because the test mock does not export `createOpenAI`.
+**Resolution:**
+1. **C-01 FIXED:** `ANTHROPIC_API_KEY` added to env schema as optional string.
+2. **C-02 SKIPPED:** False positive — `openai` IS used at line 28 in the `case 'openai':` branch.
+3. **C-03 FIXED:** Generate-worker tests rewritten with 6 tests covering full pipeline (computeDiff → generateArticle → upsert).
+4. **W-01 through W-06 FIXED:** All warning findings resolved.
+5. **I-01 DOCUMENTED:** TODO comments added; actual fix requires sources table join, deferred.
+6. **I-02, I-03, I-04 FIXED:** Code quality improvements applied.
+7. **I-05 SKIPPED:** Low priority, won't improve test quality significantly.
+
+**Test results after fixes:**
+- Modified test files: 20/20 pass
+- Full suite: 285/286 pass (1 pre-existing timeout, unrelated)
+- TypeScript compilation: Clean in all modified files
 
 The frontend pages are well-structured and follow established codebase patterns. The ISR + `generateStaticParams` pattern is correctly applied. The date validation regex prevents injection. react-markdown handles XSS sanitization.
 

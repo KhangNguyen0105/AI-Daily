@@ -52,16 +52,18 @@ Exceptions: TopNav height uses `py-3` (12px) + `h-14` (56px total) for compact f
 | Role | Size | Weight | Line Height | Tailwind Classes |
 |------|------|--------|-------------|------------------|
 | Page title (h1) | 30px | 700 (bold) | 1.2 | `text-3xl font-bold tracking-tight` |
-| Section heading (h2) | 20px | 600 (semibold) | 1.3 | `text-xl font-semibold` |
-| Archive heading (h2) | 24px | 600 (semibold) | 1.3 | `text-2xl font-semibold` |
+| Section heading (h2) | 20px | 700 (bold) | 1.3 | `text-xl font-bold` |
+| Archive heading (h2) | 24px | 700 (bold) | 1.3 | `text-2xl font-bold` |
 | Article title (h1 in detail) | 30px | 700 (bold) | 1.2 | `text-3xl font-bold` |
 | Body text | 14px | 400 (regular) | 1.5 | `text-sm` |
 | Label / metadata | 14px | 400 (regular) | 1.5 | `text-sm text-gray-500` |
-| Nav link | 14px | 400/600 | 1.5 | `text-sm` (regular) / `text-sm font-semibold` (active) |
+| Nav link | 14px | 400/700 | 1.5 | `text-sm` (regular) / `text-sm font-bold` (active) |
 | Archive date | 14px | 400 (regular) | 1.5 | `text-sm text-gray-500` |
 | Archive summary | 14px | 400 (regular) | 1.5 | `text-sm text-gray-600` |
 
-**Source:** Exact class patterns from `page.tsx` (h1: `text-3xl font-bold tracking-tight`), `HomePageClient.tsx` (h2: `text-2xl font-semibold`), `ModelDetailClient.tsx` (h2: `text-xl font-semibold`, body: `text-sm text-gray-500`).
+**Weights:** Only 2 — regular (400) for body/labels/metadata, bold (700) for all headings and active nav. No semibold.
+
+**Source:** Exact class patterns from `page.tsx` (h1: `text-3xl font-bold tracking-tight`). Consolidated all headings to bold for consistency.
 
 ---
 
@@ -136,7 +138,7 @@ Exceptions: TopNav height uses `py-3` (12px) + `h-14` (56px total) for compact f
 - Brand: `<Link href="/">` with `text-lg font-bold text-gray-900`
 - Nav links: `flex items-center gap-6`
 - Each link: `<Link>` with conditional classes:
-  - Active: `text-sm font-semibold text-blue-600`
+  - Active: `text-sm font-bold text-blue-600`
   - Inactive: `text-sm text-gray-600 hover:text-gray-900`
 
 **Active detection:** `usePathname()` — link is "active" when pathname starts with the link's href (e.g., `/digest` is active for both `/digest` and `/digest/2026-06-14`).
@@ -198,7 +200,7 @@ Exceptions: TopNav height uses `py-3` (12px) + `h-14` (56px total) for compact f
 - Article list: `<div className="space-y-0">` (no gap — use border separators)
 - Each article item: `<article>` with `border-b border-gray-200 py-6` (last item: `border-b-0` or use `last:`)
   - Date: `<time className="text-sm text-gray-500">{format(date, 'MMMM d, yyyy')}</time>`
-  - Title: `<Link href={/digest/${date}} className="text-lg font-semibold text-gray-900 hover:text-blue-600 mt-1 block">`
+  - Title: `<Link href={/digest/${date}} className="text-lg font-bold text-gray-900 hover:text-blue-600 mt-1 block">`
   - Summary: `<p className="text-sm text-gray-600 mt-1">{summary}</p>`
 - Load more: `<Link href={/digest?offset=${offset}} className="text-blue-600 hover:text-blue-800 text-sm mt-8 inline-block">Load more</Link>`
 - Empty state: `<div className="text-center py-16"><p className="text-gray-500">No articles yet. Check back after the first pipeline run.</p></div>`
@@ -241,7 +243,7 @@ Exceptions: TopNav height uses `py-3` (12px) + `h-14` (56px total) for compact f
     Published: {format(new Date(article.publishedAt || article.date), 'MMMM d, yyyy')}
   </p>
 
-  <div className="mt-8 prose prose-slate max-w-none prose-headings:font-semibold prose-h2:text-xl prose-h2:mt-8 prose-h2:mb-4 prose-p:text-gray-700 prose-p:leading-relaxed prose-li:text-gray-700 prose-strong:text-gray-900">
+  <div className="mt-8 prose prose-slate max-w-none prose-headings:font-bold prose-h2:text-xl prose-h2:mt-8 prose-h2:mb-4 prose-p:text-gray-700 prose-p:leading-relaxed prose-li:text-gray-700 prose-strong:text-gray-900">
     <ReactMarkdown remarkPlugins={[remarkGfm]}>
       {article.content}
     </ReactMarkdown>
@@ -252,7 +254,7 @@ Exceptions: TopNav height uses `py-3` (12px) + `h-14` (56px total) for compact f
 **Markdown prose styling (via Tailwind Typography plugin classes or manual overrides):**
 - `prose` — base typography
 - `prose-slate` — slate color scheme (gray-700 body, gray-900 headings)
-- `prose-headings:font-semibold` — all headings semibold
+- `prose-headings:font-bold` — all headings semibold
 - `prose-h2:text-xl` — h2 at 20px
 - `prose-h2:mt-8 prose-h2:mb-4` — h2 spacing (32px top, 16px bottom)
 - `prose-p:text-gray-700 prose-p:leading-relaxed` — body text gray-700, 1.625 line-height
@@ -268,18 +270,18 @@ Exceptions: TopNav height uses `py-3` (12px) + `h-14` (56px total) for compact f
   remarkPlugins={[remarkGfm]}
   components={{
     h1: ({children}) => <h1 className="text-3xl font-bold mt-8 mb-4">{children}</h1>,
-    h2: ({children}) => <h2 className="text-xl font-semibold mt-8 mb-4">{children}</h2>,
+    h2: ({children}) => <h2 className="text-xl font-bold mt-8 mb-4">{children}</h2>,
     p: ({children}) => <p className="text-gray-700 leading-relaxed mb-4">{children}</p>,
     ul: ({children}) => <ul className="list-disc pl-6 mb-4 text-gray-700 space-y-1">{children}</ul>,
     ol: ({children}) => <ol className="list-decimal pl-6 mb-4 text-gray-700 space-y-1">{children}</ol>,
     li: ({children}) => <li className="text-gray-700">{children}</li>,
-    strong: ({children}) => <strong className="font-semibold text-gray-900">{children}</strong>,
+    strong: ({children}) => <strong className="font-bold text-gray-900">{children}</strong>,
     a: ({href, children}) => <a href={href} className="text-blue-600 hover:text-blue-800 underline">{children}</a>,
     blockquote: ({children}) => <blockquote className="border-l-4 border-gray-200 pl-4 italic text-gray-600 my-4">{children}</blockquote>,
     code: ({children}) => <code className="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono">{children}</code>,
     pre: ({children}) => <pre className="bg-gray-100 p-4 rounded-lg overflow-x-auto my-4">{children}</pre>,
     table: ({children}) => <table className="min-w-full border-collapse border border-gray-200 my-4">{children}</table>,
-    th: ({children}) => <th className="border border-gray-200 px-4 py-2 bg-gray-50 text-left font-semibold">{children}</th>,
+    th: ({children}) => <th className="border border-gray-200 px-4 py-2 bg-gray-50 text-left font-bold">{children}</th>,
     td: ({children}) => <td className="border border-gray-200 px-4 py-2">{children}</td>,
   }}
 >
@@ -298,14 +300,14 @@ Exceptions: TopNav height uses `py-3` (12px) + `h-14` (56px total) for compact f
 |-------|-------|
 | Default (inactive) | `text-sm text-gray-600` |
 | Hover (inactive) | `text-sm text-gray-600 hover:text-gray-900` |
-| Active (current page) | `text-sm font-semibold text-blue-600` |
+| Active (current page) | `text-sm font-bold text-blue-600` |
 | Focus | Browser default outline (no custom style) |
 
 ### Archive Article Links
 | State | Style |
 |-------|-------|
-| Default | `text-lg font-semibold text-gray-900` |
-| Hover | `text-lg font-semibold text-gray-900 hover:text-blue-600` |
+| Default | `text-lg font-bold text-gray-900` |
+| Hover | `text-lg font-bold text-gray-900 hover:text-blue-600` |
 | Focus | Browser default outline |
 
 ### "Back to digest" / "Back to pricing" Links
@@ -382,11 +384,11 @@ No third-party registries. No shadcn. All components are hand-written with Tailw
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS
+- [x] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** approved 2026-06-14

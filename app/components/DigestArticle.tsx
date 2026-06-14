@@ -41,7 +41,13 @@ export function DigestArticle({
       <h1 className="text-3xl font-bold tracking-tight">{article.title}</h1>
 
       <p className="text-sm text-gray-500 mt-2">
-        Published: {format(publishedDate, 'MMMM d, yyyy')}
+        Published: {(() => {
+          try {
+            return format(publishedDate, 'MMMM d, yyyy');
+          } catch {
+            return article.date;
+          }
+        })()}
       </p>
 
       <div className="mt-8">
