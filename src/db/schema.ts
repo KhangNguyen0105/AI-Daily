@@ -7,7 +7,7 @@ import {
   timestamp,
   jsonb,
   pgEnum,
-  real,
+  doublePrecision,
 } from 'drizzle-orm/pg-core';
 
 // Confidence scoring enum (D-06)
@@ -51,8 +51,8 @@ export const extractions = pgTable('extractions', {
     .references(() => sources.id)
     .notNull(),
   modelName: varchar('model_name', { length: 255 }).notNull(),
-  inputPricePer1m: real('input_price_per_1m'),
-  outputPricePer1m: real('output_price_per_1m'),
+  inputPricePer1m: doublePrecision('input_price_per_1m'),
+  outputPricePer1m: doublePrecision('output_price_per_1m'),
   contextWindow: integer('context_window'),
   confidence: confidenceEnum('confidence').notNull(),
   rawEvidence: jsonb('raw_evidence'),
@@ -87,9 +87,33 @@ export const exchangeRates = pgTable('exchange_rates', {
   id: serial('id').primaryKey(),
   fromCurrency: varchar('from_currency', { length: 3 }).notNull(),
   toCurrency: varchar('to_currency', { length: 3 }).notNull(),
-  rate: real('rate').notNull(),
+  rate: doublePrecision('rate').notNull(),
   fetchedAt: timestamp('fetched_at').defaultNow().notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+// Promotion type enum (D-09)
+export const promotionTypeEnum = pgEnum('promotion_type', [
+  'free_tier',
+  'promotion',
+  'beta',
+]);
+
+// Promotions table - free tiers, promotions, beta trials (D-09)
+export const promotions = pgTable('promotions', {
+  id: serial('id').primaryKey(),
+  sourceId: integer('source_id')
+    .references(() => sources.id)
+    .notNull(),
+  modelPattern: varchar('model_pattern', { length: 255 }).notNull(),
+  type: promotionTypeEnum('type').notNull(),
+  description: text('description').notNull(),
+  credits: varchar('credits', { length: 255 }),
+  startDate: timestamp('start_date'),
+  endDate: timestamp('end_date'),
+  sourceUrl: text('source_url'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
 // Practical costs table - real-world cost examples
@@ -101,7 +125,7 @@ export const practicalCosts = pgTable('practical_costs', {
   scenarioName: varchar('scenario_name', { length: 255 }).notNull(),
   inputTokens: integer('input_tokens').notNull(),
   outputTokens: integer('output_tokens').notNull(),
-  estimatedCost: real('estimated_cost').notNull(),
+  estimatedCost: doublePrecision('estimated_cost').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

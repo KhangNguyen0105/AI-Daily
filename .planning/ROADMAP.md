@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Data Collection Pipeline** - Automated collection, extraction, scoring, and verification from 10+ providers
 - [x] **Phase 3: Pricing Comparison Table** - Sortable/filterable pricing table with confidence badges and source attribution
 - [ ] **Phase 4: Practical Cost Calculator** - Real-world cost scenarios (prompts, coding, documents, agents) with side-by-side comparison
-- [ ] **Phase 5: Model Detail Pages** - Per-model profile with pricing history, promotions, and provider links
+- [x] **Phase 5: Model Detail Pages** - Per-model profile with pricing history, promotions, and provider links
 - [ ] **Phase 6: Daily Content Engine** - Auto-generated daily articles with chronological archive
 - [ ] **Phase 7: Intelligence & Analytics** - Trend charts, promotion tracker, multi-model comparison, and price alerts
 - [ ] **Phase 8: Admin Operations** - Pipeline monitoring, content editing/rollback, source management, and admin auth
@@ -55,11 +55,6 @@ Plans:
   5. A pipeline run completes within 30 minutes and logs structured stats (sources attempted, succeeded, failed)
 **Plans**: 4 plans
 Plans:
-- [ ] 05-01-PLAN.md — Schema + utilities: promotions table, slug generation, provider links
-- [ ] 05-02-PLAN.md — Server route + data fetching: /model/[slug] page with generateStaticParams
-- [ ] 05-03-PLAN.md — Client components: ModelDetailClient, PricingGrid, PriceHistoryChart, PromotionsList, ProviderLinks
-- [ ] 05-04-PLAN.md — PricingTable integration: clickable model names with slug-based navigation
-Plans:
 - [x] 02-01-PLAN.md — 11 provider adapters: Anthropic, Google, Mistral, Cohere, Groq, Together, Perplexity, xAI, Fireworks, DeepSeek, Bedrock + registry integration
 - [x] 02-02-PLAN.md — Confidence scoring and two-pass verification: source tier types, confidence calculator, evidence-anchored verification
 - [x] 02-03-PLAN.md — Pipeline orchestrator and score worker: orchestrateDailyRun, real verification in score worker, stats tracking
@@ -80,10 +75,6 @@ Plans:
 **Status**: ✅ COMPLETE (verified 2026-06-13, 186/186 tests pass, code reviewed with 6 auto-fixes)
 **Plans**: 4 plans
 Plans:
-- [ ] 05-01-PLAN.md — Schema + utilities: promotions table, slug generation, provider links
-- [ ] 05-02-PLAN.md — Server route + data fetching: /model/[slug] page with generateStaticParams
-- [ ] 05-03-PLAN.md — Client components: ModelDetailClient, PricingGrid, PriceHistoryChart, PromotionsList, ProviderLinks
-- [ ] 05-04-PLAN.md — PricingTable integration: clickable model names with slug-based navigation
 Plans:
 - [x] 03-01-PLAN.md — Data layer + interactive table: Drizzle JOIN query, utility functions, @tanstack/react-table with sorting, confidence badges
 - [x] 03-02-PLAN.md — Search, filters, provider logos: global text search, provider dropdown, free tier checkbox, SVG logos, model family grouping
@@ -105,9 +96,9 @@ Plans:
   5. User can compare practical costs side-by-side across multiple models ranked cheapest to most expensive
 **Plans**: 3 plans
 Plans:
-- [ ] 04-01-PLAN.md — Cost scenario definitions and calculation utilities: COST_SCENARIOS, calculatePracticalCost, calculateScenarioCosts
-- [ ] 04-02-PLAN.md — CostCalculator client component: scenario tabs, ranked model list, input/output breakdown, cheapest-model highlight
-- [ ] 04-03-PLAN.md — Landing page integration: CostCalculator section below PricingTable, shared currency state between components
+- [x] 04-01-PLAN.md — Cost scenario definitions and calculation utilities: COST_SCENARIOS, calculatePracticalCost, calculateScenarioCosts
+- [x] 04-02-PLAN.md — CostCalculator client component: scenario tabs, ranked model list, input/output breakdown, cheapest-model highlight
+- [x] 04-03-PLAN.md — Landing page integration: CostCalculator section below PricingTable, shared currency state between components
 **UI hint**: yes
 
 ### Phase 5: Model Detail Pages
@@ -116,17 +107,17 @@ Plans:
 **Depends on**: Phase 3
 **Requirements**: MDTL-01, MDTL-02, MDTL-03, MDTL-04, MDTL-05, MDTL-06
 **Success Criteria** (what must be TRUE):
-  1. User can view a model detail page with current pricing (input/output/cache tiers)
+  1. User can view a model detail page with current pricing (input/output per 1M tokens and context window)
   2. User can see a line chart showing the model's price changes over time
   3. The detail page shows context window, model family, and release date
   4. Active free tier and promotion status are displayed on the detail page
   5. The detail page links to provider docs, API, and playground, and shows recent mentions in daily digests
 **Plans**: 4 plans
 Plans:
-- [ ] 05-01-PLAN.md — Schema + utilities: promotions table, slug generation, provider links
-- [ ] 05-02-PLAN.md — Server route + data fetching: /model/[slug] page with generateStaticParams
-- [ ] 05-03-PLAN.md — Client components: ModelDetailClient, PricingGrid, PriceHistoryChart, PromotionsList, ProviderLinks
-- [ ] 05-04-PLAN.md — PricingTable integration: clickable model names with slug-based navigation
+- [x] 05-01-PLAN.md — Schema + utilities: promotions table, slug generation, provider links
+- [x] 05-02-PLAN.md — Server route + data fetching: /model/[slug] page with generateStaticParams
+- [x] 05-03-PLAN.md — Client components: ModelDetailClient, PricingGrid, PriceHistoryChart, PromotionsList, ProviderLinks
+- [x] 05-04-PLAN.md — PricingTable integration: clickable model names with slug-based navigation
 **UI hint**: yes
 
 ### Phase 6: Daily Content Engine
@@ -139,12 +130,7 @@ Plans:
   2. User can view a chronological archive of all past daily digests
   3. Each digest uses a scannable format: headline, key changes, pricing highlights, what to watch
   4. Article generation uses a configurable multi-provider AI backend (Claude, OpenAI, etc.)
-**Plans**: 4 plans
-Plans:
-- [ ] 05-01-PLAN.md — Schema + utilities: promotions table, slug generation, provider links
-- [ ] 05-02-PLAN.md — Server route + data fetching: /model/[slug] page with generateStaticParams
-- [ ] 05-03-PLAN.md — Client components: ModelDetailClient, PricingGrid, PriceHistoryChart, PromotionsList, ProviderLinks
-- [ ] 05-04-PLAN.md — PricingTable integration: clickable model names with slug-based navigation
+**Plans**: TBD
 **UI hint**: yes
 
 ### Phase 7: Intelligence & Analytics
@@ -157,12 +143,7 @@ Plans:
   2. User can view a dedicated promotion/free tier tracker showing active promotions, beta trials, and free credits with expiration dates
   3. User can select 2-5 models for side-by-side multi-dimensional comparison (pricing, context window, practical cost, free tier status)
   4. User can set price threshold alerts for specific models
-**Plans**: 4 plans
-Plans:
-- [ ] 05-01-PLAN.md — Schema + utilities: promotions table, slug generation, provider links
-- [ ] 05-02-PLAN.md — Server route + data fetching: /model/[slug] page with generateStaticParams
-- [ ] 05-03-PLAN.md — Client components: ModelDetailClient, PricingGrid, PriceHistoryChart, PromotionsList, ProviderLinks
-- [ ] 05-04-PLAN.md — PricingTable integration: clickable model names with slug-based navigation
+**Plans**: TBD
 **UI hint**: yes
 
 ### Phase 8: Admin Operations
@@ -176,12 +157,8 @@ Plans:
   3. Admin can rollback a published article to a previous version
   4. Admin can mark sources as trusted/untrusted and manually trigger re-crawl for a specific provider
   5. Admin can disable auto-publish for low-confidence items and manually regenerate a daily article
-**Plans**: 4 plans
-Plans:
-- [ ] 05-01-PLAN.md — Schema + utilities: promotions table, slug generation, provider links
-- [ ] 05-02-PLAN.md — Server route + data fetching: /model/[slug] page with generateStaticParams
-- [ ] 05-03-PLAN.md — Client components: ModelDetailClient, PricingGrid, PriceHistoryChart, PromotionsList, ProviderLinks
-- [ ] 05-04-PLAN.md — PricingTable integration: clickable model names with slug-based navigation
+**Plans**: TBD
+**UI hint**: yes
 **UI hint**: yes
 
 ## Progress
@@ -194,8 +171,8 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 1. Foundation & Pipeline Core | 3/3 | Execution complete | 2026-06-10 |
 | 2. Data Collection Pipeline | 4/4 | Execution complete | 2026-06-11 |
 | 3. Pricing Comparison Table | 4/4 | Complete   | 2026-06-13 |
-| 4. Practical Cost Calculator | 0/3 | Planned | - |
-| 5. Model Detail Pages | 0/0 | Not started | - |
+| 4. Practical Cost Calculator | 3/3 | Complete | 2026-06-13 |
+| 5. Model Detail Pages | 4/4 | Complete | 2026-06-14 |
 | 6. Daily Content Engine | 0/0 | Not started | - |
 | 7. Intelligence & Analytics | 0/0 | Not started | - |
 | 8. Admin Operations | 0/0 | Not started | - |

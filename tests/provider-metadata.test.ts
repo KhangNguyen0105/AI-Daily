@@ -58,10 +58,10 @@ describe('getProviderLogo', () => {
 
 describe('getUniqueProviders', () => {
   const mockData: PricingRow[] = [
-    { id: 1, modelName: 'gpt-4o', inputPricePer1m: 2.5, outputPricePer1m: 10, contextWindow: 128000, confidence: 'verified', collectedAt: new Date(), sourceName: 'OpenAI', sourceUrl: null },
-    { id: 2, modelName: 'gpt-4o-mini', inputPricePer1m: 0.15, outputPricePer1m: 0.6, contextWindow: 128000, confidence: 'verified', collectedAt: new Date(), sourceName: 'OpenAI', sourceUrl: null },
-    { id: 3, modelName: 'claude-3.5-sonnet', inputPricePer1m: 3, outputPricePer1m: 15, contextWindow: 200000, confidence: 'verified', collectedAt: new Date(), sourceName: 'Anthropic', sourceUrl: null },
-    { id: 4, modelName: 'gemini-2.0-flash', inputPricePer1m: 0.1, outputPricePer1m: 0.4, contextWindow: 1000000, confidence: 'likely', collectedAt: new Date(), sourceName: 'Google', sourceUrl: null },
+    { id: 1, sourceId: 1, modelName: 'gpt-4o', inputPricePer1m: 2.5, outputPricePer1m: 10, contextWindow: 128000, confidence: 'verified', collectedAt: new Date(), sourceName: 'OpenAI', sourceUrl: null },
+    { id: 2, sourceId: 1, modelName: 'gpt-4o-mini', inputPricePer1m: 0.15, outputPricePer1m: 0.6, contextWindow: 128000, confidence: 'verified', collectedAt: new Date(), sourceName: 'OpenAI', sourceUrl: null },
+    { id: 3, sourceId: 2, modelName: 'claude-3.5-sonnet', inputPricePer1m: 3, outputPricePer1m: 15, contextWindow: 200000, confidence: 'verified', collectedAt: new Date(), sourceName: 'Anthropic', sourceUrl: null },
+    { id: 4, sourceId: 3, modelName: 'gemini-2.0-flash', inputPricePer1m: 0.1, outputPricePer1m: 0.4, contextWindow: 1000000, confidence: 'likely', collectedAt: new Date(), sourceName: 'Google', sourceUrl: null },
   ];
 
   it('returns sorted unique provider names', () => {
@@ -80,8 +80,8 @@ describe('getUniqueProviders', () => {
 
   it('skips rows with null sourceName', () => {
     const dataWithNull: PricingRow[] = [
-      { id: 1, modelName: 'model-a', inputPricePer1m: null, outputPricePer1m: null, contextWindow: null, confidence: 'likely', collectedAt: new Date(), sourceName: null, sourceUrl: null },
-      { id: 2, modelName: 'model-b', inputPricePer1m: 1, outputPricePer1m: 2, contextWindow: 1000, confidence: 'verified', collectedAt: new Date(), sourceName: 'OpenAI', sourceUrl: null },
+      { id: 1, sourceId: 1, modelName: 'model-a', inputPricePer1m: null, outputPricePer1m: null, contextWindow: null, confidence: 'likely', collectedAt: new Date(), sourceName: null, sourceUrl: null },
+      { id: 2, sourceId: 1, modelName: 'model-b', inputPricePer1m: 1, outputPricePer1m: 2, contextWindow: 1000, confidence: 'verified', collectedAt: new Date(), sourceName: 'OpenAI', sourceUrl: null },
     ];
     expect(getUniqueProviders(dataWithNull)).toEqual(['OpenAI']);
   });

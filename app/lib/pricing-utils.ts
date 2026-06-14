@@ -107,6 +107,8 @@ export function formatVND(priceInVND: number | null | undefined): string {
  */
 export function formatCurrencyPrice(price: number | null | undefined, currency: 'usd' | 'vnd', rate?: number): string {
   if (currency === 'vnd') {
+    const effectiveRate = rate ?? USD_VND_RATE;
+    if (!Number.isFinite(effectiveRate)) return formatPrice(price);
     return formatVND(convertToVND(price, rate));
   }
   return formatPrice(price);

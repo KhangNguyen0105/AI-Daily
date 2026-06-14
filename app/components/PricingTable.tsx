@@ -14,8 +14,10 @@ import {
   type FilterFn,
 } from '@tanstack/react-table';
 import { format } from 'date-fns';
+import Link from 'next/link';
 import { formatPrice, formatContextWindow, sanitizeDisplayName, getConfidenceColor, getModelFamily, formatCurrencyPrice } from '@/app/lib/pricing-utils';
 import { getProviderLogo, getUniqueProviders } from '@/app/lib/provider-metadata';
+import { generateSlug } from '@/app/lib/slug-utils';
 
 // Factory functions: create once at module level, not per render.
 // TanStack Table docs recommend this to avoid re-creating on every render.
@@ -40,6 +42,7 @@ const CONFIDENCE_TOOLTIPS: Record<string, string> = {
  */
 export interface PricingRow {
   id: number;
+  sourceId: number;
   modelName: string;
   inputPricePer1m: number | null;
   outputPricePer1m: number | null;
@@ -239,11 +242,18 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
     }),
     columnHelper.accessor('modelName', {
       header: 'Model',
-      cell: (info) => (
-        <span className="text-sm font-medium text-gray-900">
-          {sanitizeDisplayName(info.getValue())}
-        </span>
-      ),
+      cell: (info) => {
+        const row = info.row.original;
+        const slug = generateSlug(row.modelName, row.sourceId);
+        return (
+          <Link
+            href={`/model/${slug}`}
+            className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline"
+          >
+            {sanitizeDisplayName(info.getValue())}
+          </Link>
+        );
+      },
     }),
     // Family column: derives family from the same modelName field used by the Model column.
     // Uses id: 'family' to differentiate the two accessors on the same data field.
