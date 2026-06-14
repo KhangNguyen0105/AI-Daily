@@ -11,12 +11,15 @@ const envSchema = z.object({
   REDIS_HOST: z.string().default('localhost'),
   REDIS_PORT: z.coerce.number().default(6379),
   OPENAI_API_KEY: z.string().optional(),
+  ANTHROPIC_API_KEY: z.string().optional(),
   MIMO_API_KEY: z.string().optional(),
   MIMO_BASE_URL: z.string().default('https://token-plan-sgp.xiaomimimo.com/v1'),
   MIMO_MODEL: z.string().default('mimo-v2.5-pro'),
   NODE_ENV: z
     .enum(['development', 'production', 'test'])
     .default('development'),
+  AI_PROVIDER: z.enum(['anthropic', 'openai', 'mimo']).default('anthropic'),
+  AI_FALLBACK_PROVIDER: z.enum(['anthropic', 'openai', 'mimo']).default('openai'),
 });
 
 export const env = envSchema.parse(process.env);
