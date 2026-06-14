@@ -7,7 +7,7 @@
  * Per PRIC-07: Dynamic USD/VND exchange rate for currency toggle.
  */
 
-import { eq, desc, and } from 'drizzle-orm';
+import { eq, desc, and, gte } from 'drizzle-orm';
 import { db } from '@/src/db';
 import { exchangeRates } from '@/src/db/schema';
 
@@ -91,7 +91,7 @@ async function storeRate(rate: number): Promise<void> {
         and(
           eq(exchangeRates.fromCurrency, 'USD'),
           eq(exchangeRates.toCurrency, 'VND'),
-          eq(exchangeRates.rate, rate)
+          gte(exchangeRates.fetchedAt, today)
         )
       )
       .limit(1);

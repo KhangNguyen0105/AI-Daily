@@ -94,6 +94,16 @@ describe('updateExchangeRate', () => {
       json: () => Promise.resolve({ result: 'success', rates: { VND: 26000 } }),
     }));
 
+    // Mock DB select for dedup check (no existing rate today)
+    const mockSelect = vi.fn().mockReturnValue({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({
+          limit: vi.fn().mockResolvedValue([]),
+        }),
+      }),
+    });
+    (db.select as ReturnType<typeof vi.fn>).mockImplementation(mockSelect);
+
     // Mock DB insert
     const mockInsert = vi.fn().mockReturnValue({
       values: vi.fn().mockResolvedValue(undefined),
@@ -106,6 +116,7 @@ describe('updateExchangeRate', () => {
       'https://open.er-api.com/v6/latest/USD',
       expect.objectContaining({ signal: expect.any(AbortSignal) })
     );
+    expect(db.insert).toHaveBeenCalled();
   });
 
   it('falls back to DB rate when API fails', async () => {
