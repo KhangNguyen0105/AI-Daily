@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Data Collection Pipeline** - Automated collection, extraction, scoring, and verification from 10+ providers
 - [x] **Phase 3: Pricing Comparison Table** - Sortable/filterable pricing table with confidence badges and source attribution
 - [ ] **Phase 4: Practical Cost Calculator** - Real-world cost scenarios (prompts, coding, documents, agents) with side-by-side comparison
-- [ ] **Phase 5: Model Detail Pages** - Per-model profile with pricing history, promotions, and provider links
+- [x] **Phase 5: Model Detail Pages** - Per-model profile with pricing history, promotions, and provider links
 - [ ] **Phase 6: Daily Content Engine** - Auto-generated daily articles with chronological archive
 - [ ] **Phase 7: Intelligence & Analytics** - Trend charts, promotion tracker, multi-model comparison, and price alerts
 - [ ] **Phase 8: Admin Operations** - Pipeline monitoring, content editing/rollback, source management, and admin auth
@@ -172,7 +172,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 2. Data Collection Pipeline | 4/4 | Execution complete | 2026-06-11 |
 | 3. Pricing Comparison Table | 4/4 | Complete   | 2026-06-13 |
 | 4. Practical Cost Calculator | 3/3 | Complete | 2026-06-13 |
-| 5. Model Detail Pages | 4/4 | Execution complete | - |
+| 5. Model Detail Pages | 4/4 | Complete | 2026-06-14 |
 | 6. Daily Content Engine | 0/0 | Not started | - |
 | 7. Intelligence & Analytics | 0/0 | Not started | - |
 | 8. Admin Operations | 0/0 | Not started | - |
