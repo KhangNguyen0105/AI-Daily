@@ -64,7 +64,9 @@ export const extractions = pgTable('extractions', {
 // Articles table - generated daily articles
 export const articles = pgTable('articles', {
   id: serial('id').primaryKey(),
+  date: varchar('date', { length: 10 }).unique().notNull(), // 'YYYY-MM-DD' for upsert targeting (D-08, D-20)
   title: varchar('title', { length: 500 }).notNull(),
+  summary: varchar('summary', { length: 500 }), // one-line summary for archive list (D-14)
   content: text('content').notNull(),
   publishedAt: timestamp('published_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
