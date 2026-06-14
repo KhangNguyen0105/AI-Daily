@@ -130,7 +130,11 @@ Plans:
   2. User can view a chronological archive of all past daily digests
   3. Each digest uses a scannable format: headline, key changes, pricing highlights, what to watch
   4. Article generation uses a configurable multi-provider AI backend (Claude, OpenAI, etc.)
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 06-01-PLAN.md — Schema extensions (date, summary columns) + article diff computation module
+- [ ] 06-02-PLAN.md — AI article generator with provider fallback + real generate worker
+- [ ] 06-03-PLAN.md — Frontend digest pages (/digest, /digest/[date]) + site navigation
 **UI hint**: yes
 
 ### Phase 7: Intelligence & Analytics
@@ -173,6 +177,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 3. Pricing Comparison Table | 4/4 | Complete   | 2026-06-13 |
 | 4. Practical Cost Calculator | 3/3 | Complete | 2026-06-13 |
 | 5. Model Detail Pages | 4/4 | Complete | 2026-06-14 |
-| 6. Daily Content Engine | 0/0 | Not started | - |
+| 6. Daily Content Engine | 0/3 | Planning complete | - |
 | 7. Intelligence & Analytics | 0/0 | Not started | - |
 | 8. Admin Operations | 0/0 | Not started | - |
