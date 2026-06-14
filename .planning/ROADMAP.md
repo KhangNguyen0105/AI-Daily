@@ -80,6 +80,7 @@ Plans:
 - [x] 03-03-PLAN.md — Source attribution, mobile responsive: source links, last-updated timestamps, responsive column visibility, mobile layout
 - [x] 03-04-PLAN.md — USD/VND currency toggle: currency conversion utilities, VND formatting, toggle UI in PricingTable
 **UI hint**: yes
+**Stitch Integration**: ✅ COMPLETE (2026-06-13) — Integrated Stitch-generated UI design with dark theme, SideNav, TopBar, Footer, ScenarioCards, DigestCard, and updated PricingTable styling
 
 ### Phase 4: Practical Cost Calculator
 **Goal**: Users can understand what AI models actually cost in real-world usage through four practical cost scenarios with side-by-side comparison.

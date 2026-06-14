@@ -532,7 +532,7 @@ await crawler.run(['https://example.com/pricing']);
 ### Sampling Rate
 - **Per task commit:** `pnpm test`
 - **Per wave merge:** `pnpm test`
-- **Phase gate:** Full suite green before `/gsd:verify-work`
+- **Phase gate:** Full suite green before `/gsd-verify-work`
 
 ### Wave 0 Gaps
 - [ ] `vitest.config.ts` — Vitest configuration file

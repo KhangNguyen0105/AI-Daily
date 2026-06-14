@@ -918,7 +918,7 @@ export const env = envSchema.parse(process.env);
 
 - **Per task commit:** `pnpm vitest run`
 - **Per wave merge:** `pnpm vitest run --coverage`
-- **Phase gate:** Full suite green before `/gsd:verify-work`
+- **Phase gate:** Full suite green before `/gsd-verify-work`
 
 ### Wave 0 Gaps
 

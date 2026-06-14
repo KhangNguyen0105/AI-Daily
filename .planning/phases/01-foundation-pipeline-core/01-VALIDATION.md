@@ -29,7 +29,7 @@ created: 2026-06-10
 
 - **After every task commit:** Run `pnpm vitest run`
 - **After every plan wave:** Run `pnpm vitest run --coverage`
-- **Before `/gsd:verify-work`:** Full suite must be green
+- **Before `/gsd-verify-work`:** Full suite must be green
 - **Max feedback latency:** 30 seconds
 
 ---
