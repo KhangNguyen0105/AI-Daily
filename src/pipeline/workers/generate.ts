@@ -2,6 +2,8 @@ import { Worker, Job } from 'bullmq';
 import { redisConnection } from '../connection';
 import { db } from '../../db/index';
 import { articles } from '../../db/schema';
+import { computeDiff } from '../article-diff';
+import { generateArticle } from '../article-generator';
 
 /**
  * Job data for the generate queue.
@@ -18,11 +20,27 @@ export interface GenerateJobResult {
 }
 
 /**
+ * Normalize a Date to UTC midnight (start of day).
+ */
+function toUTCMidnight(date: Date): Date {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+}
+
+/**
+ * Format a Date as 'YYYY-MM-DD' string in UTC.
+ */
+function formatDateUTC(date: Date): string {
+  return date.toISOString().split('T')[0];
+}
+
+/**
  * Create the generate worker for the fourth and final pipeline stage.
- * Per Pitfall 1: Error handler prevents silent crashes.
  *
- * Phase 1: Creates a placeholder article.
- * Phase 2 adds real article generation using Vercel AI SDK.
+ * Real implementation (Phase 6):
+ * 1. Computes diff between today and yesterday extractions
+ * 2. Generates article via Vercel AI SDK with provider fallback
+ * 3. Upserts into articles table using date-based deduplication
+ * 4. Sets publishedAt immediately (auto-publish per D-18)
  *
  * @returns BullMQ Worker instance for the 'generate' queue
  */
@@ -30,30 +48,52 @@ export function createGenerateWorker(): Worker<GenerateJobData, GenerateJobResul
   const worker = new Worker<GenerateJobData, GenerateJobResult>(
     'generate',
     async (job: Job<GenerateJobData>) => {
-      const { extractionIds } = job.data;
+      // 1. Compute today's and yesterday's UTC dates
+      const now = new Date();
+      const today = toUTCMidnight(now);
+      const yesterday = new Date(today);
+      yesterday.setUTCDate(yesterday.getUTCDate() - 1);
 
-      // Phase 1: Create a placeholder article
-      // Phase 2 will generate real articles using Vercel AI SDK
-      const today = new Date().toISOString().split('T')[0];
-      const title = `AI Daily - ${today}`;
-      const content = `Pipeline completed. ${extractionIds.length} models extracted.`;
+      // 2. Compute diff context
+      const diff = await computeDiff(today, yesterday);
 
+      // 3. Generate article via AI
+      const generated = await generateArticle(diff);
+
+      // 4. Format today's date for the date column
+      const todayStr = formatDateUTC(today);
+
+      // 5. Upsert into articles table (D-20: one article per day)
       const inserted = await db
         .insert(articles)
         .values({
-          title,
-          content,
-          publishedAt: null, // Not auto-published in Phase 1
+          date: todayStr,
+          title: generated.title,
+          summary: generated.summary,
+          content: generated.content,
+          publishedAt: new Date(), // D-18: auto-publish immediately
+        })
+        .onConflictDoUpdate({
+          target: articles.date,
+          set: {
+            title: generated.title,
+            summary: generated.summary,
+            content: generated.content,
+            publishedAt: new Date(),
+            updatedAt: new Date(),
+          },
         })
         .returning({ id: articles.id });
 
       const articleId = inserted[0].id;
 
-      console.log(`Generate worker: Created placeholder article ${articleId} with ${extractionIds.length} extractions`);
+      console.log(
+        `Generate worker: Upserted article ${articleId} for ${todayStr} — "${generated.title}"`,
+      );
 
       return { articleId };
     },
-    { connection: redisConnection, concurrency: 1 }
+    { connection: redisConnection, concurrency: 1 },
   );
 
   // Per Pitfall 1: Error handler prevents silent crashes
