@@ -1,41 +1,10 @@
 import { db } from '@/src/db/index';
 import { extractions } from '@/src/db/schema';
 import { eq } from 'drizzle-orm';
+import { parseSlug, generateSlug } from '@/app/lib/slug-utils';
 
-/**
- * Generate a URL-safe slug from a model name and source ID.
- * Format: "normalized-model-name--sourceId"
- *
- * Examples:
- *   ("gpt-4o", 1) -> "gpt-4o--1"
- *   ("Claude 3.5 Sonnet", 2) -> "claude-35-sonnet--2"
- *   ("gemini-1.5-pro", 3) -> "gemini-15-pro--3"
- */
-export function generateSlug(modelName: string, sourceId: number): string {
-  const modelSlug = modelName
-    .toLowerCase()
-    .replace(/\./g, '') // strip dots (version numbers like 3.5 -> 35)
-    .replace(/[^a-z0-9]+/g, '-') // non-alphanumeric to hyphens
-    .replace(/^-+|-+$/g, ''); // trim leading/trailing hyphens
-
-  return `${modelSlug}--${sourceId}`;
-}
-
-/**
- * Parse a slug to extract the sourceId.
- * Returns null if the slug is invalid (no '--' separator or non-numeric sourceId).
- * Does NOT query the database — use resolveSlug for full resolution.
- */
-export function parseSlug(slug: string): { sourceId: number } | null {
-  const lastDoubleDash = slug.lastIndexOf('--');
-  if (lastDoubleDash === -1) return null;
-
-  const sourceIdStr = slug.slice(lastDoubleDash + 2);
-  const sourceId = parseInt(sourceIdStr, 10);
-  if (isNaN(sourceId)) return null;
-
-  return { sourceId };
-}
+// Re-export pure utilities so existing imports from '@/app/lib/slug' still work
+export { generateSlug, parseSlug } from '@/app/lib/slug-utils';
 
 /**
  * Resolve a slug back to model name + source ID.
