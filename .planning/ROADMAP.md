@@ -114,7 +114,7 @@ Plans:
   5. The detail page links to provider docs, API, and playground, and shows recent mentions in daily digests
 **Plans**: 4 plans
 Plans:
-- [ ] 05-01-PLAN.md — Schema + utilities: promotions table, slug generation, provider links
+- [x] 05-01-PLAN.md — Schema + utilities: promotions table, slug generation, provider links
 - [ ] 05-02-PLAN.md — Server route + data fetching: /model/[slug] page with generateStaticParams
 - [ ] 05-03-PLAN.md — Client components: ModelDetailClient, PricingGrid, PriceHistoryChart, PromotionsList, ProviderLinks
 - [ ] 05-04-PLAN.md — PricingTable integration: clickable model names with slug-based navigation
@@ -172,7 +172,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 2. Data Collection Pipeline | 4/4 | Execution complete | 2026-06-11 |
 | 3. Pricing Comparison Table | 4/4 | Complete   | 2026-06-13 |
 | 4. Practical Cost Calculator | 3/3 | Complete | 2026-06-13 |
-| 5. Model Detail Pages | 0/4 | Planned | - |
+| 5. Model Detail Pages | 1/4 | In Progress | - |
 | 6. Daily Content Engine | 0/0 | Not started | - |
 | 7. Intelligence & Analytics | 0/0 | Not started | - |
 | 8. Admin Operations | 0/0 | Not started | - |
