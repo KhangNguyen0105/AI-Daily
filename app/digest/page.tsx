@@ -81,16 +81,7 @@ export default async function DigestArchivePage({
                   className="border-b border-gray-200 py-6"
                 >
                   <time className="text-sm text-gray-500">
-                    {(() => {
-                      try {
-                        return format(
-                          new Date(article.publishedAt || article.date + 'T00:00:00'),
-                          'MMMM d, yyyy'
-                        );
-                      } catch {
-                        return article.date;
-                      }
-                    })()}
+                    {format(new Date(article.date + 'T00:00:00'), 'MMMM d, yyyy')}
                   </time>
                   <Link
                     href={`/digest/${article.date}`}

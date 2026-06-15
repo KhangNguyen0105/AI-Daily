@@ -19,6 +19,7 @@ export interface GeneratedArticle {
 /**
  * MIMO provider client — created once at module level (I-02).
  * Uses OpenAI-compatible API with custom baseURL.
+ * Uses .chat() method to force /chat/completions endpoint instead of /responses.
  */
 const mimoProvider = createOpenAI({
   baseURL: env.MIMO_BASE_URL,
@@ -36,7 +37,7 @@ function getModel(provider: string) {
     case 'openai':
       return openai('gpt-4o');
     case 'mimo':
-      return mimoProvider('mimo-v2.5-pro');
+      return mimoProvider.chat('mimo-v2.5-pro');
     default:
       return anthropic('claude-sonnet-4-5');
   }
