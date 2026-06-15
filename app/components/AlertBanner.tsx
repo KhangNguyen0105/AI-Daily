@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { getAlerts } from '@/app/lib/alerts';
 import { formatPrice } from '@/app/lib/pricing-utils';
 
@@ -51,43 +51,51 @@ export function AlertBanner({
     }
   }, [currentPrices]);
 
+  // Track both timeout IDs to clear on cleanup (CR-03)
+  const fadeOutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Shared helper to start fade-out then hide (CR-03)
+  const startFadeOut = useCallback((onComplete?: () => void) => {
+    // Clear any existing timers
+    if (fadeOutTimerRef.current) clearTimeout(fadeOutTimerRef.current);
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+
+    setFading(true);
+    hideTimerRef.current = setTimeout(() => {
+      setVisible(false);
+      setFading(false);
+      onComplete?.();
+    }, 300); // fade duration
+  }, []);
+
   // Auto-dismiss after 10 seconds
   useEffect(() => {
     if (!visible) return;
 
-    const timeout = setTimeout(() => {
-      setFading(true);
-      setTimeout(() => {
-        setVisible(false);
-        setFading(false);
-      }, 300); // fade duration
+    fadeOutTimerRef.current = setTimeout(() => {
+      startFadeOut();
     }, 10_000);
 
-    return () => clearTimeout(timeout);
-  }, [visible]);
+    return () => {
+      if (fadeOutTimerRef.current) clearTimeout(fadeOutTimerRef.current);
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    };
+  }, [visible, startFadeOut]);
 
   const dismissAlert = useCallback((index: number) => {
     setTriggeredAlerts((prev) => {
       const next = prev.filter((_, i) => i !== index);
       if (next.length === 0) {
-        setFading(true);
-        setTimeout(() => {
-          setVisible(false);
-          setFading(false);
-        }, 300);
+        startFadeOut();
       }
       return next;
     });
-  }, []);
+  }, [startFadeOut]);
 
   const dismissAll = useCallback(() => {
-    setFading(true);
-    setTimeout(() => {
-      setVisible(false);
-      setFading(false);
-      setTriggeredAlerts([]);
-    }, 300);
-  }, []);
+    startFadeOut(() => setTriggeredAlerts([]));
+  }, [startFadeOut]);
 
   if (!visible || triggeredAlerts.length === 0) return null;
 

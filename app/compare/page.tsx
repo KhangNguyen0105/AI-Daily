@@ -1,6 +1,6 @@
 import { db } from '@/src/db/index';
 import { extractions, sources, promotions, practicalCosts } from '@/src/db/schema';
-import { eq, inArray, sql, and, desc } from 'drizzle-orm';
+import { eq, inArray, desc } from 'drizzle-orm';
 import type { PricingRow } from '@/app/components/PricingTable';
 import type { PracticalCost } from '@/app/lib/pricing-utils';
 import type { PromotionData } from '@/app/components/PromotionsList';
@@ -176,28 +176,22 @@ export default async function ComparePage({
   }
 
   // Query 4: Fetch promotions for selected models
+  // Fetch ALL promotions then match in application code, because modelPattern
+  // can contain wildcards (e.g. "gpt-*", "*") that inArray cannot evaluate.
   let promotionsMap: Record<string, PromotionData[]> = {};
   if (modelNames.length > 0) {
     try {
-      const promoRows = await db
-        .select()
-        .from(promotions)
-        .where(
-          inArray(
-            promotions.modelPattern,
-            modelNames.map((n) => n),
-          ),
-        );
+      const promoRows = await db.select().from(promotions);
 
       // Build a map keyed by modelName (modelPattern matches modelName)
       for (const row of promoRows) {
-        // Match promotions to models by pattern
+        // Match promotions to models by pattern (supports wildcards)
         for (const modelName of modelNames) {
           if (
             row.modelPattern === modelName ||
             row.modelPattern === '*' ||
-            row.modelPattern.endsWith('*') &&
-              modelName.startsWith(row.modelPattern.slice(0, -1))
+            (row.modelPattern.endsWith('*') &&
+              modelName.startsWith(row.modelPattern.slice(0, -1)))
           ) {
             // Find all sourceIds for this modelName
             const matchingModels = modelsData.filter(

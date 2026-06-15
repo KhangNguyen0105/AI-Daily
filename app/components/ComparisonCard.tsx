@@ -10,6 +10,10 @@ import type { PracticalCost } from '@/app/lib/pricing-utils';
 import type { PricingRow } from '@/app/components/PricingTable';
 import type { PromotionData } from '@/app/components/PromotionsList';
 import { COST_SCENARIOS } from '@/app/lib/cost-scenarios';
+import {
+  PROMO_BADGE_STYLES,
+  PROMO_BADGE_LABELS,
+} from '@/app/lib/promotion-utils';
 
 /**
  * Single model comparison card for the /compare page.
@@ -18,19 +22,6 @@ import { COST_SCENARIOS } from '@/app/lib/cost-scenarios';
  *
  * Uses server-calculated practical costs for all 4 scenarios.
  */
-
-// Badge styles per UI-SPEC
-const PROMO_BADGE_STYLES: Record<string, string> = {
-  free_tier: 'bg-green-100 text-green-800',
-  promotion: 'bg-blue-100 text-blue-800',
-  beta: 'bg-purple-100 text-purple-800',
-};
-
-const PROMO_BADGE_LABELS: Record<string, string> = {
-  free_tier: 'Free tier',
-  promotion: 'Promotion',
-  beta: 'Beta',
-};
 
 export function ComparisonCard({
   model,
@@ -42,15 +33,6 @@ export function ComparisonCard({
   promotions: PromotionData[];
 }) {
   const displayName = sanitizeDisplayName(model.modelName);
-
-  // Build a map of scenario ID -> cost for this model
-  const costMap = new Map<string, PracticalCost>();
-  for (const cost of practicalCosts) {
-    if (cost.modelId === model.id) {
-      // Match by scenario name stored in scenarioName field, or by totalCost
-      costMap.set(cost.modelName, cost);
-    }
-  }
 
   return (
     <div className="border rounded-lg p-4 bg-white">

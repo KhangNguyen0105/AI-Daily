@@ -1,6 +1,11 @@
 'use client';
 
 import { isSafeUrl } from '@/app/lib/url-utils';
+import {
+  PROMO_BADGE_STYLES,
+  isPromoActive,
+} from '@/app/lib/promotion-utils';
+import { sanitizeDisplayName } from '@/app/lib/pricing-utils';
 
 export interface PromotionCardData {
   id: number;
@@ -12,18 +17,6 @@ export interface PromotionCardData {
   endDate: Date | null;
   sourceUrl: string | null;
   sourceName: string | null;
-}
-
-const typeBadgeStyles: Record<string, string> = {
-  free_tier: 'bg-green-100 text-green-800',
-  promotion: 'bg-blue-100 text-blue-800',
-  beta: 'bg-purple-100 text-purple-800',
-};
-
-function isActive(promo: PromotionCardData): boolean {
-  if (promo.endDate === null) return true;
-  // Use Date.now() for timezone-consistent comparison (Pitfall 4)
-  return new Date(promo.endDate).getTime() > Date.now();
 }
 
 function getDaysRemaining(endDate: Date | null): string | null {
@@ -39,7 +32,7 @@ function getDaysRemaining(endDate: Date | null): string | null {
 }
 
 export function PromotionCard({ promo }: { promo: PromotionCardData }) {
-  const active = isActive(promo);
+  const active = isPromoActive(promo.endDate);
   const daysLeft = getDaysRemaining(promo.endDate);
 
   return (
@@ -53,7 +46,7 @@ export function PromotionCard({ promo }: { promo: PromotionCardData }) {
       <div className="flex items-center gap-2 mb-2">
         <span
           className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
-            typeBadgeStyles[promo.type] ?? 'bg-gray-100 text-gray-800'
+            PROMO_BADGE_STYLES[promo.type] ?? 'bg-gray-100 text-gray-800'
           }`}
         >
           {promo.type}
@@ -71,7 +64,7 @@ export function PromotionCard({ promo }: { promo: PromotionCardData }) {
       {promo.sourceName && (
         <p className="text-xs text-gray-500 mb-1">{promo.sourceName}</p>
       )}
-      <p className="text-sm text-gray-900">{promo.description}</p>
+      <p className="text-sm text-gray-900">{sanitizeDisplayName(promo.description)}</p>
       {promo.credits && (
         <p className="text-xs text-gray-600 mt-1">Credits: {promo.credits}</p>
       )}

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { PromotionCard, type PromotionCardData } from './PromotionCard';
+import { isPromoActive } from '@/app/lib/promotion-utils';
 
 type FilterType = 'all' | 'free_tier' | 'promotion' | 'beta';
 
@@ -11,11 +12,6 @@ const filterOptions: { value: FilterType; label: string }[] = [
   { value: 'promotion', label: 'Promotion' },
   { value: 'beta', label: 'Beta' },
 ];
-
-function isPromoActive(promo: PromotionCardData): boolean {
-  if (promo.endDate === null) return true;
-  return new Date(promo.endDate).getTime() > Date.now();
-}
 
 export function PromotionsPageClient({
   promotions,
@@ -32,8 +28,8 @@ export function PromotionsPageClient({
 
   // Sort: active promotions first, then expired
   const sorted = [...filtered].sort((a, b) => {
-    const aActive = isPromoActive(a) ? 0 : 1;
-    const bActive = isPromoActive(b) ? 0 : 1;
+    const aActive = isPromoActive(a.endDate) ? 0 : 1;
+    const bActive = isPromoActive(b.endDate) ? 0 : 1;
     return aActive - bActive;
   });
 

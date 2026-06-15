@@ -5,6 +5,17 @@ import { addAlert, removeAlert, getAlerts } from '@/app/lib/alerts';
 import { formatPrice } from '@/app/lib/pricing-utils';
 
 /**
+ * Slugify a string for use as an HTML ID.
+ * Replaces non-alphanumeric characters with hyphens and lowercases.
+ */
+function slugify(str: string): string {
+  return str
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+/**
  * Inline form for setting a price alert threshold.
  * Per D-15, D-17, D-18: Threshold input + Set/Remove buttons.
  * Per UI-SPEC: Inline confirmation for remove action.
@@ -81,13 +92,13 @@ export function AlertSetForm({
           <div className="flex gap-2 items-end">
             <div className="flex-1">
               <label
-                htmlFor={`threshold-${modelName}-${sourceId}`}
+                htmlFor={`threshold-${slugify(modelName)}-${sourceId}`}
                 className="block text-xs text-gray-600 mb-1"
               >
-                Alert when price drops below ($/1M)
+                Input price per 1M tokens
               </label>
               <input
-                id={`threshold-${modelName}-${sourceId}`}
+                id={`threshold-${slugify(modelName)}-${sourceId}`}
                 type="number"
                 value={thresholdInput}
                 onChange={(e) => {

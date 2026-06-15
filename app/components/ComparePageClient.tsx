@@ -31,16 +31,18 @@ export function ComparePageClient({
   promotionsMap: Record<string, PromotionData[]>;
 }) {
   const router = useRouter();
+  // CR-02: Use (ModelOption | null)[] to reflect that empty slots are null
   const [selectedModels, setSelectedModels] =
-    useState<ModelOption[]>(initialSelected);
+    useState<(ModelOption | null)[]>(initialSelected);
 
   // Sync URL when selection changes
   const syncUrl = useCallback(
-    (models: ModelOption[]) => {
-      if (models.length === 0) {
+    (models: (ModelOption | null)[]) => {
+      const validModels = models.filter((m): m is ModelOption => m !== null);
+      if (validModels.length === 0) {
         router.replace('/compare', { scroll: false });
       } else {
-        const param = models
+        const param = validModels
           .map((m) => encodeURIComponent(m.modelName))
           .join(',');
         router.replace(`/compare?models=${param}`, { scroll: false });
@@ -49,30 +51,38 @@ export function ComparePageClient({
     [router],
   );
 
+  // WR-01: Use functional state updater to avoid stale closures
   const handleSelect = useCallback(
     (index: number, model: ModelOption) => {
-      const next = [...selectedModels];
-      next[index] = model;
-      setSelectedModels(next);
-      syncUrl(next);
+      setSelectedModels((prev) => {
+        const next = [...prev];
+        next[index] = model;
+        syncUrl(next);
+        return next;
+      });
     },
-    [selectedModels, syncUrl],
+    [syncUrl],
   );
 
+  // CR-02: Use null directly instead of `null as unknown as ModelOption`
   const handleAdd = useCallback(() => {
-    if (selectedModels.length >= MAX_MODELS) return;
-    const next = [...selectedModels, null as unknown as ModelOption];
-    setSelectedModels(next);
-  }, [selectedModels]);
+    setSelectedModels((prev) => {
+      if (prev.length >= MAX_MODELS) return prev;
+      return [...prev, null];
+    });
+  }, []);
 
+  // WR-01: Use functional state updater to avoid stale closures
   const handleRemove = useCallback(
     (index: number) => {
-      if (selectedModels.length <= MIN_MODELS) return;
-      const next = selectedModels.filter((_, i) => i !== index);
-      setSelectedModels(next);
-      syncUrl(next);
+      setSelectedModels((prev) => {
+        if (prev.length <= MIN_MODELS) return prev;
+        const next = prev.filter((_, i) => i !== index);
+        syncUrl(next);
+        return next;
+      });
     },
-    [selectedModels, syncUrl],
+    [syncUrl],
   );
 
   // Get the actual PricingRow for each selected model
@@ -85,6 +95,12 @@ export function ComparePageClient({
       );
     })
     .filter((r): r is PricingRow => r !== undefined);
+
+  // WR-04: Generate a stable slotId for each model slot to use as React key
+  // We use the index as a stable identity since slots are positional
+  const slotIds = selectedModels.map((m, i) =>
+    m !== null ? `${m.modelName}:${m.sourceId}:${i}` : `empty:${i}`,
+  );
 
   const validSelectedCount = selectedModels.filter(
     (m): m is ModelOption => m !== null,
@@ -104,7 +120,7 @@ export function ComparePageClient({
       {/* Model selectors */}
       <div className="flex flex-col md:flex-row gap-3 mb-6">
         {selectedModels.map((selected, index) => (
-          <div key={index} className="flex-1 flex items-start gap-2">
+          <div key={slotIds[index]} className="flex-1 flex items-start gap-2">
             <div className="flex-1">
               <ModelSelector
                 models={allModels}

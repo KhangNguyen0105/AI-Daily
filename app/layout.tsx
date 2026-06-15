@@ -4,8 +4,7 @@ import './globals.css';
 import { TopNav } from '@/app/components/TopNav';
 import { AlertBanner } from '@/app/components/AlertBanner';
 import { db } from '@/src/db/index';
-import { extractions } from '@/src/db/schema';
-import { desc, sql } from 'drizzle-orm';
+import { sql } from 'drizzle-orm';
 
 export const metadata: Metadata = {
   title: 'AI Daily - AI Model Pricing Intelligence',
@@ -26,29 +25,24 @@ export default async function RootLayout({
     const hasAlerts = cookieStore.get('has_alerts')?.value === '1';
 
     if (hasAlerts) {
-      // Query latest price per model+source using DISTINCT ON
-      const rows = await db
-        .select({
-          modelName: extractions.modelName,
-          sourceId: extractions.sourceId,
-          inputPricePer1m: extractions.inputPricePer1m,
-        })
-        .from(extractions)
-        .orderBy(
-          extractions.modelName,
-          extractions.sourceId,
-          desc(extractions.collectedAt),
-        );
+      // WR-03: Use DISTINCT ON to get only the latest price per model+source at SQL level
+      // This avoids fetching all historical extractions into memory
+      const rows = await db.execute<{
+        model_name: string;
+        source_id: number;
+        input_price_per_1m: number;
+      }>(
+        sql`SELECT DISTINCT ON (model_name, source_id)
+              model_name, source_id, input_price_per_1m
+            FROM extractions
+            WHERE input_price_per_1m IS NOT NULL
+            ORDER BY model_name, source_id, collected_at DESC`,
+      );
 
-      // Deduplicate: keep latest per modelName+sourceId
-      const seen = new Set<string>();
       currentPrices = {};
-      for (const row of rows) {
-        const key = `${row.modelName}:${row.sourceId}`;
-        if (!seen.has(key) && row.inputPricePer1m !== null) {
-          seen.add(key);
-          currentPrices[key] = row.inputPricePer1m;
-        }
+      for (const row of rows.rows) {
+        const key = `${row.model_name}:${row.source_id}`;
+        currentPrices[key] = row.input_price_per_1m;
       }
     }
   } catch {

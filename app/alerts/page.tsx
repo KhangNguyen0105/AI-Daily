@@ -9,7 +9,7 @@ export const revalidate = 60;
 
 export default function AlertsPage() {
   return (
-    <main className="min-h-screen bg-white text-gray-900 pt-14">
+    <main className="min-h-screen bg-white text-gray-900">
       <AlertsPageClient />
     </main>
   );
