@@ -18,6 +18,10 @@ export function TopNav() {
   const navLinks = [
     { label: 'Pricing', href: '/' },
     { label: 'Daily Digest', href: '/digest' },
+    { label: 'Trends', href: '/trends' },
+    { label: 'Promotions', href: '/promotions' },
+    { label: 'Compare', href: '/compare' },
+    { label: 'Alerts', href: '/alerts' },
   ];
 
   return (
