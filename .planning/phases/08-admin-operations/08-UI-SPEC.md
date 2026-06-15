@@ -51,10 +51,10 @@ Exceptions: 44px minimum touch target for toggle switches and mobile hamburger b
 
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
+| Label | 12px (text-xs) | 600 | 1.4 |
 | Body | 14px (text-sm) | 400 | 1.5 |
-| Label | 14px (text-sm) | 600 | 1.4 |
-| Heading | 24px (text-2xl) | 600 | 1.3 |
-| Display | 18px (text-lg) | 700 | 1.3 |
+| Heading | 18px (text-lg) | 600 | 1.3 |
+| Display | 24px (text-2xl) | 700 | 1.3 |
 
 **Font families:** Default system-ui stack (Tailwind v4 default). No custom fonts.
 
@@ -62,7 +62,7 @@ Exceptions: 44px minimum touch target for toggle switches and mobile hamburger b
 
 **Admin-specific additions:**
 - Sidebar nav link: 14px (text-sm), weight 400, active state weight 600
-- Summary card value: 28px (text-[28px]), weight 700
+- Summary card value: 24px (text-2xl), weight 700
 - Summary card label: 14px (text-sm), weight 400, color gray-500
 - Table header: 12px (text-xs), weight 600, uppercase, letter-spacing wide
 - Table cell: 14px (text-sm), weight 400
@@ -112,12 +112,19 @@ Exceptions: 44px minimum touch target for toggle switches and mobile hamburger b
 | **Empty state: sources** | "No sources found" / "Try adjusting your filters, or check that providers have been configured." |
 | **Empty state: error logs** | "No errors recorded" / "All recent pipeline runs completed without errors." |
 | **Empty state: article versions** | "No previous versions" / "This article has not been edited yet. Save changes to create a version history." |
-| **Error: general** | "Something went wrong" / "Please try again. If the problem persists, check the pipeline logs." |
-| **Error: save failed** | "Failed to save changes" / "Your changes were not saved. Please try again." |
-| **Error: action failed** | "Action failed" / "The requested action could not be completed. Check the pipeline status and try again." |
+| **Error: load pipeline data** | "Could not load pipeline data" / "The pipeline monitor could not retrieve run history. Refresh the page or check the pipeline logs." |
+| **Error: load articles** | "Could not load articles" / "The article list could not be retrieved. Refresh the page or try again later." |
+| **Error: load sources** | "Could not load sources" / "The source list could not be retrieved. Refresh the page or check provider configuration." |
+| **Error: save failed** | "Article save failed" / "Your changes were not saved. Please try again." |
+| **Error: action failed** | "Re-crawl failed to queue" / "The re-crawl job could not be queued. Check the pipeline status and try again." |
+| **Error: rollback failed** | "Rollback failed" / "The article could not be restored to the selected version. Please try again." |
+| **Error: regenerate failed** | "Regeneration failed to queue" / "The regeneration job could not be queued. Check the pipeline status and try again." |
 | **Destructive: rollback** | "Rollback Article": "This will replace the current article content with a previous version. The current version will be saved in history. Continue?" |
 | **Destructive: re-crawl** | "Re-crawl Provider": "This will queue a new crawl job for {providerName}. The current data will remain until the crawl completes. Continue?" |
 | **Destructive: regenerate** | "Regenerate Article": "This will regenerate the article for {date}. The current version will be saved in history. Continue?" |
+| **Confirm: rollback** | "Yes, Rollback" |
+| **Confirm: re-crawl** | "Yes, Re-crawl" |
+| **Confirm: regenerate** | "Yes, Regenerate" |
 | **Toast: save success** | "Changes saved successfully." |
 | **Toast: rollback success** | "Article rolled back to the selected version." |
 | **Toast: re-crawl queued** | "Re-crawl job queued for {providerName}. Check the pipeline page for progress." |
@@ -131,6 +138,12 @@ Exceptions: 44px minimum touch target for toggle switches and mobile hamburger b
 | **Sidebar: Articles** | "Articles" |
 | **Sidebar: Pipeline** | "Pipeline" |
 | **Sidebar: Sources** | "Sources" |
+
+**Version History actions:**
+| Element | Copy |
+|---------|------|
+| **Version table: rollback button** | "Rollback to This Version" |
+| **Articles table: edit button** | "Edit Article" |
 
 ---
 
@@ -244,8 +257,8 @@ Exceptions: 44px minimum touch target for toggle switches and mobile hamburger b
 
 - 3 summary cards in a row (grid-cols-1 sm:grid-cols-3)
 - Each card: white bg, border, rounded-lg, p-6
-- Card value: text-[28px] font-bold, gray-900
-- Card label: text-sm, gray-500
+- Card value: text-2xl (24px) font-bold, gray-900
+- Card label: text-sm (14px), gray-500
 - Card status icon: green check for healthy, red X for error
 - Quick actions: list of Link components styled as blue-600 text links
 
@@ -264,8 +277,8 @@ Exceptions: 44px minimum touch target for toggle switches and mobile hamburger b
 +--------------------------------------------------+
 ```
 
-- Table columns: Date, Title, Status (published/draft badge), Edit link
-- Click "Edit" navigates to `/admin/articles/[id]/edit`
+- Table columns: Date, Title, Status (published/draft badge), Edit Article link
+- Click "Edit Article" navigates to `/admin/articles/[id]/edit`
 - Pagination at bottom if > 20 articles
 - Status badge: green for published, gray for draft
 
@@ -295,11 +308,11 @@ Exceptions: 44px minimum touch target for toggle switches and mobile hamburger b
 |                                                  |
 | Version History                                  |
 | +----------------------------------------------+ |
-| | Version | Date       | Action   |            | |
-| |---------|------------|----------|            | |
-| | v3      | Jun 15     | Current  |            | |
-| | v2      | Jun 15     | [Rollback]|           | |
-| | v1      | Jun 14     | [Rollback]|           | |
+| | Version | Date       | Action                 | |
+| |---------|------------|------------------------| |
+| | v3      | Jun 15     | Current                | |
+| | v2      | Jun 15     | [Rollback to This Ver.]| |
+| | v1      | Jun 14     | [Rollback to This Ver.]| |
 | +----------------------------------------------+ |
 +--------------------------------------------------+
 ```
@@ -309,7 +322,7 @@ Exceptions: 44px minimum touch target for toggle switches and mobile hamburger b
 - Textarea: min-height 400px, monospace font, full width
 - Preview: rendered Markdown with basic styling (headings, lists, code blocks, links)
 - Save button: top-right, blue-600 bg, disabled while saving
-- Version History: table below content, "Rollback" button on non-current versions
+- Version History: table below content, "Rollback to This Version" button on non-current versions
 - Rollback triggers ConfirmDialog
 
 ### Pipeline Page (`/admin/pipeline`)
@@ -321,7 +334,7 @@ Exceptions: 44px minimum touch target for toggle switches and mobile hamburger b
 | Actions                                          |
 | +----------------------------------------------+ |
 | | Re-crawl: [Provider v] [Re-crawl Provider]   | |
-| | Regenerate: [Date picker] [Regenerate]       | |
+| | Regenerate: [Date picker] [Regenerate Art.]   | |
 | | Auto-publish: [toggle ON/OFF]                | |
 | +----------------------------------------------+ |
 |                                                  |
@@ -407,7 +420,10 @@ Exceptions: 44px minimum touch target for toggle switches and mobile hamburger b
 ### Confirmation Dialogs
 - Modal overlay (fixed, bg-black/50)
 - Centered card (max-w-md, white bg, rounded-lg, p-6)
-- Two buttons: "Cancel" (gray outline) and "Confirm" (red bg for destructive, blue for non-destructive)
+- Two buttons: "Cancel" (gray outline) and action-specific confirm button:
+  - Rollback: "Yes, Rollback" (red bg)
+  - Re-crawl: "Yes, Re-crawl" (red bg)
+  - Regenerate: "Yes, Regenerate" (red bg)
 - Press Escape or click backdrop to dismiss
 - Focus trapped inside modal when open
 
