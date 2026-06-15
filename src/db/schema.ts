@@ -131,3 +131,24 @@ export const practicalCosts = pgTable('practical_costs', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
+
+// Article versions table - version history for article edits (Phase 8)
+export const articleVersions = pgTable('article_versions', {
+  id: serial('id').primaryKey(),
+  articleId: integer('article_id')
+    .references(() => articles.id)
+    .notNull(),
+  title: varchar('title', { length: 500 }).notNull(),
+  summary: varchar('summary', { length: 500 }),
+  content: text('content').notNull(),
+  version: integer('version').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+// Admin settings table - key-value store for admin configuration (Phase 8)
+export const adminSettings = pgTable('admin_settings', {
+  id: serial('id').primaryKey(),
+  key: varchar('key', { length: 100 }).unique().notNull(),
+  value: text('value').notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});

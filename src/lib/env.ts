@@ -20,6 +20,8 @@ const envSchema = z.object({
     .default('development'),
   AI_PROVIDER: z.enum(['anthropic', 'openai', 'mimo']).default('anthropic'),
   AI_FALLBACK_PROVIDER: z.enum(['anthropic', 'openai', 'mimo']).default('openai'),
+  ADMIN_PASSWORD: z.string().optional(),
+  NEXTAUTH_SECRET: z.string().optional(),
 });
 
 export const env = envSchema.parse(process.env);
