@@ -165,7 +165,12 @@ Plans:
   3. Admin can rollback a published article to a previous version
   4. Admin can mark sources as trusted/untrusted and manually trigger re-crawl for a specific provider
   5. Admin can disable auto-publish for low-confidence items and manually regenerate a daily article
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 08-01-PLAN.md — Auth layer: NextAuth.js v5 Credentials provider, JWT sessions, middleware, login page, schema extensions
+- [ ] 08-02-PLAN.md — Admin layout + overview: sidebar navigation, header bar, overview dashboard with summary cards
+- [ ] 08-03-PLAN.md — Articles management: list, edit with Markdown preview, version history, rollback, source evidence
+- [ ] 08-04-PLAN.md — Pipeline monitoring + sources: runs table, error log, re-crawl/regenerate triggers, auto-publish toggle, sources table with trust toggle
 **UI hint**: yes
 
 ## Progress
@@ -182,4 +187,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 5. Model Detail Pages | 4/4 | Complete | 2026-06-14 |
 | 6. Daily Content Engine | 0/3 | Planning complete | - |
 | 7. Intelligence & Analytics | 0/4 | Planning complete | - |
-| 8. Admin Operations | 0/0 | Not started | - |
+| 8. Admin Operations | 0/4 | Planning complete | - |
