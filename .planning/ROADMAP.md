@@ -75,7 +75,6 @@ Plans:
 **Status**: ✅ COMPLETE (verified 2026-06-13, 186/186 tests pass, code reviewed with 6 auto-fixes)
 **Plans**: 4 plans
 Plans:
-Plans:
 - [x] 03-01-PLAN.md — Data layer + interactive table: Drizzle JOIN query, utility functions, @tanstack/react-table with sorting, confidence badges
 - [x] 03-02-PLAN.md — Search, filters, provider logos: global text search, provider dropdown, free tier checkbox, SVG logos, model family grouping
 - [x] 03-03-PLAN.md — Source attribution, mobile responsive: source links, last-updated timestamps, responsive column visibility, mobile layout
@@ -147,7 +146,12 @@ Plans:
   2. User can view a dedicated promotion/free tier tracker showing active promotions, beta trials, and free credits with expiration dates
   3. User can select 2-5 models for side-by-side multi-dimensional comparison (pricing, context window, practical cost, free tier status)
   4. User can set price threshold alerts for specific models
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 07-01-PLAN.md — Navigation + alerts utility: TopNav links for all Phase 7 pages, localStorage alerts CRUD, /alerts management page
+- [ ] 07-02-PLAN.md — Trends page: per-model pricing trend charts with visual markers (green/red dots, amber stars) via Recharts
+- [ ] 07-03-PLAN.md — Promotions page: card grid layout with type filter, active/expired sorting, data from promotions table
+- [ ] 07-04-PLAN.md — Compare page + alerts integration: 2-5 model selector dropdowns, side-by-side comparison cards, bell icon on model detail, alert banner
 **UI hint**: yes
 
 ### Phase 8: Admin Operations
@@ -157,12 +161,11 @@ Plans:
 **Requirements**: ADMN-01, ADMN-02, ADMN-03, ADMN-04, ADMN-05, ADMN-06, ADMN-07, ADMN-08, ADMN-09
 **Success Criteria** (what must be TRUE):
   1. Admin can log in via NextAuth.js and access a dashboard showing pipeline health, job status, and error logs
-  2. Admin can view published daily articles with their source evidence and edit wrong information
+  2. Admin can view published daily articles and their source evidence
   3. Admin can rollback a published article to a previous version
   4. Admin can mark sources as trusted/untrusted and manually trigger re-crawl for a specific provider
   5. Admin can disable auto-publish for low-confidence items and manually regenerate a daily article
 **Plans**: TBD
-**UI hint**: yes
 **UI hint**: yes
 
 ## Progress
@@ -174,9 +177,9 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 |-------|----------------|--------|-----------|
 | 1. Foundation & Pipeline Core | 3/3 | Execution complete | 2026-06-10 |
 | 2. Data Collection Pipeline | 4/4 | Execution complete | 2026-06-11 |
-| 3. Pricing Comparison Table | 4/4 | Complete   | 2026-06-13 |
+| 3. Pricing Comparison Table | 4/4 | Complete | 2026-06-13 |
 | 4. Practical Cost Calculator | 3/3 | Complete | 2026-06-13 |
 | 5. Model Detail Pages | 4/4 | Complete | 2026-06-14 |
 | 6. Daily Content Engine | 0/3 | Planning complete | - |
-| 7. Intelligence & Analytics | 0/0 | Not started | - |
+| 7. Intelligence & Analytics | 0/4 | Planning complete | - |
 | 8. Admin Operations | 0/0 | Not started | - |
