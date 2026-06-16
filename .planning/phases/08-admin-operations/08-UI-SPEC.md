@@ -51,14 +51,13 @@ Exceptions: none
 |------|------|--------|-------------|
 | Body | 14px (`text-sm`) | 400 (normal) | 1.5 |
 | Label | 12px (`text-xs`) | 600 (semibold), uppercase, tracking-wide | 1.4 |
-| Heading (page) | 24px (`text-2xl`) | 700 (bold) | 1.3 |
-| Heading (section) | 18px (`text-lg`) | 600 (semibold) | 1.3 |
-| Display | 32px (`text-2xl` in SummaryCard value) | 700 (bold) | 1.2 |
+| Section heading | 18px (`text-lg`) | 600 (semibold) | 1.3 |
+| Page heading / Display | 32px (`text-3xl`) | 700 (bold) | 1.2 |
 
 **Typography rules:**
 - All body text uses `text-sm` (14px) — never 16px in admin UI
 - Table headers use `text-xs font-semibold uppercase tracking-wide text-gray-500`
-- Page titles use `text-2xl font-bold text-gray-900`
+- Page titles and SummaryCard values use `text-3xl font-bold text-gray-900`
 - Section headings use `text-lg font-semibold text-gray-900`
 - Labels use `text-sm font-medium text-gray-700`
 
@@ -155,7 +154,7 @@ Accent reserved for:
 
 **SummaryCard** (`app/components/admin/SummaryCard.tsx`)
 - White card with border, rounded-lg, p-6
-- Value: `text-2xl font-bold text-gray-900`
+- Value: `text-3xl font-bold text-gray-900`
 - Label: `text-sm text-gray-500 mt-1`
 - Optional status dot: 8px circle (green/red/gray)
 
@@ -253,6 +252,18 @@ Accent reserved for:
 - Sources page: manual refresh via re-fetch after toggle
 - Article edit: manual refresh via re-fetch after save/rollback
 - No SWR implemented — uses direct `fetch` with manual state management
+
+---
+
+## Visual Hierarchy
+
+| Screen | Primary Focal Point | Secondary |
+|--------|-------------------|-----------|
+| Overview | SummaryCard stats row (4 cards with large values) | Navigation sidebar |
+| Articles List | Article rows in table (date + title) | Empty state if no articles |
+| Article Edit | Markdown textarea (edit tab) or rendered preview | Save button in header |
+| Pipeline | Most recent run row (top of table) | Status icons (green/red/yellow) |
+| Sources | Source rows with trust toggle | Filter dropdowns |
 
 ---
 
