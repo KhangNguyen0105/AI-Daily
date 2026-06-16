@@ -354,3 +354,85 @@ export const adminSettings = pgTable('admin_settings', {
   value: text('value').notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
+
+// ============================================================
+// Model Discovery & Lifecycle Tracking (Wave 5, D-02, D-04)
+// ============================================================
+
+// Discovery source type enum — how a model was first detected
+export const discoverySourceEnum = pgEnum('discovery_source', [
+  'pricing_page',
+  'feed',
+  'api',
+  'diff',
+]);
+
+// Discovered model status enum — model lifecycle states
+export const discoveredModelStatusEnum = pgEnum('discovered_model_status', [
+  'announced',
+  'pricing_pending',
+  'verified',
+  'deprecated',
+  'replaced',
+  'quarantined',
+]);
+
+// Status event type enum — what triggered a status change
+export const statusEventTypeEnum = pgEnum('status_event_type', [
+  'announced',
+  'pricing_detected',
+  'deprecated',
+  'replaced',
+  'quarantined',
+]);
+
+/**
+ * Discovered models table — tracks models detected before pricing is available.
+ * Per D-02: Multi-source discovery stores models from pricing pages, feeds, APIs, and diffs.
+ * Per D-04: Model lifecycle tracking (announced → pricing_pending → verified → deprecated).
+ */
+export const discoveredModels = pgTable('discovered_models', {
+  id: serial('id').primaryKey(),
+  providerId: integer('provider_id')
+    .references(() => sources.id)
+    .notNull(),
+  providerModelId: varchar('provider_model_id', { length: 255 }).notNull(),
+  canonicalId: uuid('canonical_id'), // FK to canonicalModels if linked
+  extractedName: varchar('extracted_name', { length: 255 }).notNull(),
+  status: discoveredModelStatusEnum('status').notNull().default('announced'),
+  sourceType: discoverySourceEnum('source_type').notNull(),
+  evidenceUrl: text('evidence_url'),
+  evidenceText: text('evidence_text'),
+  firstDiscoveredAt: timestamp('first_discovered_at').notNull(),
+  pricingFoundAt: timestamp('pricing_found_at'),
+  deprecatedAt: timestamp('deprecated_at'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+}, (table) => {
+  return {
+    providerModelIdx: index('discovered_provider_model_idx').on(table.providerId, table.providerModelId),
+    statusIdx: index('discovered_status_idx').on(table.status),
+    firstDiscoveredIdx: index('discovered_first_found_idx').on(table.firstDiscoveredAt),
+  };
+});
+
+/**
+ * Model status events table — immutable audit trail of discovered model lifecycle changes.
+ * Per D-04: Tracks announced, pricing_detected, deprecated, replaced, quarantined events.
+ */
+export const modelStatusEvents = pgTable('model_status_events', {
+  id: serial('id').primaryKey(),
+  discoveredModelId: integer('discovered_model_id')
+    .references(() => discoveredModels.id)
+    .notNull(),
+  eventType: statusEventTypeEnum('event_type').notNull(),
+  details: jsonb('details'),
+  triggeredBy: varchar('triggered_by', { length: 50 }), // 'feed_monitor', 'api_discovery', 'price_crawler', 'diff_detection'
+  createdAt: timestamp('created_at').defaultNow(),
+}, (table) => {
+  return {
+    discoveredModelIdx: index('status_event_discovered_model_idx').on(table.discoveredModelId),
+    eventTypeIdx: index('status_event_type_idx').on(table.eventType),
+    createdAtIdx: index('status_event_created_at_idx').on(table.createdAt),
+  };
+});
