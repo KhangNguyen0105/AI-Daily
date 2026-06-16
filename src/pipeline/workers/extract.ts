@@ -5,6 +5,10 @@ import { redisConnection } from '../connection';
 import { db } from '../../db/index';
 import { rawData, extractions, promotions } from '../../db/schema';
 import { eq } from 'drizzle-orm';
+import { classifyEdgeCases } from '../edge-case-classifier';
+import { buildEvidenceQuotes, captureEvidence } from '../../lib/evidence-anchor';
+import type { EdgeCaseFlags } from '../edge-case-classifier';
+import type { EvidenceQuotes } from '../../lib/evidence-anchor';
 
 /**
  * Job data for the extract queue.
@@ -74,9 +78,40 @@ export function createExtractWorker(): Worker<ExtractJobData, ExtractJobResult> 
       // Normalize the results
       const normalized = adapter.normalize(extractionResults);
 
+      // Classify edge cases in the HTML (D-08)
+      const edgeCaseFlags = await classifyEdgeCases(html, {
+        modelName: normalized.models[0]?.modelName ?? '',
+        inputPricePer1m: normalized.models[0]?.inputPricePer1m ?? null,
+        outputPricePer1m: normalized.models[0]?.outputPricePer1m ?? null,
+        contextWindow: normalized.models[0]?.contextWindow ?? null,
+      }, providerName);
+
       // Insert each extraction into the database
       const extractionIds: number[] = [];
+      const allEvidenceQuotes: Record<number, EvidenceQuotes> = {};
+
       for (const result of normalized.models) {
+        // Build evidence quotes for this extraction (D-08)
+        const sourceUrl = rawRecord.url ?? '';
+        const evidenceQuotes = buildEvidenceQuotes(html, {
+          modelName: result.modelName,
+          inputPricePer1m: result.inputPricePer1m,
+          outputPricePer1m: result.outputPricePer1m,
+          contextWindow: result.contextWindow,
+        }, sourceUrl);
+
+        // Capture model name evidence
+        const modelNameEvidence = captureEvidence(html, 'model_name', result.modelName, sourceUrl);
+
+        // Determine verification status based on evidence availability
+        let verificationStatus: string | null = null;
+        if (result.inputPricePer1m !== null && !evidenceQuotes.input_price) {
+          verificationStatus = 'needs_review';
+        }
+        if (result.outputPricePer1m !== null && !evidenceQuotes.output_price) {
+          verificationStatus = 'needs_review';
+        }
+
         const inserted = await db
           .insert(extractions)
           .values({
@@ -89,6 +124,17 @@ export function createExtractWorker(): Worker<ExtractJobData, ExtractJobResult> 
             confidence: result.confidence,
             rawEvidence: result.rawEvidence ?? null,
             collectedAt: new Date(),
+            // Evidence anchoring columns
+            sourceUrl: sourceUrl || null,
+            rawHtmlSnapshotId: rawDataId.toString(),
+            extractedTextSnippet: evidenceQuotes.model_name?.extracted_text_snippet ?? null,
+            evidenceQuote: evidenceQuotes.model_name?.evidence_quote ?? null,
+            evidenceSelector: evidenceQuotes.model_name?.evidence_selector ?? null,
+            evidenceHash: evidenceQuotes.model_name?.evidence_hash ?? null,
+            extractedAt: new Date(),
+            evidenceQuotes: evidenceQuotes as any,
+            edgeCaseFlags: edgeCaseFlags as any,
+            verificationStatus: verificationStatus as any,
           })
           .onConflictDoUpdate({
             target: [extractions.sourceId, extractions.modelName],
@@ -101,11 +147,24 @@ export function createExtractWorker(): Worker<ExtractJobData, ExtractJobResult> 
               rawEvidence: result.rawEvidence ?? null,
               collectedAt: new Date(),
               updatedAt: new Date(),
+              // Update evidence anchoring
+              sourceUrl: sourceUrl || null,
+              rawHtmlSnapshotId: rawDataId.toString(),
+              extractedTextSnippet: evidenceQuotes.model_name?.extracted_text_snippet ?? null,
+              evidenceQuote: evidenceQuotes.model_name?.evidence_quote ?? null,
+              evidenceSelector: evidenceQuotes.model_name?.evidence_selector ?? null,
+              evidenceHash: evidenceQuotes.model_name?.evidence_hash ?? null,
+              extractedAt: new Date(),
+              evidenceQuotes: evidenceQuotes as any,
+              edgeCaseFlags: edgeCaseFlags as any,
+              verificationStatus: verificationStatus as any,
             },
           })
           .returning({ id: extractions.id });
 
-        extractionIds.push(inserted[0].id);
+        const extractionId = inserted[0].id;
+        extractionIds.push(extractionId);
+        allEvidenceQuotes[extractionId] = evidenceQuotes;
       }
 
       // Update promotions: delete old ones for this source and insert new ones
@@ -123,13 +182,15 @@ export function createExtractWorker(): Worker<ExtractJobData, ExtractJobResult> 
       }
 
       // Chain to score stage (D-10: worker-triggered chaining)
-      // Pass rawDataId and sourceId so score worker can run verification
+      // Pass evidenceQuotes and edgeCaseFlags for evidence-based verification (D-08)
       // WR-01: Propagate pipelineRunId for downstream stats tracking
       await scoreQueue.add('score', {
         extractionIds,
         rawDataId,
         sourceId,
         pipelineRunId,
+        evidenceQuotes: allEvidenceQuotes,
+        edgeCaseFlags,
       });
 
       return { extractionIds };

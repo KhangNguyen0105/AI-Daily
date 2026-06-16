@@ -4,11 +4,14 @@ import { redisConnection } from '../connection';
 import { db } from '../../db/index';
 import { rawData, extractions } from '../../db/schema';
 import { eq, inArray } from 'drizzle-orm';
-import { verifyExtraction } from '../verification';
+import { verifyExtraction, verifyWithEvidenceQuotes, detectLargeChange, compareNumericValues } from '../verification';
 import { calculateConfidence } from '../confidence';
 import { updatePipelineStats } from '../orchestrator';
 import { env } from '../../lib/env';
+import { isComparableTokenPricing } from '../edge-case-classifier';
 import type { ExtractionResult } from '../../providers/base';
+import type { EdgeCaseFlags } from '../edge-case-classifier';
+import type { EvidenceQuotes } from '../../lib/evidence-anchor';
 
 /**
  * Job data for the score queue.
@@ -21,6 +24,8 @@ export interface ScoreJobData {
   rawDataId: number;
   sourceId: number;
   pipelineRunId?: number;
+  evidenceQuotes?: Record<number, EvidenceQuotes>;
+  edgeCaseFlags?: EdgeCaseFlags;
 }
 
 /**
@@ -51,7 +56,7 @@ export function createScoreWorker(): Worker<ScoreJobData, ScoreJobResult> {
   const worker = new Worker<ScoreJobData, ScoreJobResult>(
     'score',
     async (job: Job<ScoreJobData>) => {
-      const { extractionIds, rawDataId, sourceId, pipelineRunId } = job.data;
+      const { extractionIds, rawDataId, sourceId, pipelineRunId, evidenceQuotes, edgeCaseFlags } = job.data;
 
       // Guard: skip generate step when there are no extractions (WR-07)
       if (extractionIds.length === 0) {
@@ -111,7 +116,12 @@ export function createScoreWorker(): Worker<ScoreJobData, ScoreJobResult> {
           rawEvidence: extractionRow.rawEvidence,
         };
 
+        // Get evidence quotes for this extraction (D-08)
+        const extractionEvidenceQuotes = evidenceQuotes?.[extractionRow.id];
+
         let confidence: 'verified' | 'likely' | 'low_confidence' = 'low_confidence';
+        let verificationStatus: string = 'needs_review';
+        let verificationNotes: string = '';
 
         try {
           // Run two-pass verification via LLM
@@ -126,12 +136,47 @@ export function createScoreWorker(): Worker<ScoreJobData, ScoreJobResult> {
             [extractionResult],
           );
 
+          // D-08: Verify against evidence quotes if available
+          let evidenceVerified = true;
+          if (extractionEvidenceQuotes) {
+            const evidenceResult = await verifyWithEvidenceQuotes(
+              extractionResult,
+              extractionEvidenceQuotes,
+              html,
+            );
+            evidenceVerified = evidenceResult.verified;
+            if (!evidenceVerified) {
+              verificationNotes += `Evidence mismatches: ${evidenceResult.quoteMismatches.join(', ')}. `;
+              verificationNotes += `Missing evidence: ${evidenceResult.missingEvidence.join(', ')}. `;
+            }
+          }
+
           // Calculate confidence from source tier + completeness + verification
           confidence = calculateConfidence(
             tier,
             extractionResult,
-            verificationResult.verified,
+            verificationResult.verified && evidenceVerified,
           );
+
+          // D-08: Determine verification status
+          if (verificationResult.verified && evidenceVerified) {
+            // Check for edge cases that should downgrade to verified_with_warning
+            if (edgeCaseFlags && Object.keys(edgeCaseFlags).length > 0) {
+              verificationStatus = 'verified_with_warning';
+              verificationNotes += 'Edge cases detected in pricing. ';
+            } else {
+              verificationStatus = 'verified';
+            }
+          } else if (verificationResult.disagreements.length > 0) {
+            // D-08: Quarantine if disagreement AND NOT edge case
+            if (edgeCaseFlags && Object.keys(edgeCaseFlags).length > 0) {
+              verificationStatus = 'verified_with_warning';
+              verificationNotes += 'Verification disagreement with edge cases present. ';
+            } else {
+              verificationStatus = 'conflicted';
+              verificationNotes += `${verificationResult.disagreements.length} disagreement(s) found. `;
+            }
+          }
 
           // Quarantine: if verification found disagreements, force low_confidence
           if (
@@ -150,12 +195,27 @@ export function createScoreWorker(): Worker<ScoreJobData, ScoreJobResult> {
             err instanceof Error ? err.message : err,
           );
           confidence = extractionRow.confidence as 'verified' | 'likely' | 'low_confidence';
+          verificationStatus = 'needs_review';
+          verificationNotes = `Verification failed: ${err instanceof Error ? err.message : 'Unknown error'}`;
         }
 
-        // Update extraction confidence in database
+        // D-08: Check if edge cases make pricing non-comparable
+        const comparable = edgeCaseFlags ? isComparableTokenPricing(edgeCaseFlags) : true;
+        if (!comparable && verificationStatus === 'verified') {
+          verificationStatus = 'verified_with_warning';
+          verificationNotes += 'Non-comparable pricing model. ';
+        }
+
+        // Update extraction confidence and verification status in database
         await db
           .update(extractions)
-          .set({ confidence, updatedAt: new Date() })
+          .set({
+            confidence,
+            verificationStatus: verificationStatus as any,
+            verificationNotes: verificationNotes || null,
+            edgeCaseFlags: (edgeCaseFlags ?? null) as any,
+            updatedAt: new Date(),
+          })
           .where(eq(extractions.id, extractionRow.id));
 
         // Track stats
