@@ -39,8 +39,8 @@ Declared values (must be multiples of 4):
 |-------|-------|-------|
 | xs | 4px | Sort indicator gap, confidence badge vertical padding |
 | sm | 8px | Provider logo/text gap, small control gaps, compact card spacing, compact control and table row vertical padding (`py-2`) |
-| md | 16px | Table cell horizontal padding (`px-4`), default panel padding, form control horizontal rhythm |
-| lg | 24px | Gap between PricingTable and CostCalculator (`gap-6`), compact page header vertical padding |
+| md | 16px | Table cell horizontal padding (`px-4`), default panel padding, form control horizontal rhythm, compact page header vertical padding (`py-4`) |
+| lg | 24px | Gap between PricingTable and CostCalculator (`gap-6`) |
 | xl | 32px | Page bottom padding and major local grouping when needed |
 | 2xl | 48px | Empty/loading state vertical padding (`py-12`) |
 | 3xl | 64px | Reserved for page-level separation only; avoid inside the table surface |
@@ -200,7 +200,7 @@ Do not create a parallel design system component library for Phase 3. Extend the
 
 - Root page background: white.
 - Fixed TopNav remains outside Phase 3 content; page content starts below `pt-14` from root layout.
-- Branding is ultra-compact: centered title plus freshness metadata, `py-5 px-4`.
+- Branding is ultra-compact: centered title plus freshness metadata, `py-4 px-4`.
 - Content container: `max-w-[1600px] mx-auto px-4 pb-8`.
 - Main body layout: `flex flex-col xl:flex-row gap-6`.
 - PricingTable panel: `xl:w-[60%] xl:min-w-0`.
