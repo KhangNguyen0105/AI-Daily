@@ -693,6 +693,7 @@ describe('Score Worker', () => {
 
       expect(generateQueue.add).toHaveBeenCalledWith('generate', {
         extractionIds: [10],
+        pipelineRunId: undefined,
       });
     });
   });
