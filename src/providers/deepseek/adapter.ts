@@ -1,6 +1,6 @@
 import { generateObject } from 'ai';
 import { ProviderAdapter } from '../base';
-import type { ProviderExtraction, ExtractionResult, ExtractionEvidence, EvidenceQuote } from '../base';
+import type { ProviderExtraction } from '../base';
 import { pricingSchema } from '../schemas';
 import { getAIModel } from '../../lib/ai-client';
 import { deepseekConfig } from './config';

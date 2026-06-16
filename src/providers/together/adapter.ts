@@ -1,6 +1,6 @@
 import { generateObject } from 'ai';
 import { ProviderAdapter } from '../base';
-import type { ProviderExtraction, ExtractionResult } from '../base';
+import type { ProviderExtraction } from '../base';
 import { pricingSchema } from '../schemas';
 import { getAIModel } from '../../lib/ai-client';
 import { togetherConfig } from './config';
