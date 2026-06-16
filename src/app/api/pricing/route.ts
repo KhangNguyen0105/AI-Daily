@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { db } from '../../../db/index';
-import { extractions, sources, canonicalModels } from '../../../db/schema';
-import { eq, and, isNull, desc, ne } from 'drizzle-orm';
-import { computeFreshnessStatus, getFreshnessBadge, isExcludedFromRankings } from '../../../lib/freshness-tracker';
+import { extractions, sources } from '../../../db/schema';
+import { eq, and, desc, ne } from 'drizzle-orm';
+import { getFreshnessBadge, isExcludedFromRankings } from '../../../lib/freshness-tracker';
 import type { FreshnessStatus } from '../../../lib/freshness-tracker';
 
 /**
@@ -110,8 +110,7 @@ export async function GET() {
     // Transform to API response format
     const responseRows: PricingRowResponse[] = rows
       .filter((row) => {
-        // Exclude quarantined entries
-        if (row.confidenceLabel === 'Quarantined') return false;
+        // IN-08: Quarantined items already excluded at DB level (WR-05 fix)
         // Exclude entries older than 30 days from rankings
         if (row.dataAgeMinutes !== null && isExcludedFromRankings(row.dataAgeMinutes)) return false;
         return true;
