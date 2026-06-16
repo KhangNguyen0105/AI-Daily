@@ -78,9 +78,10 @@ export function createExtractWorker(): Worker<ExtractJobData, ExtractJobResult> 
       // Normalize the results
       const normalized = adapter.normalize(extractionResults);
 
-      // Classify edge cases in the HTML (D-08)
+      // WR-07: Classify edge cases using all model names from the batch
+      const allModelNames = normalized.models.map(m => m.modelName).join(', ');
       const edgeCaseFlags = await classifyEdgeCases(html, {
-        modelName: normalized.models[0]?.modelName ?? '',
+        modelName: allModelNames,
         inputPricePer1m: normalized.models[0]?.inputPricePer1m ?? null,
         outputPricePer1m: normalized.models[0]?.outputPricePer1m ?? null,
         contextWindow: normalized.models[0]?.contextWindow ?? null,
