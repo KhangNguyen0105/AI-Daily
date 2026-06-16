@@ -178,10 +178,10 @@ export function createScoreWorker(): Worker<ScoreJobData, ScoreJobResult> {
           );
 
           // Compute freshness metadata
-          const freshnessMetadata = await computeFreshnessMetadata(new Date(), sourceTier);
+          const freshnessMetadata = computeFreshnessMetadata(new Date(), sourceTier);
 
           // Check SLA breach
-          const slaBreach = await checkSLABreach(freshnessMetadata.data_age_minutes, sourceTier);
+          const slaBreach = checkSLABreach(freshnessMetadata.data_age_minutes, sourceTier);
           if (slaBreach.breached) {
             await triggerPriorityRecrawl(sourceId, `SLA breach: ${slaBreach.daysOverdue} days overdue`);
             verificationNotes += `SLA breach detected: ${slaBreach.daysOverdue} days overdue. `;
@@ -285,7 +285,7 @@ export function createScoreWorker(): Worker<ScoreJobData, ScoreJobResult> {
 
           // Still compute basic freshness for the extraction
           const freshnessConf = computeFreshnessConfidence(0);
-          const freshnessMetadata = await computeFreshnessMetadata(new Date(), sourceTier);
+          const freshnessMetadata = computeFreshnessMetadata(new Date(), sourceTier);
 
           await db
             .update(extractions)

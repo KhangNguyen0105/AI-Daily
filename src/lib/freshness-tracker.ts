@@ -139,10 +139,10 @@ export function getFreshnessBadge(status: FreshnessStatus): FreshnessBadge {
  *
  * @returns breach status, days overdue, and whether priority recrawl is needed
  */
-export async function checkSLABreach(
+export function checkSLABreach(
   dataAgeMinutes: number,
   sourceTier: SourceTier,
-): Promise<SLABreachResult> {
+): SLABreachResult {
   const sla = SLA_TIERS[sourceTier];
   const ageHours = dataAgeMinutes / 60;
 
@@ -162,13 +162,13 @@ export async function checkSLABreach(
 /**
  * Compute full freshness metadata for an extraction.
  */
-export async function computeFreshnessMetadata(
+export function computeFreshnessMetadata(
   lastVerifiedAt: Date,
   sourceTier: SourceTier,
-): Promise<FreshnessMetadata> {
+): FreshnessMetadata {
   const dataAgeMinutes = computeDataAge(lastVerifiedAt);
   const freshnessStatus = computeFreshnessStatus(dataAgeMinutes);
-  const breach = await checkSLABreach(dataAgeMinutes, sourceTier);
+  const breach = checkSLABreach(dataAgeMinutes, sourceTier);
 
   return {
     last_verified_at: lastVerifiedAt,
