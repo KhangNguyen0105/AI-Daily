@@ -38,17 +38,17 @@ Declared values (must be multiples of 4):
 | Token | Value | Usage |
 |-------|-------|-------|
 | xs | 4px | Sort indicator gap, confidence badge vertical padding |
-| sm | 8px | Provider logo/text gap, small control gaps, compact card spacing |
-| md | 16px | Table cell padding (`px-4 py-3`), default panel padding, form control horizontal rhythm |
+| sm | 8px | Provider logo/text gap, small control gaps, compact card spacing, compact control and table row vertical padding (`py-2`) |
+| md | 16px | Table cell horizontal padding (`px-4`), default panel padding, form control horizontal rhythm |
 | lg | 24px | Gap between PricingTable and CostCalculator (`gap-6`), compact page header vertical padding |
 | xl | 32px | Page bottom padding and major local grouping when needed |
 | 2xl | 48px | Empty/loading state vertical padding (`py-12`) |
 | 3xl | 64px | Reserved for page-level separation only; avoid inside the table surface |
 
 Exceptions:
-- Text buttons and form controls may use 6px vertical padding (`py-1.5`) where the element remains at least 32px high.
+- Text buttons and form controls use 8px vertical padding (`py-2`) where compact density is needed.
 - Mobile interactive controls must maintain a practical hit target of at least 40px high; use 44px only for icon-only controls, which Phase 3 does not introduce.
-- Table row density stays compact but readable: keep `py-3` for cells and do not reduce body rows to `py-2`.
+- Table row density stays compact but readable: use `py-2` for cell vertical padding and do not introduce non-standard vertical spacing values.
 
 Source: preserved from existing `PricingTable`, `HomePageClient`, and user decisions D-01 through D-10. Corrected the baseline token mapping so `gap-6` is documented as 24px, not 32px.
 
