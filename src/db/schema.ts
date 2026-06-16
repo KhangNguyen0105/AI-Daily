@@ -68,6 +68,25 @@ export const normalizationConfidenceEnum = pgEnum('normalization_confidence', [
   'unknown',
 ]);
 
+// Verification status enum (D-08) — replaces simple confidence for verification workflow
+export const verificationStatusEnum = pgEnum('verification_status', [
+  'verified',
+  'verified_with_warning',
+  'needs_review',
+  'conflicted',
+  'quarantined',
+  'unsupported_pricing_model',
+]);
+
+// Human review status enum (D-07)
+export const humanReviewStatusEnum = pgEnum('human_review_status', [
+  'unreviewed',
+  'approved',
+  'corrected',
+  'rejected',
+  'quarantined',
+]);
+
 // Sources table - provider information
 export const sources = pgTable('sources', {
   id: serial('id').primaryKey(),
@@ -124,12 +143,42 @@ export const extractions = pgTable('extractions', {
   normalizationNotes: text('normalization_notes'),
   // Canonical model reference (D-04)
   canonicalModelId: uuid('canonical_model_id'),
+  // Evidence anchoring columns (D-08)
+  sourceUrl: text('source_url'),
+  rawHtmlSnapshotId: varchar('raw_html_snapshot_id', { length: 255 }),
+  extractedTextSnippet: text('extracted_text_snippet'),
+  evidenceQuote: text('evidence_quote'),
+  evidenceSelector: varchar('evidence_selector', { length: 500 }),
+  evidenceHash: varchar('evidence_hash', { length: 64 }),
+  extractedAt: timestamp('extracted_at'),
+  // Per-field evidence quotes (JSONB) — stores quote + selector for each field
+  evidenceQuotes: jsonb('evidence_quotes'),
+  // Edge case classification (JSONB, D-08) — detected non-standard pricing
+  edgeCaseFlags: jsonb('edge_case_flags'),
+  // Verification status (D-08) — replaces simple confidence for verification workflow
+  verificationStatus: verificationStatusEnum('verification_status'),
+  verificationNotes: text('verification_notes'),
+  priceChangeFlag: varchar('price_change_flag', { length: 10 }).default('false'),
+  largeChangeReason: text('large_change_reason'),
+  // Human-in-the-loop fields (D-07)
+  humanReviewStatus: humanReviewStatusEnum('human_review_status').default('unreviewed'),
+  reviewedBy: varchar('reviewed_by', { length: 255 }),
+  reviewedAt: timestamp('reviewed_at'),
+  humanConfidenceOverride: integer('human_confidence_override'),
+  reviewNotes: text('review_notes'),
+  // Change history tracking — comparison between pass1 and pass2
+  disagreementReason: text('disagreement_reason'),
+  pass1Values: jsonb('pass1_values'),
+  pass2Values: jsonb('pass2_values'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => {
   return {
     sourceModelUnique: uniqueIndex('source_model_unique').on(table.sourceId, table.modelName),
     canonicalModelIdIdx: index('canonical_model_id_idx').on(table.canonicalModelId),
+    verificationStatusIdx: index('verification_status_idx').on(table.verificationStatus),
+    humanReviewStatusIdx: index('human_review_status_idx').on(table.humanReviewStatus),
+    extractedAtIdx: index('extracted_at_idx').on(table.extractedAt),
   };
 });
 
