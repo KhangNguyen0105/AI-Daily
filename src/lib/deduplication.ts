@@ -154,39 +154,12 @@ export async function calculateMatchScore(
     signals.normalizedNameMatch = 75;
   }
 
-  // 4. Family + context window match
+  // CR-05: Removed family+context and pricing similarity signals.
+  // canonicalModels table does not have contextWindow, inputPricePer1m,
+  // or outputPricePer1m columns, so these signals always evaluated to 0.
+  // TODO: If needed, join with extractions table to get latest pricing data.
   signals.familyAndContextMatch = 0;
-  if (candidate.family && extraction.contextWindow && candidate.contextWindow) {
-    // Both have family and context window - check if they match
-    // Simplified: check if context windows are within 10% of each other
-    const contextDiff = Math.abs(extraction.contextWindow - candidate.contextWindow);
-    const contextDiffPercent = (contextDiff / Math.max(extraction.contextWindow, candidate.contextWindow)) * 100;
-    
-    if (contextDiffPercent < 10) {
-      signals.familyAndContextMatch = 60;
-    }
-  }
-
-  // 5. Pricing similarity (weak signal)
   signals.pricingSimilarity = 0;
-  if (
-    extraction.inputPricePer1m &&
-    extraction.outputPricePer1m &&
-    candidate.inputPricePer1m &&
-    candidate.outputPricePer1m
-  ) {
-    // Calculate % difference for input and output prices
-    const inputDiff = Math.abs(extraction.inputPricePer1m - candidate.inputPricePer1m);
-    const inputDiffPercent = (inputDiff / Math.max(extraction.inputPricePer1m, candidate.inputPricePer1m)) * 100;
-    
-    const outputDiff = Math.abs(extraction.outputPricePer1m - candidate.outputPricePer1m);
-    const outputDiffPercent = (outputDiff / Math.max(extraction.outputPricePer1m, candidate.outputPricePer1m)) * 100;
-    
-    // Within 5% on both input and output = price similarity match
-    if (inputDiffPercent <= 5 && outputDiffPercent <= 5) {
-      signals.pricingSimilarity = 40;
-    }
-  }
 
   // Calculate final score: sum of all signals
   // This gives a score between 0-100+ (we normalize later)
@@ -292,11 +265,4 @@ function normalizeName(name: string): string {
     .replace(/[^\w\s-]/g, '') // Remove punctuation except dash
     .replace(/\s+/g, '-') // Replace spaces with dash
     .replace(/-+/g, '-'); // Collapse multiple dashes
-}
-
-/**
- * Extract context window from extraction data if available
- */
-function getContextWindow(extraction: ExtractionResult): number | undefined {
-  return extraction.contextWindow;
 }
