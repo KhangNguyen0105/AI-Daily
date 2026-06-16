@@ -56,7 +56,8 @@ export class CanonicalRegistry {
         })
         .where(eq(canonicalModels.id, existing.id));
 
-      await this.recordAuditEvent(existing.id, 'created', null, 'active', {
+      // IN-04: Use 'aliased' instead of 'created' for duplicate registration
+      await this.recordAuditEvent(existing.id, 'aliased', null, 'active', {
         reason: 'duplicate_registration_attempt',
         providerName,
         providerModelId,
