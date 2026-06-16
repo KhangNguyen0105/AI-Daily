@@ -2,9 +2,9 @@ import { Worker, Job } from 'bullmq';
 import { generateQueue } from '../queues';
 import { redisConnection } from '../connection';
 import { db } from '../../db/index';
-import { rawData, extractions, sources } from '../../db/schema';
+import { rawData, extractions, sources, pipelineRuns } from '../../db/schema';
 import { getProviderTier } from '../../providers/registry';
-import { eq, inArray } from 'drizzle-orm';
+import { eq, inArray, and } from 'drizzle-orm';
 import { verifyExtraction, verifyWithEvidenceQuotes, detectLargeChange, compareNumericValues } from '../verification';
 import { calculateMultiDimensionalConfidence, applyHumanOverride, calculateConfidence } from '../confidence';
 import { computeFreshnessConfidence, computeFreshnessMetadata, checkSLABreach, triggerPriorityRecrawl } from '../../lib/freshness-tracker';
@@ -334,6 +334,29 @@ export function createScoreWorker(): Worker<ScoreJobData, ScoreJobResult> {
           `Score worker: All ${extractionRows.length} extractions are low_confidence. ` +
           'Skipping article generation to avoid publishing unreliable data.'
         );
+        // CR-09: Finalize pipeline run when no generate job will be created.
+        // Use a guard (WHERE status = 'running') to prevent overwriting a
+        // 'completed' status that another score worker or the generate worker
+        // may have already set.
+        if (pipelineRunId) {
+          await db
+            .update(pipelineRuns)
+            .set({
+              status: 'completed',
+              completedAt: new Date(),
+              updatedAt: new Date(),
+            })
+            .where(
+              and(
+                eq(pipelineRuns.id, pipelineRunId),
+                eq(pipelineRuns.status, 'running'),
+              ),
+            );
+          console.log(
+            `Score worker: Pipeline run ${pipelineRunId} finalized as completed ` +
+            '(all extractions low_confidence, no article generated).',
+          );
+        }
       }
 
       return {
