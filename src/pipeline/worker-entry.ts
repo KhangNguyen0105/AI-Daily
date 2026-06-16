@@ -6,8 +6,12 @@ import { createGenerateWorker } from './workers/generate';
 import {
   setupDailyScheduler,
   setupTier1Scheduler,
+  setupTier2Scheduler,
+  setupFeedMonitorScheduler,
   createDailyPipelineWorker,
   createTier1RefreshWorker,
+  createTier2RefreshWorker,
+  createFeedMonitorWorker,
 } from './scheduler';
 
 /**
@@ -36,16 +40,24 @@ await setupDailyScheduler();
 // Per D-03: Set up Tier 1 refresh scheduler (every 4 hours)
 await setupTier1Scheduler();
 
-// Create all workers (6 total — added tier1-refresh worker)
+// CR-04: Set up Tier 2 refresh scheduler (every 12 hours)
+await setupTier2Scheduler();
+
+// CR-04: Set up feed monitor scheduler (daily at 2 AM UTC)
+await setupFeedMonitorScheduler();
+
+// Create all workers (8 total — added tier1-refresh, tier2-refresh, feed-monitor workers)
 const collectWorker = createCollectWorker();
 const extractWorker = createExtractWorker();
 const scoreWorker = createScoreWorker();
 const generateWorker = createGenerateWorker();
 const dailyPipelineWorker = createDailyPipelineWorker();
 const tier1RefreshWorker = createTier1RefreshWorker();
+const tier2RefreshWorker = createTier2RefreshWorker();
+const feedMonitorWorker = createFeedMonitorWorker();
 
 console.log('Pipeline workers started', {
-  queues: ['collect', 'extract', 'score', 'generate', 'daily-pipeline', 'tier1-refresh'],
+  queues: ['collect', 'extract', 'score', 'generate', 'daily-pipeline', 'tier1-refresh', 'tier2-refresh', 'feed-monitor'],
   pid: process.pid,
 });
 
@@ -62,6 +74,8 @@ async function shutdown(signal: string) {
     generateWorker.close(),
     dailyPipelineWorker.close(),
     tier1RefreshWorker.close(),
+    tier2RefreshWorker.close(),
+    feedMonitorWorker.close(),
   ]);
   console.log('All workers closed');
   process.exit(0);
