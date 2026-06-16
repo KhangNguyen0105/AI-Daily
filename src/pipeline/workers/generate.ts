@@ -5,6 +5,7 @@ import { articles } from '../../db/schema';
 import { computeDiff } from '../article-diff';
 import { generateArticle } from '../article-generator';
 import { finalizePipelineRun } from '../orchestrator';
+import { eq } from 'drizzle-orm';
 
 /**
  * Job data for the generate queue.
@@ -56,16 +57,36 @@ export function createGenerateWorker(): Worker<GenerateJobData, GenerateJobResul
       const yesterday = new Date(today);
       yesterday.setUTCDate(yesterday.getUTCDate() - 1);
 
+      // Format today's date early for the deduplication check
+      const todayStr = formatDateUTC(today);
+
+      // WR-12: Skip if an article for today already exists (prevents
+      // redundant LLM calls when multiple score workers trigger generate
+      // concurrently for the same date).
+      const existingArticle = await db
+        .select({ id: articles.id })
+        .from(articles)
+        .where(eq(articles.date, todayStr))
+        .limit(1);
+
+      if (existingArticle.length > 0) {
+        console.log(
+          `Generate worker: Article for ${todayStr} already exists (id=${existingArticle[0].id}), skipping redundant generation`,
+        );
+        // Still finalize pipeline run so it doesn't stay 'running' forever
+        if (job.data.pipelineRunId) {
+          await finalizePipelineRun(job.data.pipelineRunId, 'completed');
+        }
+        return { articleId: existingArticle[0].id };
+      }
+
       // 2. Compute diff context
       const diff = await computeDiff(today, yesterday);
 
       // 3. Generate article via AI
       const generated = await generateArticle(diff);
 
-      // 4. Format today's date for the date column
-      const todayStr = formatDateUTC(today);
-
-      // 5. Upsert into articles table (D-20: one article per day)
+      // 4. Upsert into articles table (D-20: one article per day)
       const inserted = await db
         .insert(articles)
         .values({
