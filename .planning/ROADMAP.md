@@ -85,7 +85,8 @@ Plans:
   6. User can toggle the pricing display between USD and VND, and all price columns automatically convert and update in place
 
 **Status**: ✅ COMPLETE (verified 2026-06-13, 186/186 tests pass, code reviewed with 6 auto-fixes)
-**Plans**: 4 plansPlans:
+**Plans**: 4 plans
+Plans:
 **Wave 1**
 
 - [x] 03-01-PLAN.md — Data layer + interactive table: Drizzle JOIN query, utility functions, @tanstack/react-table with sorting, confidence badges
@@ -195,7 +196,7 @@ Plans:
 
 ### Phase 8: Admin Operations
 
-**Goal**: Admin can monitor the pipeline, manage published content, and control data quality through a secure dashboard.
+**Goal**: As an admin, I want to monitor the pipeline, manage published content, and control data quality through a secure dashboard, so that I can ensure the automated system produces accurate, timely AI pricing intelligence.
 **Mode:** mvp
 **Depends on**: Phase 2, Phase 6
 **Requirements**: ADMN-01, ADMN-02, ADMN-03, ADMN-04, ADMN-05, ADMN-06, ADMN-07, ADMN-08, ADMN-09
@@ -208,13 +209,27 @@ Plans:
   5. Admin can disable auto-publish for low-confidence items and manually regenerate a daily article
 
 **Status**: ✅ COMPLETE (verified 2026-06-15, deep code review with 9 issues fixed)
-**Plans**: 4 plans
+**Plans**: 7 plans
 Plans:
 
+**Wave 1**
+
 - [x] 08-01-PLAN.md — Auth layer: NextAuth.js v5 Credentials provider, JWT sessions, middleware, login page, schema extensions
+
+**Wave 2** *(depends on Wave 1)*
+
 - [x] 08-02-PLAN.md — Admin layout + overview: sidebar navigation, header bar, overview dashboard with summary cards
-- [x] 08-03-PLAN.md — Articles management: list, edit with Markdown preview, version history, rollback, source evidence
-- [x] 08-04-PLAN.md — Pipeline monitoring + sources: runs table, error log, re-crawl/regenerate triggers, auto-publish toggle, sources table with trust toggle
+
+**Wave 3** *(depends on Wave 2)*
+
+- [x] 08-03-PLAN.md — Article list + evidence: articles list page, ConfirmDialog, Toast, source evidence API
+- [x] 08-04-PLAN.md — Article edit + versioning: edit form with Markdown preview, version history, rollback, source evidence tab
+- [x] 08-05-PLAN.md — Pipeline monitoring: runs table with expandable details, error log, SSE real-time updates
+
+**Wave 4** *(depends on Wave 3)*
+
+- [x] 08-06-PLAN.md — Pipeline actions: re-crawl, regenerate, run-full, cancel triggers, auto-publish toggle
+- [x] 08-07-PLAN.md — Source management: sources table with filters, trust toggle, expandable details
 
 **UI hint**: yes
 
@@ -226,10 +241,10 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Pipeline Core | 3/3 | Execution complete | 2026-06-10 |
-| 2. Data Collection Pipeline | 4/4 | Execution complete | 2026-06-11 |
+| 2. Data Collection Pipeline | 10/10 | Complete   | 2026-06-16 |
 | 3. Pricing Comparison Table | 4/4 | Complete | 2026-06-13 |
 | 4. Practical Cost Calculator | 3/3 | Complete | 2026-06-13 |
 | 5. Model Detail Pages | 4/4 | Complete | 2026-06-14 |
 | 6. Daily Content Engine | 3/3 | Complete | 2026-06-14 |
 | 7. Intelligence & Analytics | 4/4 | Complete | 2026-06-15 |
-| 8. Admin Operations | 4/4 | Complete | 2026-06-15 |
+| 8. Admin Operations | 7/7 | Complete | 2026-06-15 |
