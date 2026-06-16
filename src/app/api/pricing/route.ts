@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '../../../db/index';
 import { extractions, sources, canonicalModels } from '../../../db/schema';
-import { eq, and, isNull, desc } from 'drizzle-orm';
+import { eq, and, isNull, desc, ne } from 'drizzle-orm';
 import { computeFreshnessStatus, getFreshnessBadge, isExcludedFromRankings } from '../../../lib/freshness-tracker';
 import type { FreshnessStatus } from '../../../lib/freshness-tracker';
 
@@ -101,8 +101,8 @@ export async function GET() {
       .leftJoin(sources, eq(extractions.sourceId, sources.id))
       .where(
         and(
-          // Exclude quarantined
-          // Note: confidenceLabel could be null for old records
+          // WR-05: Exclude quarantined items at DB level instead of in-memory filter
+          ne(extractions.confidenceLabel, 'Quarantined'),
         )
       )
       .orderBy(desc(extractions.updatedAt));
@@ -126,12 +126,12 @@ export async function GET() {
 
         // Build confidence breakdown
         const confidence: ConfidenceBreakdown = {
-          overall: row.overallConfidence ?? row.sourceConfidence ?? 0,
+          overall: row.overallConfidence ?? row.sourceConfidence ?? mapLegacyConfidenceToScore(row.confidence),
           label: row.confidenceLabel || mapLegacyConfidence(row.confidence),
           breakdown: {
             source: row.sourceConfidence ?? 0,
             extraction: row.extractionConfidence ?? 0,
-            normalization: 0, // normalizationConfidence is an enum, not numeric
+            normalization: mapNormalizationConfidence(row.normalizationConfidence),
             verification: row.verificationConfidence ?? 0,
             freshness: row.freshnessConfidence ?? 0,
           },
@@ -186,5 +186,30 @@ function mapLegacyConfidence(confidence: string | null): string {
       return 'Low';
     default:
       return 'Low';
+  }
+}
+
+/**
+ * WR-06: Map normalization confidence enum to numeric score.
+ */
+function mapNormalizationConfidence(level: string | null): number {
+  switch (level) {
+    case 'high': return 88;
+    case 'medium': return 72;
+    case 'low': return 45;
+    case 'unknown': return 15;
+    default: return 0;
+  }
+}
+
+/**
+ * IN-05: Map legacy confidence enum to numeric score for fallback.
+ */
+function mapLegacyConfidenceToScore(confidence: string | null): number {
+  switch (confidence) {
+    case 'verified': return 88;
+    case 'likely': return 72;
+    case 'low_confidence': return 35;
+    default: return 0;
   }
 }
