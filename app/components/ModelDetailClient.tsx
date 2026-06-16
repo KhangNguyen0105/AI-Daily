@@ -14,6 +14,7 @@ import { PricingGrid } from './PricingGrid';
 import { PriceHistoryChart, type HistoryPoint } from './PriceHistoryChart';
 import { PromotionsList, type PromotionData } from './PromotionsList';
 import { ProviderLinks } from './ProviderLinks';
+import { BellIcon } from './BellIcon';
 
 export interface ModelDetailData {
   id: number;
@@ -57,7 +58,14 @@ export function ModelDetailClient({
           &larr; Back to pricing
         </Link>
 
-        <h1 className="text-3xl font-bold mt-2">{displayName}</h1>
+        <div className="flex items-center gap-2 mt-2">
+          <h1 className="text-3xl font-bold">{displayName}</h1>
+          <BellIcon
+            modelName={model.modelName}
+            sourceId={model.sourceId}
+            currentPrice={model.inputPricePer1m}
+          />
+        </div>
 
         <div className="flex items-center gap-3 mt-3 flex-wrap">
           {model.sourceName && (
