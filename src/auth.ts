@@ -1,6 +1,11 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 
+// WR-04 fix: Validate NEXTAUTH_SECRET at module load time in production
+if (process.env.NODE_ENV === 'production' && !process.env.NEXTAUTH_SECRET) {
+  throw new Error('NEXTAUTH_SECRET environment variable is required in production. Generate one with: openssl rand -base64 32');
+}
+
 export const { auth, signIn, signOut, handlers } = NextAuth({
   providers: [
     Credentials({

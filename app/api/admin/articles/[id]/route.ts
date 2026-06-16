@@ -68,44 +68,53 @@ export async function PUT(
 
     const { title, summary, content } = parsed.data;
 
-    // Fetch current article
-    const current = await db
-      .select()
-      .from(articles)
-      .where(eq(articles.id, articleId))
-      .limit(1);
+    // CR-02 fix: Wrap version creation and article update in a transaction
+    const updated = await db.transaction(async (tx) => {
+      // Fetch current article
+      const current = await tx
+        .select()
+        .from(articles)
+        .where(eq(articles.id, articleId))
+        .limit(1);
 
-    if (current.length === 0) {
+      if (current.length === 0) {
+        return null;
+      }
+
+      const currentArticle = current[0];
+
+      // Get next version number
+      const maxVersionResult = await tx
+        .select({ maxVersion: sql<number>`coalesce(max(${articleVersions.version}), 0)` })
+        .from(articleVersions)
+        .where(eq(articleVersions.articleId, articleId));
+
+      const nextVersion = (maxVersionResult[0]?.maxVersion ?? 0) + 1;
+
+      // Save current version before updating
+      await tx.insert(articleVersions).values({
+        articleId,
+        title: currentArticle.title,
+        summary: currentArticle.summary,
+        content: currentArticle.content,
+        version: nextVersion,
+      });
+
+      // Update article
+      const result = await tx
+        .update(articles)
+        .set({ title, summary, content, updatedAt: new Date() })
+        .where(eq(articles.id, articleId))
+        .returning();
+
+      return result[0];
+    });
+
+    if (!updated) {
       return NextResponse.json({ error: 'Article not found' }, { status: 404 });
     }
 
-    const currentArticle = current[0];
-
-    // Get next version number
-    const maxVersionResult = await db
-      .select({ maxVersion: sql<number>`coalesce(max(${articleVersions.version}), 0)` })
-      .from(articleVersions)
-      .where(eq(articleVersions.articleId, articleId));
-
-    const nextVersion = (maxVersionResult[0]?.maxVersion ?? 0) + 1;
-
-    // Save current version before updating
-    await db.insert(articleVersions).values({
-      articleId,
-      title: currentArticle.title,
-      summary: currentArticle.summary,
-      content: currentArticle.content,
-      version: nextVersion,
-    });
-
-    // Update article
-    const updated = await db
-      .update(articles)
-      .set({ title, summary, content, updatedAt: new Date() })
-      .where(eq(articles.id, articleId))
-      .returning();
-
-    return NextResponse.json({ article: updated[0] });
+    return NextResponse.json({ article: updated });
   } catch (error) {
     console.error('Error updating article:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

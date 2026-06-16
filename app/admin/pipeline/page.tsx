@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { PipelineRunsTable } from '@/app/components/admin/PipelineRunsTable';
 import { ErrorLogTable } from '@/app/components/admin/ErrorLogTable';
 import { ReCrawlTrigger } from '@/app/components/admin/ReCrawlTrigger';
@@ -28,47 +28,47 @@ export default function PipelinePage() {
   const [isLoading, setIsLoading] = useState(true);
   const { toasts, addToast, removeToast } = useToast();
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [runsRes, errorsRes, sourcesRes, settingsRes] = await Promise.all([
-          fetch('/api/admin/pipeline/runs'),
-          fetch('/api/admin/pipeline/errors'),
-          fetch('/api/admin/sources'),
-          fetch('/api/admin/settings'),
-        ]);
+  const loadData = useCallback(async () => {
+    try {
+      const [runsRes, errorsRes, sourcesRes, settingsRes] = await Promise.all([
+        fetch('/api/admin/pipeline/runs'),
+        fetch('/api/admin/pipeline/errors'),
+        fetch('/api/admin/sources'),
+        fetch('/api/admin/settings'),
+      ]);
 
-        if (runsRes.ok) {
-          const data = await runsRes.json();
-          setRuns(data.runs ?? []);
-        }
-
-        if (errorsRes.ok) {
-          const data = await errorsRes.json();
-          setErrors(data.errors ?? []);
-        }
-
-        if (sourcesRes.ok) {
-          const data = await sourcesRes.json();
-          const uniqueProviders = Array.from(
-            new Set((data.sources ?? []).map((s: { name: string }) => s.name))
-          ).map((name) => ({ name: name as string }));
-          setProviders(uniqueProviders);
-        }
-
-        if (settingsRes.ok) {
-          const data = await settingsRes.json();
-          setAutoPublish(data.settings?.auto_publish === 'true');
-        }
-      } catch {
-        addToast('error', 'Could not load pipeline data. The pipeline monitor could not retrieve run history. Refresh the page or check the pipeline logs.');
-      } finally {
-        setIsLoading(false);
+      if (runsRes.ok) {
+        const data = await runsRes.json();
+        setRuns(data.runs ?? []);
       }
-    };
 
+      if (errorsRes.ok) {
+        const data = await errorsRes.json();
+        setErrors(data.errors ?? []);
+      }
+
+      if (sourcesRes.ok) {
+        const data = await sourcesRes.json();
+        const uniqueProviders = Array.from(
+          new Set((data.sources ?? []).map((s: { name: string }) => s.name))
+        ).map((name) => ({ name: name as string }));
+        setProviders(uniqueProviders);
+      }
+
+      if (settingsRes.ok) {
+        const data = await settingsRes.json();
+        setAutoPublish(data.settings?.auto_publish === 'true');
+      }
+    } catch {
+      addToast('error', 'Could not load pipeline data. The pipeline monitor could not retrieve run history. Refresh the page or check the pipeline logs.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [addToast]);
+
+  useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
   const handleAutoPublishChange = async (enabled: boolean) => {
     const res = await fetch('/api/admin/settings', {

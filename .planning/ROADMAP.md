@@ -15,11 +15,11 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Foundation & Pipeline Core** - Project scaffold with working infrastructure and provider adapter pattern
 - [x] **Phase 2: Data Collection Pipeline** - Automated collection, extraction, scoring, and verification from 10+ providers
 - [x] **Phase 3: Pricing Comparison Table** - Sortable/filterable pricing table with confidence badges and source attribution
-- [ ] **Phase 4: Practical Cost Calculator** - Real-world cost scenarios (prompts, coding, documents, agents) with side-by-side comparison
+- [x] **Phase 4: Practical Cost Calculator** - Real-world cost scenarios (prompts, coding, documents, agents) with side-by-side comparison
 - [x] **Phase 5: Model Detail Pages** - Per-model profile with pricing history, promotions, and provider links
-- [ ] **Phase 6: Daily Content Engine** - Auto-generated daily articles with chronological archive
+- [x] **Phase 6: Daily Content Engine** - Auto-generated daily articles with chronological archive
 - [ ] **Phase 7: Intelligence & Analytics** - Trend charts, promotion tracker, multi-model comparison, and price alerts
-- [ ] **Phase 8: Admin Operations** - Pipeline monitoring, content editing/rollback, source management, and admin auth
+- [x] **Phase 8: Admin Operations** - Pipeline monitoring, content editing/rollback, source management, and admin auth
 
 ## Phase Details
 
@@ -129,11 +129,12 @@ Plans:
   2. User can view a chronological archive of all past daily digests
   3. Each digest uses a scannable format: headline, key changes, pricing highlights, what to watch
   4. Article generation uses a configurable multi-provider AI backend (Claude, OpenAI, etc.)
+**Status**: ✅ COMPLETE (verified 2026-06-14, code reviewed with 14 issues fixed)
 **Plans**: 3 plans
 Plans:
-- [ ] 06-01-PLAN.md — Schema extensions (date, summary columns) + article diff computation module
-- [ ] 06-02-PLAN.md — AI article generator with provider fallback + real generate worker
-- [ ] 06-03-PLAN.md — Frontend digest pages (/digest, /digest/[date]) + site navigation
+- [x] 06-01-PLAN.md — Schema extensions (date, summary columns) + article diff computation module
+- [x] 06-02-PLAN.md — AI article generator with provider fallback + real generate worker
+- [x] 06-03-PLAN.md — Frontend digest pages (/digest, /digest/[date]) + site navigation
 **UI hint**: yes
 
 ### Phase 7: Intelligence & Analytics
@@ -165,12 +166,13 @@ Plans:
   3. Admin can rollback a published article to a previous version
   4. Admin can mark sources as trusted/untrusted and manually trigger re-crawl for a specific provider
   5. Admin can disable auto-publish for low-confidence items and manually regenerate a daily article
+**Status**: ✅ COMPLETE (verified 2026-06-15, deep code review with 9 issues fixed)
 **Plans**: 4 plans
 Plans:
-- [ ] 08-01-PLAN.md — Auth layer: NextAuth.js v5 Credentials provider, JWT sessions, middleware, login page, schema extensions
-- [ ] 08-02-PLAN.md — Admin layout + overview: sidebar navigation, header bar, overview dashboard with summary cards
-- [ ] 08-03-PLAN.md — Articles management: list, edit with Markdown preview, version history, rollback, source evidence
-- [ ] 08-04-PLAN.md — Pipeline monitoring + sources: runs table, error log, re-crawl/regenerate triggers, auto-publish toggle, sources table with trust toggle
+- [x] 08-01-PLAN.md — Auth layer: NextAuth.js v5 Credentials provider, JWT sessions, middleware, login page, schema extensions
+- [x] 08-02-PLAN.md — Admin layout + overview: sidebar navigation, header bar, overview dashboard with summary cards
+- [x] 08-03-PLAN.md — Articles management: list, edit with Markdown preview, version history, rollback, source evidence
+- [x] 08-04-PLAN.md — Pipeline monitoring + sources: runs table, error log, re-crawl/regenerate triggers, auto-publish toggle, sources table with trust toggle
 **UI hint**: yes
 
 ## Progress
@@ -185,6 +187,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 3. Pricing Comparison Table | 4/4 | Complete | 2026-06-13 |
 | 4. Practical Cost Calculator | 3/3 | Complete | 2026-06-13 |
 | 5. Model Detail Pages | 4/4 | Complete | 2026-06-14 |
-| 6. Daily Content Engine | 0/3 | Planning complete | - |
+| 6. Daily Content Engine | 3/3 | Complete | 2026-06-14 |
 | 7. Intelligence & Analytics | 0/4 | Planning complete | - |
-| 8. Admin Operations | 0/4 | Planning complete | - |
+| 8. Admin Operations | 4/4 | Complete | 2026-06-15 |

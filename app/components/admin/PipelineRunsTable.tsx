@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { format, formatDistanceToNow } from 'date-fns';
+import { format, differenceInSeconds } from 'date-fns';
 
 interface PipelineStats {
   totalProviders?: number;
@@ -43,21 +43,30 @@ export function PipelineRunsTable({ runs }: PipelineRunsTableProps) {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed':
-        return <span className="text-green-600">✓</span>;
+        return <span className="text-green-600">&#10003;</span>;
       case 'failed':
-        return <span className="text-red-600">✗</span>;
+        return <span className="text-red-600">&#10007;</span>;
       case 'running':
-        return <span className="text-yellow-600">⟳</span>;
+        return <span className="text-yellow-600">&#10227;</span>;
       default:
         return <span className="text-gray-400">?</span>;
     }
   };
 
+  // WR-01 fix: Calculate actual duration from startedAt to completedAt
   const getDuration = (startedAt: string, completedAt: string | null) => {
     if (!completedAt) return 'In progress';
     const start = new Date(startedAt);
     const end = new Date(completedAt);
-    return formatDistanceToNow(start, { addSuffix: false });
+    const seconds = differenceInSeconds(end, start);
+    if (seconds < 0) return 'N/A';
+    if (seconds < 60) return `${seconds}s`;
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    if (minutes < 60) return `${minutes}m ${remainingSeconds}s`;
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    return `${hours}h ${remainingMinutes}m`;
   };
 
   return (

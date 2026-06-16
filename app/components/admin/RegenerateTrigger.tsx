@@ -23,12 +23,13 @@ export function RegenerateTrigger({ onSuccess, onError }: RegenerateTriggerProps
         body: JSON.stringify({ date: selectedDate }),
       });
 
+      // IN-02 fix: Read body once before status check
+      const data = await res.json();
+
       if (!res.ok) {
-        const data = await res.json();
         throw new Error(data.error ?? 'Failed');
       }
 
-      const data = await res.json();
       onSuccess(data.message ?? `Article regeneration queued for ${selectedDate}. Check the pipeline page for progress.`);
     } catch {
       onError('Regeneration failed to queue. The regeneration job could not be queued. Check the pipeline status and try again.');

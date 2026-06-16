@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { SourcesTable } from '@/app/components/admin/SourcesTable';
 import { useToast, ToastContainer } from '@/app/components/admin/Toast';
 
@@ -18,25 +18,25 @@ export default function SourcesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const { toasts, addToast, removeToast } = useToast();
 
-  useEffect(() => {
-    const loadSources = async () => {
-      try {
-        const res = await fetch('/api/admin/sources');
-        if (res.ok) {
-          const data = await res.json();
-          setSources(data.sources ?? []);
-        } else {
-          addToast('error', 'Could not load sources. The source list could not be retrieved. Refresh the page or check provider configuration.');
-        }
-      } catch {
+  const loadSources = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/sources');
+      if (res.ok) {
+        const data = await res.json();
+        setSources(data.sources ?? []);
+      } else {
         addToast('error', 'Could not load sources. The source list could not be retrieved. Refresh the page or check provider configuration.');
-      } finally {
-        setIsLoading(false);
       }
-    };
+    } catch {
+      addToast('error', 'Could not load sources. The source list could not be retrieved. Refresh the page or check provider configuration.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [addToast]);
 
+  useEffect(() => {
     loadSources();
-  }, []);
+  }, [loadSources]);
 
   const handleToggleTrust = async (id: number, isActive: boolean) => {
     try {

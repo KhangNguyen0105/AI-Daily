@@ -23,12 +23,13 @@ export function ReCrawlTrigger({ providers, onSuccess, onError }: ReCrawlTrigger
         body: JSON.stringify({ providerName: selectedProvider }),
       });
 
+      // IN-02 fix: Read body once before status check
+      const data = await res.json();
+
       if (!res.ok) {
-        const data = await res.json();
         throw new Error(data.error ?? 'Failed');
       }
 
-      const data = await res.json();
       onSuccess(data.message ?? `Re-crawl job queued for ${selectedProvider}. Check the pipeline page for progress.`);
       setSelectedProvider('');
     } catch {
