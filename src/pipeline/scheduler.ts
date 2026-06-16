@@ -4,6 +4,8 @@ import { orchestrateDailyRun } from './orchestrator';
 import { getAllTier1Adapters, getAllTier2Adapters, getAllTier3Adapters } from '../providers/registry';
 import { collectQueue } from './queues';
 import { monitorProviderFeeds, createFeedMonitorWorker } from './feed-monitor-worker';
+import { db } from '../db/index';
+import { pipelineRuns } from '../db/schema';
 
 /**
  * Cron pattern for daily collection at 6:00 AM UTC.
@@ -272,6 +274,17 @@ export function createTier1RefreshWorker(): Worker {
     async (job) => {
       console.log(`Tier 1 refresh triggered by job ${job.id}`);
 
+      // CR-03: Create pipeline run for observability
+      const inserted = await db
+        .insert(pipelineRuns)
+        .values({
+          status: 'running',
+          startedAt: new Date(),
+          stats: { type: 'tier1_refresh' },
+        })
+        .returning({ id: pipelineRuns.id });
+      const runId = inserted[0].id;
+
       const tier1Adapters = getAllTier1Adapters();
       let enqueued = 0;
 
@@ -280,6 +293,7 @@ export function createTier1RefreshWorker(): Worker {
           'collect-tier1-refresh',
           {
             providerName: adapter.config.name,
+            pipelineRunId: runId,
             isScheduled: true,
             isTier1Refresh: true,
           },
@@ -292,8 +306,8 @@ export function createTier1RefreshWorker(): Worker {
         enqueued++;
       }
 
-      console.log(`Tier 1 refresh: enqueued ${enqueued} collect jobs`);
-      return { tier1ProvidersEnqueued: enqueued };
+      console.log(`Tier 1 refresh: enqueued ${enqueued} collect jobs (runId: ${runId})`);
+      return { tier1ProvidersEnqueued: enqueued, runId };
     },
     { connection: redisConnection, concurrency: 1 },
   );
@@ -327,6 +341,17 @@ export function createTier2RefreshWorker(): Worker {
     async (job) => {
       console.log(`Tier 2 refresh triggered by job ${job.id}`);
 
+      // CR-03: Create pipeline run for observability
+      const inserted = await db
+        .insert(pipelineRuns)
+        .values({
+          status: 'running',
+          startedAt: new Date(),
+          stats: { type: 'tier2_refresh' },
+        })
+        .returning({ id: pipelineRuns.id });
+      const runId = inserted[0].id;
+
       const tier2Adapters = getAllTier2Adapters();
       let enqueued = 0;
 
@@ -335,6 +360,7 @@ export function createTier2RefreshWorker(): Worker {
           'collect-tier2-refresh',
           {
             providerName: adapter.config.name,
+            pipelineRunId: runId,
             isScheduled: true,
             isTier2Refresh: true,
           },
@@ -347,8 +373,8 @@ export function createTier2RefreshWorker(): Worker {
         enqueued++;
       }
 
-      console.log(`Tier 2 refresh: enqueued ${enqueued} collect jobs`);
-      return { tier2ProvidersEnqueued: enqueued };
+      console.log(`Tier 2 refresh: enqueued ${enqueued} collect jobs (runId: ${runId})`);
+      return { tier2ProvidersEnqueued: enqueued, runId };
     },
     { connection: redisConnection, concurrency: 1 },
   );
