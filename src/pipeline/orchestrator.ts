@@ -122,6 +122,15 @@ export async function orchestrateDailyRun(): Promise<number> {
  * @param updates - Partial stats to merge. Numeric values are treated as deltas
  *                  (increment by value), non-numeric values are replaced.
  */
+// CR-07: Allowlist of valid stats keys to prevent JSONB path injection
+const VALID_STATS_KEYS = new Set([
+  'totalProviders', 'tier1ProvidersCount', 'tier2ProvidersCount',
+  'tier3ProvidersCount', 'attempted', 'succeeded', 'failed',
+  'tier1_succeeded', 'tier1_failed', 'tier2_succeeded', 'tier2_failed',
+  'tier3_succeeded', 'tier3_failed', 'extractions', 'verifiedCount',
+  'likelyCount', 'lowConfidenceCount',
+]);
+
 export async function updatePipelineStats(
   pipelineRunId: number,
   updates: Partial<PipelineStats>,
@@ -130,6 +139,11 @@ export async function updatePipelineStats(
   // This is safe under concurrent workers because each UPDATE is atomic
   for (const [key, value] of Object.entries(updates)) {
     if (typeof value === 'number') {
+      // CR-07: Validate key against allowlist before interpolation
+      if (!VALID_STATS_KEYS.has(key)) {
+        console.warn(`updatePipelineStats: ignoring unknown key "${key}"`);
+        continue;
+      }
       await db
         .update(pipelineRuns)
         .set({
