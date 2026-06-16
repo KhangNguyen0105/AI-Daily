@@ -1,0 +1,9 @@
+{
+	"id": "G65YowXGZtBonb9",
+	"json": "{\"id\":\"G65YowXGZtBonb9\",\"url\":\"https://platform.deepseek.com/api-docs/pricing\",\"loadedUrl\":\"https://platform.deepseek.com/api-docs/pricing\",\"uniqueKey\":\"https://platform.deepseek.com/api-docs/pricing-1781597315640\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"__crawlee\":{\"state\":4}},\"handledAt\":\"2026-06-16T08:08:37.756Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "https://platform.deepseek.com/api-docs/pricing-1781597315640",
+	"url": "https://platform.deepseek.com/api-docs/pricing"
+}

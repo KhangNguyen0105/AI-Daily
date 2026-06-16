@@ -1,0 +1,9 @@
+{
+	"id": "AHBRHoivFdQzlFl",
+	"json": "{\"id\":\"AHBRHoivFdQzlFl\",\"url\":\"https://cohere.com/pricing\",\"loadedUrl\":\"https://cohere.com/pricing\",\"uniqueKey\":\"https://cohere.com/pricing-1781597331237\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"__crawlee\":{\"state\":4}},\"handledAt\":\"2026-06-16T08:08:55.857Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "https://cohere.com/pricing-1781597331237",
+	"url": "https://cohere.com/pricing"
+}

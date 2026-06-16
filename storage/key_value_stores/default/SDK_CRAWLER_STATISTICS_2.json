@@ -1,40 +1,29 @@
 {
   "requestsFinished": 1,
   "requestsFailed": 0,
-  "requestsRetries": 1,
+  "requestsRetries": 0,
   "requestsFailedPerMinute": 0,
-  "requestsFinishedPerMinute": 2,
-  "requestMinDurationMillis": 2948,
-  "requestMaxDurationMillis": 2948,
+  "requestsFinishedPerMinute": 13,
+  "requestMinDurationMillis": 3439,
+  "requestMaxDurationMillis": 3439,
   "requestTotalFailedDurationMillis": 0,
-  "requestTotalFinishedDurationMillis": 2948,
-  "crawlerStartedAt": "2026-06-16T07:28:20.366Z",
-  "crawlerFinishedAt": "2026-06-16T07:28:47.365Z",
-  "statsPersistedAt": "2026-06-16T07:28:47.365Z",
-  "crawlerRuntimeMillis": 27128,
-  "crawlerLastStartTimestamp": 1781594900237,
+  "requestTotalFinishedDurationMillis": 3439,
+  "crawlerStartedAt": "2026-06-16T08:08:23.945Z",
+  "crawlerFinishedAt": "2026-06-16T08:08:28.245Z",
+  "statsPersistedAt": "2026-06-16T08:08:28.245Z",
+  "crawlerRuntimeMillis": 4460,
+  "crawlerLastStartTimestamp": 1781597303785,
   "requestRetryHistogram": [
-    null,
     1
   ],
   "statsId": 2,
   "requestAvgFailedDurationMillis": null,
-  "requestAvgFinishedDurationMillis": 2948,
-  "requestTotalDurationMillis": 2948,
+  "requestAvgFinishedDurationMillis": 3439,
+  "requestTotalDurationMillis": 3439,
   "requestsTotal": 1,
   "requestsWithStatusCode": {
     "200": 1
   },
   "errors": {},
-  "retryErrors": {
-    "E:\\WorkSpace\\AI-base Projects\\AI-daily\\node_modules\\.pnpm\\@crawlee+playwright@3.17.0_playwright@1.60.0\\node_modules\\@crawlee\\playwright\\internals\\utils\\playwright-utils.js:165:17": {
-      "missing error code": {
-        "Error": {
-          "page.goto: net::ERR_EMPTY_RESPONSE at https://ai.google.dev/pricing": {
-            "count": 1
-          }
-        }
-      }
-    }
-  }
+  "retryErrors": {}
 }

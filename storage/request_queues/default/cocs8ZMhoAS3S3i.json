@@ -1,0 +1,9 @@
+{
+	"id": "cocs8ZMhoAS3S3i",
+	"json": "{\"id\":\"cocs8ZMhoAS3S3i\",\"url\":\"https://groq.com/pricing/\",\"loadedUrl\":\"https://groq.com/pricing\",\"uniqueKey\":\"https://groq.com/pricing/-1781597288762\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"__crawlee\":{\"state\":4}},\"handledAt\":\"2026-06-16T08:08:11.370Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "https://groq.com/pricing/-1781597288762",
+	"url": "https://groq.com/pricing/"
+}

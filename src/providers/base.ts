@@ -98,7 +98,10 @@ export abstract class ProviderAdapter {
       },
     });
 
-    await crawler.run([this.config.pricingUrl]);
+    await crawler.run([
+      { url: this.config.pricingUrl, uniqueKey: `${this.config.pricingUrl}-${Date.now()}` }
+    ]);
+
     if (!result) {
       throw new Error(`Failed to crawl ${this.config.name} pricing page at ${this.config.pricingUrl}`);
     }
