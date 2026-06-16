@@ -473,27 +473,23 @@ const columns = [
 | A5 | Tremor 3.18.7 is compatible with Tailwind 4.x | Common Pitfalls | If incompatible, can replace Tremor Badge with custom Tailwind component. Medium risk. |
 | A6 | `useDeferredValue` is preferred over lodash.debounce for search debouncing | Alternatives Considered | `useDeferredValue` is built-in React 18+. No extra dependency. Low risk. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Does the `sources` table have a `lastCrawledAt` field?**
    - What we know: The schema shows `updatedAt` on `sources`, which is updated on every record update.
-   - What's unclear: Whether `updatedAt` accurately reflects the last crawl time, or if it's updated for other reasons.
-   - Recommendation: Use `max(extractions.collectedAt)` as the "last updated" timestamp. This is more accurate than `sources.updatedAt`.
+   - RESOLVED: Use `max(extractions.collectedAt)` as the "last updated" timestamp and compute freshness from extraction collection time, not `sources.updatedAt`. This is locked by D-21 through D-24 and implemented in plans 03-02 and 03-05.
 
 2. **How should model family grouping be displayed?**
    - What we know: PRIC-02 requires "model family grouping."
-   - What's unclear: Whether this means collapsible row groups, a separate column, or visual grouping.
-   - Recommendation: Add a "Family" column derived from model name. Users can sort/filter by family. Collapsible groups add complexity for marginal UX benefit.
+   - RESOLVED: Add a derived "Family" column from model name and include family in global search. Do not add collapsible row groups for this phase. This is locked by D-05, D-11, and D-14 and covered by plans 03-01 and 03-03.
 
 3. **Should the table support column resizing?**
    - What we know: @tanstack/react-table supports column resizing.
-   - What's unclear: Whether this is needed for v1.
-   - Recommendation: Skip for v1. Fixed column widths with responsive hiding are sufficient.
+   - RESOLVED: Skip column resizing for v1. Use fixed responsive column visibility and viewport-relative table height from D-05, D-06, and D-11. Covered by plans 03-03 and 03-05.
 
 4. **What Tremor version is compatible with Tailwind 4.x?**
    - What we know: Tremor 3.18.7 is in the stack. Tailwind 4.3.0 is in the stack.
-   - What's unclear: Whether Tremor 3.x works with Tailwind 4.x without issues.
-   - Recommendation: Test during implementation. If incompatible, use custom Tailwind components for Badge and other UI elements.
+   - RESOLVED: Do not use Tremor or shadcn for Phase 3 UI work. Use Tailwind CSS 4.x utilities and existing local components only. This is locked by D-29, D-30, and 03-UI-SPEC, and covered by plans 03-03 and 03-05.
 
 ## Environment Availability
 
