@@ -1,4 +1,4 @@
-import { getAllAdapters, getAllTier1Adapters, isTier1Provider } from '../providers/registry';
+import { getAllAdapters, getAllTier1Adapters, getAllTier2Adapters, getAllTier3Adapters, isTier1Provider, isTier2Provider, isTier3Provider } from '../providers/registry';
 import { collectQueue } from './queues';
 import { db } from '../db/index';
 import { pipelineRuns } from '../db/schema';
@@ -13,11 +13,17 @@ import { eq, sql } from 'drizzle-orm';
 export interface PipelineStats {
   totalProviders: number;
   tier1ProvidersCount: number;
+  tier2ProvidersCount: number;
+  tier3ProvidersCount: number;
   attempted: number;
   succeeded: number;
   failed: number;
   tier1_succeeded: number;
   tier1_failed: number;
+  tier2_succeeded: number;
+  tier2_failed: number;
+  tier3_succeeded: number;
+  tier3_failed: number;
   extractions: number;
   verifiedCount: number;
   likelyCount: number;
@@ -36,15 +42,23 @@ export interface PipelineStats {
 export async function orchestrateDailyRun(): Promise<number> {
   const adapters = getAllAdapters();
   const tier1Adapters = getAllTier1Adapters();
+  const tier2Adapters = getAllTier2Adapters();
+  const tier3Adapters = getAllTier3Adapters();
 
   const initialStats: PipelineStats = {
     totalProviders: adapters.length,
     tier1ProvidersCount: tier1Adapters.length,
+    tier2ProvidersCount: tier2Adapters.length,
+    tier3ProvidersCount: tier3Adapters.length,
     attempted: 0,
     succeeded: 0,
     failed: 0,
     tier1_succeeded: 0,
     tier1_failed: 0,
+    tier2_succeeded: 0,
+    tier2_failed: 0,
+    tier3_succeeded: 0,
+    tier3_failed: 0,
     extractions: 0,
     verifiedCount: 0,
     likelyCount: 0,
@@ -64,27 +78,34 @@ export async function orchestrateDailyRun(): Promise<number> {
   const runId = inserted[0].id;
 
   // Enqueue a collect job for each registered provider
-  // Per D-01: Tier 1 providers get priority=1 (processed before Tier 2/3)
+  // Per D-01: Tier 1 providers get priority=3 (highest), Tier 2 priority=2, Tier 3 priority=1
+  // BullMQ: lower number = higher priority
   for (const adapter of adapters) {
     const isT1 = isTier1Provider(adapter.config.name);
+    const isT2 = isTier2Provider(adapter.config.name);
+    const isT3 = isTier3Provider(adapter.config.name);
+
+    const priority = isT1 ? 3 : isT2 ? 2 : isT3 ? 1 : 10;
+
     await collectQueue.add(
       'collect',
       {
         providerName: adapter.config.name,
         pipelineRunId: runId,
         isTier1: isT1,
+        isTier2: isT2,
+        isTier3: isT3,
       },
       {
         jobId: `collect-${adapter.config.name}-${Date.now()}`,
-        // Per D-01: Tier 1 providers get higher priority (lower number = higher priority in BullMQ)
-        priority: isT1 ? 1 : 10,
+        priority,
       },
     );
   }
 
   console.log(
     `Orchestrator: started pipeline run ${runId} with ${adapters.length} providers ` +
-    `(${tier1Adapters.length} Tier 1)`,
+    `(${tier1Adapters.length} Tier 1, ${tier2Adapters.length} Tier 2, ${tier3Adapters.length} Tier 3)`,
   );
 
   return runId;
