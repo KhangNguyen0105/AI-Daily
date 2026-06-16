@@ -87,6 +87,17 @@ ${truncatedHtml}`,
    */
   normalize(extractions: ProviderExtraction): ProviderExtraction {
     for (const e of extractions.models) {
+      // CR-06: Capture raw price text for evidence anchoring
+      if (e.inputPricePer1m !== null) {
+        e.rawPriceText = `$${e.inputPricePer1m} per 1M input tokens`;
+        e.rawUnit = 'per 1M tokens';
+        e.rawCurrency = 'USD';
+      }
+      if (e.outputPricePer1m !== null) {
+        e.rawPriceText = e.rawPriceText
+          ? `${e.rawPriceText}; $${e.outputPricePer1m} per 1M output tokens`
+          : `$${e.outputPricePer1m} per 1M output tokens`;
+      }
       if (e.inputPricePer1m !== null && e.inputPricePer1m > 100) {
         console.warn(
           `[${this.config.name}] Suspicious input price for ${e.modelName}: $${e.inputPricePer1m}/1M tokens. ` +

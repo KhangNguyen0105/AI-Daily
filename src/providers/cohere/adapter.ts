@@ -79,4 +79,24 @@ ${truncatedHtml}`,
       throw error;
     }
   }
+
+  /**
+   * CR-06: Normalize Cohere extractions.
+   * Preserve raw_price_text alongside normalized values for evidence anchoring.
+   */
+  normalize(extractions: ProviderExtraction): ProviderExtraction {
+    for (const e of extractions.models) {
+      if (e.inputPricePer1m !== null) {
+        e.rawPriceText = `$${e.inputPricePer1m} per 1M input tokens`;
+        e.rawUnit = 'per 1M tokens';
+        e.rawCurrency = 'USD';
+      }
+      if (e.outputPricePer1m !== null) {
+        e.rawPriceText = e.rawPriceText
+          ? `${e.rawPriceText}; $${e.outputPricePer1m} per 1M output tokens`
+          : `$${e.outputPricePer1m} per 1M output tokens`;
+      }
+    }
+    return extractions;
+  }
 }

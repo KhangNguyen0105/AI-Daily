@@ -109,6 +109,12 @@ ${truncatedHtml}`,
         e.rawUnit = 'per 1M tokens';
         e.rawCurrency = 'CNY';
       }
+      // CR-06: Also capture output price text for evidence anchoring
+      if (e.outputPricePer1m !== null) {
+        e.rawPriceText = e.rawPriceText
+          ? `${e.rawPriceText}; ${e.outputPricePer1m} CNY per 1M output tokens`
+          : `${e.outputPricePer1m} CNY per 1M output tokens`;
+      }
     }
     return extractions;
   }

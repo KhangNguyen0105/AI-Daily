@@ -99,6 +99,12 @@ ${truncatedHtml}`,
         e.rawUnit = 'per 1M tokens';
         e.rawCurrency = 'USD';
       }
+      // CR-06: Also capture output price text for evidence anchoring
+      if (e.outputPricePer1m !== null) {
+        e.rawPriceText = e.rawPriceText
+          ? `${e.rawPriceText}; $${e.outputPricePer1m} per 1M output tokens`
+          : `$${e.outputPricePer1m} per 1M output tokens`;
+      }
     }
     return extractions;
   }
