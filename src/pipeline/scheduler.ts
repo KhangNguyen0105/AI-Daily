@@ -1,6 +1,6 @@
 import { Queue, Worker } from 'bullmq';
 import { redisConnection } from './connection';
-import { orchestrateDailyRun, finalizePipelineRun } from './orchestrator';
+import { orchestrateDailyRun } from './orchestrator';
 import { getAllTier1Adapters, getAllTier2Adapters, getAllTier3Adapters } from '../providers/registry';
 import { collectQueue } from './queues';
 import { monitorProviderFeeds, createFeedMonitorWorker } from './feed-monitor-worker';
@@ -235,9 +235,9 @@ export function createDailyPipelineWorker(): Worker {
       console.log(`Daily pipeline triggered by job ${job.id}`);
       const runId = await orchestrateDailyRun();
 
-      // Finalize pipeline run after all collect jobs are enqueued.
-      await finalizePipelineRun(runId, 'completed');
-
+      // CR-01: Do NOT finalize here -- the run should be finalized by the last
+      // worker in the chain (generate), or by a completion-check mechanism.
+      // Premature finalization marked the run "completed" before any work executed.
       return { runId };
     },
     { connection: redisConnection, concurrency: 1 },
