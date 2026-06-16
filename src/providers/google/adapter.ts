@@ -1,6 +1,6 @@
 import { generateObject } from 'ai';
 import { ProviderAdapter } from '../base';
-import type { ProviderExtraction, ExtractionResult } from '../base';
+import type { ProviderExtraction, ExtractionResult, ExtractionEvidence, EvidenceQuote } from '../base';
 import { pricingSchema } from '../schemas';
 import { getAIModel } from '../../lib/ai-client';
 import { googleConfig } from './config';
@@ -8,13 +8,17 @@ import { googleConfig } from './config';
 /**
  * Google provider adapter.
  *
+ * Per D-01: Tier 1 provider (highest business value).
+ * Per D-03: 4-hour crawl frequency for Tier 1 freshness.
+ * Per D-05: Stores raw_price_text, raw_unit, raw_currency before normalization.
+ * Per D-08: Evidence anchoring required for all extractions.
+ *
  * CR-05: Uses validated env module instead of raw process.env.
  * IN-01: Uses base class crawl() implementation.
  * IN-02: Uses shared pricingSchema from schemas.ts.
  * IN-03: Uses shared AI client (Mimo or OpenAI).
  * IN-04: Uses base class default normalize().
  */
-
 export class GoogleAdapter extends ProviderAdapter {
   config = googleConfig;
 
@@ -71,6 +75,10 @@ ${truncatedHtml}`,
           contextWindow: model.contextWindow,
           confidence: 'likely' as const,
           rawEvidence: model,
+          // Per D-05: Store raw currency and unit for USD providers
+          rawCurrency: 'USD',
+          rawUnit: 'per 1M tokens',
+          pricingModelType: 'token_usage',
         })),
         promotions: object.promotions || [],
       };
@@ -78,5 +86,20 @@ ${truncatedHtml}`,
       console.error('Google extraction failed:', error);
       throw error;
     }
+  }
+
+  /**
+   * Normalize Google extractions.
+   * Per D-05: Preserve raw_price_text alongside normalized values.
+   */
+  normalize(extractions: ProviderExtraction): ProviderExtraction {
+    for (const e of extractions.models) {
+      if (e.inputPricePer1m !== null) {
+        e.rawPriceText = `$${e.inputPricePer1m} per 1M input tokens`;
+        e.rawUnit = 'per 1M tokens';
+        e.rawCurrency = 'USD';
+      }
+    }
+    return extractions;
   }
 }

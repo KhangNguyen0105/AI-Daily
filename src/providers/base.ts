@@ -1,13 +1,29 @@
 import { PlaywrightCrawler } from 'crawlee';
+import type { SourceTier, ProviderSource } from './types';
 
 /**
  * Configuration for a provider adapter.
  * Each adapter provides its name, base URL, and pricing page URL.
+ *
+ * Per Wave 4: Extended with tier classification, source URLs, crawl frequency,
+ * and API key configuration for Tier 1 providers.
  */
 export interface ProviderConfig {
   name: string;
   baseUrl: string;
   pricingUrl: string;
+  /** Provider tier for SLA enforcement and scheduling priority */
+  tier?: SourceTier;
+  /** Multiple source URLs with tier classification */
+  sources?: ProviderSource[];
+  /** Crawl frequency in hours (Tier 1: 4, Tier 2: 12, Tier 3: 24) */
+  crawlFrequencyHours?: number;
+  /** Whether the provider API key is optional (some Tier 1 providers need it for /models endpoint) */
+  apiKeyOptional?: boolean;
+  /** Provider-specific model ID format identifier */
+  modelIdFormat?: string;
+  /** Currency used by this provider's pricing page */
+  currency?: 'USD' | 'CNY' | 'EUR';
 }
 
 /**
@@ -21,8 +37,34 @@ export interface CrawlResult {
 }
 
 /**
+ * Evidence anchoring data for a single extracted field.
+ * Per D-08: Every extracted field must include the source text snippet and selector.
+ */
+export interface EvidenceQuote {
+  /** The exact text extracted from the source page */
+  quote: string;
+  /** CSS selector or path to locate the text in the HTML */
+  selector?: string;
+}
+
+/**
+ * Evidence bundle attached to an extraction.
+ * Per D-08: Evidence anchoring required for all extractions.
+ */
+export interface ExtractionEvidence {
+  /** The URL where the data was extracted from */
+  source_url: string;
+  /** A text snippet from the source page around the extraction point */
+  extracted_text_snippet: string;
+  /** Per-field evidence quotes mapping field name to quote */
+  evidence_quotes: Record<string, EvidenceQuote>;
+}
+
+/**
  * Structured extraction of pricing data from a provider.
  * Maps to the `extractions` table in the database.
+ *
+ * Per Wave 4: Extended with evidence anchoring fields (D-05, D-08).
  */
 export interface ExtractionResult {
   modelName: string;
@@ -31,13 +73,25 @@ export interface ExtractionResult {
   contextWindow: number | null;
   confidence: 'verified' | 'likely' | 'low_confidence';
   rawEvidence: unknown;
+  /** Per D-05: Raw price text before normalization */
+  rawPriceText?: string;
+  /** Per D-05: Raw unit string (e.g., "per 1M tokens", "per 1K tokens") */
+  rawUnit?: string;
+  /** Per D-05: Raw currency from source (e.g., "USD", "CNY") */
+  rawCurrency?: string;
+  /** Per D-05: Pricing model type classification */
+  pricingModelType?: 'token_usage' | 'request_based' | 'fixed_monthly' | 'tiered' | 'free';
+  /** Per D-08: Evidence anchoring data */
+  evidence?: ExtractionEvidence;
+  /** Per D-04: Provider-specific model ID for canonical registry matching */
+  providerModelId?: string;
 }
 
 export interface PromotionResult {
   modelPattern: string;
   type: 'free_tier' | 'promotion' | 'beta';
   description: string;
-  credits?: string;
+  credits?: string | null;
 }
 
 export interface ProviderExtraction {

@@ -1,6 +1,6 @@
 import { generateObject } from 'ai';
 import { ProviderAdapter } from '../base';
-import type { ProviderExtraction, ExtractionResult } from '../base';
+import type { ProviderExtraction, ExtractionResult, ExtractionEvidence, EvidenceQuote } from '../base';
 import { pricingSchema } from '../schemas';
 import { getAIModel } from '../../lib/ai-client';
 import { deepseekConfig } from './config';
@@ -8,13 +8,17 @@ import { deepseekConfig } from './config';
 /**
  * DeepSeek provider adapter.
  *
+ * Per D-01: Tier 1 provider (highest business value).
+ * Per D-03: 4-hour crawl frequency for Tier 1 freshness.
+ * Per D-05: Stores raw_price_text, raw_unit, raw_currency before normalization.
+ * Per D-08: Evidence anchoring required for all extractions.
+ *
  * CR-05: Uses validated env module instead of raw process.env.
  * CR-06: Removed dangerous price < 0.01 heuristic. Trust LLM extraction output.
  * IN-01: Uses base class crawl() implementation.
  * IN-02: Uses shared pricingSchema from schemas.ts.
  * IN-03: Uses shared AI client (Mimo or OpenAI).
  */
-
 export class DeepSeekAdapter extends ProviderAdapter {
   config = deepseekConfig;
 
@@ -71,6 +75,10 @@ ${truncatedHtml}`,
           contextWindow: model.contextWindow,
           confidence: 'likely' as const,
           rawEvidence: model,
+          // Per D-05: Store raw currency and unit for USD providers
+          rawCurrency: 'USD',
+          rawUnit: 'per 1M tokens',
+          pricingModelType: 'token_usage',
         })),
         promotions: object.promotions || [],
       };
@@ -84,9 +92,15 @@ ${truncatedHtml}`,
    * CR-06: Normalize DeepSeek extractions.
    * Removed the dangerous price < 0.01 heuristic that silently corrupted data.
    * Instead, log suspicious prices for manual review.
+   * Per D-05: Preserve raw_price_text alongside normalized values.
    */
   normalize(extractions: ProviderExtraction): ProviderExtraction {
     for (const e of extractions.models) {
+      if (e.inputPricePer1m !== null) {
+        e.rawPriceText = `$${e.inputPricePer1m} per 1M input tokens`;
+        e.rawUnit = 'per 1M tokens';
+        e.rawCurrency = 'USD';
+      }
       if (e.inputPricePer1m !== null && e.inputPricePer1m > 100) {
         console.warn(
           `[${this.config.name}] Suspicious input price for ${e.modelName}: $${e.inputPricePer1m}/1M tokens. ` +
