@@ -2,7 +2,8 @@ import { Worker, Job } from 'bullmq';
 import { generateQueue } from '../queues';
 import { redisConnection } from '../connection';
 import { db } from '../../db/index';
-import { rawData, extractions } from '../../db/schema';
+import { rawData, extractions, sources } from '../../db/schema';
+import { getProviderTier } from '../../providers/registry';
 import { eq, inArray } from 'drizzle-orm';
 import { verifyExtraction, verifyWithEvidenceQuotes, detectLargeChange, compareNumericValues } from '../verification';
 import { calculateMultiDimensionalConfidence, applyHumanOverride, calculateConfidence } from '../confidence';
@@ -97,11 +98,16 @@ export function createScoreWorker(): Worker<ScoreJobData, ScoreJobResult> {
         return { scored: 0, verified: 0, likely: 0, lowConfidence: 0 };
       }
 
-      // IN-05: All providers crawl official pricing pages, so tier is always 'tier1'.
-      // The SourceTier system (tier1/tier2/tier3) is defined in types.ts for future
-      // use when we add non-official sources (API docs, changelogs, aggregators).
-      // When that happens, read the tier from the sources table instead of hardcoding.
-      const sourceTier = 'tier1' as SourceTier;
+      // CR-02: Look up actual provider tier from registry instead of hardcoding 'tier1'.
+      // This ensures Tier 2/3 providers get correct confidence scores.
+      const sourceRows = await db
+        .select({ name: sources.name })
+        .from(sources)
+        .where(eq(sources.id, sourceId))
+        .limit(1);
+
+      const providerName = sourceRows[0]?.name;
+      const sourceTier = (getProviderTier(providerName) ?? 'tier3') as SourceTier;
 
       // Track confidence distribution
       let verifiedCount = 0;
