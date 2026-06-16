@@ -158,6 +158,15 @@ export const extractions = pgTable('extractions', {
   // Verification status (D-08) — replaces simple confidence for verification workflow
   verificationStatus: verificationStatusEnum('verification_status'),
   verificationNotes: text('verification_notes'),
+  // Multi-dimensional confidence scores (D-07, Phase 2.1-03)
+  sourceConfidence: integer('source_confidence'),
+  extractionConfidence: integer('extraction_confidence'),
+  freshnessConfidence: integer('freshness_confidence'),
+  verificationConfidence: integer('verification_confidence'),
+  overallConfidence: integer('overall_confidence'),
+  confidenceLabel: varchar('confidence_label', { length: 20 }),
+  confidenceBreakdown: text('confidence_breakdown'),
+  perFieldConfidence: jsonb('per_field_confidence'),
   priceChangeFlag: varchar('price_change_flag', { length: 10 }).default('false'),
   largeChangeReason: text('large_change_reason'),
   // Human-in-the-loop fields (D-07)

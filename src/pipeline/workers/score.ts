@@ -5,13 +5,15 @@ import { db } from '../../db/index';
 import { rawData, extractions } from '../../db/schema';
 import { eq, inArray } from 'drizzle-orm';
 import { verifyExtraction, verifyWithEvidenceQuotes, detectLargeChange, compareNumericValues } from '../verification';
-import { calculateConfidence } from '../confidence';
+import { calculateMultiDimensionalConfidence, applyHumanOverride, calculateConfidence } from '../confidence';
+import { computeFreshnessConfidence, computeFreshnessMetadata, checkSLABreach, triggerPriorityRecrawl } from '../../lib/freshness-tracker';
 import { updatePipelineStats } from '../orchestrator';
 import { env } from '../../lib/env';
 import { isComparableTokenPricing } from '../edge-case-classifier';
 import type { ExtractionResult } from '../../providers/base';
 import type { EdgeCaseFlags } from '../edge-case-classifier';
 import type { EvidenceQuotes } from '../../lib/evidence-anchor';
+import type { SourceTier } from '../../providers/types';
 
 /**
  * Job data for the score queue.
@@ -43,12 +45,14 @@ export interface ScoreJobResult {
  * Per D-10: Worker chains to generate stage on completion.
  * Per Pitfall 1: Error handler prevents silent crashes.
  *
- * Phase 2: Real two-pass verification and confidence scoring.
+ * Phase 2.1-03: Multi-dimensional confidence scoring with freshness tracking.
  * 1. Fetch raw HTML and extraction records from the database
  * 2. Run verifyExtraction (LLM second-pass) on each extraction
- * 3. Calculate confidence using source tier + completeness + verification
- * 4. Quarantine extractions where verification disagrees
- * 5. Chain to generate stage
+ * 3. Calculate 6-dimension confidence (source/extraction/normalization/freshness/verification/overall)
+ * 4. Compute freshness metadata and check SLA breaches
+ * 5. Quarantine extractions where verification disagrees
+ * 6. Apply human overrides if present
+ * 7. Chain to generate stage
  *
  * @returns BullMQ Worker instance for the 'score' queue
  */
@@ -97,7 +101,7 @@ export function createScoreWorker(): Worker<ScoreJobData, ScoreJobResult> {
       // The SourceTier system (tier1/tier2/tier3) is defined in types.ts for future
       // use when we add non-official sources (API docs, changelogs, aggregators).
       // When that happens, read the tier from the sources table instead of hardcoding.
-      const tier = 'tier1' as const;
+      const sourceTier = 'tier1' as SourceTier;
 
       // Track confidence distribution
       let verifiedCount = 0;
@@ -119,7 +123,10 @@ export function createScoreWorker(): Worker<ScoreJobData, ScoreJobResult> {
         // Get evidence quotes for this extraction (D-08)
         const extractionEvidenceQuotes = evidenceQuotes?.[extractionRow.id];
 
-        let confidence: 'verified' | 'likely' | 'low_confidence' = 'low_confidence';
+        // Get normalization confidence from DB
+        const normalizationConf = extractionRow.normalizationConfidence as 'high' | 'medium' | 'low' | 'unknown' | undefined;
+
+        let legacyConfidence: 'verified' | 'likely' | 'low_confidence' = 'low_confidence';
         let verificationStatus: string = 'needs_review';
         let verificationNotes: string = '';
 
@@ -151,16 +158,31 @@ export function createScoreWorker(): Worker<ScoreJobData, ScoreJobResult> {
             }
           }
 
-          // Calculate confidence from source tier + completeness + verification
-          confidence = calculateConfidence(
-            tier,
+          // Phase 2.1-03: Multi-dimensional confidence scoring
+          // Freshness confidence: just extracted, so 0 minutes old = 90
+          const freshnessConf = computeFreshnessConfidence(0);
+
+          const confidenceScore = await calculateMultiDimensionalConfidence(
+            sourceTier,
             extractionResult,
-            verificationResult.verified && evidenceVerified,
+            verificationResult.verified && evidenceVerified ? verificationResult : { ...verificationResult, verified: false },
+            freshnessConf,
+            edgeCaseFlags,
+            normalizationConf,
           );
 
-          // D-08: Determine verification status
+          // Compute freshness metadata
+          const freshnessMetadata = await computeFreshnessMetadata(new Date(), sourceTier);
+
+          // Check SLA breach
+          const slaBreach = await checkSLABreach(freshnessMetadata.data_age_minutes, sourceTier);
+          if (slaBreach.breached) {
+            await triggerPriorityRecrawl(sourceId, `SLA breach: ${slaBreach.daysOverdue} days overdue`);
+            verificationNotes += `SLA breach detected: ${slaBreach.daysOverdue} days overdue. `;
+          }
+
+          // Determine verification status
           if (verificationResult.verified && evidenceVerified) {
-            // Check for edge cases that should downgrade to verified_with_warning
             if (edgeCaseFlags && Object.keys(edgeCaseFlags).length > 0) {
               verificationStatus = 'verified_with_warning';
               verificationNotes += 'Edge cases detected in pricing. ';
@@ -168,7 +190,6 @@ export function createScoreWorker(): Worker<ScoreJobData, ScoreJobResult> {
               verificationStatus = 'verified';
             }
           } else if (verificationResult.disagreements.length > 0) {
-            // D-08: Quarantine if disagreement AND NOT edge case
             if (edgeCaseFlags && Object.keys(edgeCaseFlags).length > 0) {
               verificationStatus = 'verified_with_warning';
               verificationNotes += 'Verification disagreement with edge cases present. ';
@@ -178,6 +199,13 @@ export function createScoreWorker(): Worker<ScoreJobData, ScoreJobResult> {
             }
           }
 
+          // Legacy confidence for backward compatibility
+          legacyConfidence = calculateConfidence(
+            sourceTier,
+            extractionResult,
+            verificationResult.verified && evidenceVerified,
+          );
+
           // Quarantine: if verification found disagreements, force low_confidence
           if (
             !verificationResult.verified &&
@@ -186,42 +214,91 @@ export function createScoreWorker(): Worker<ScoreJobData, ScoreJobResult> {
             console.warn(
               `Score worker: quarantining extraction ${extractionRow.id} (${extractionRow.modelName}) — ${verificationResult.disagreements.length} disagreement(s) found`,
             );
-            confidence = 'low_confidence';
+            legacyConfidence = 'low_confidence';
           }
+
+          // Check if edge cases make pricing non-comparable
+          const comparable = edgeCaseFlags ? isComparableTokenPricing(edgeCaseFlags) : true;
+          if (!comparable && verificationStatus === 'verified') {
+            verificationStatus = 'verified_with_warning';
+            verificationNotes += 'Non-comparable pricing model. ';
+          }
+
+          // Apply human override if present
+          let finalConfidenceScore = confidenceScore;
+          if (extractionRow.humanConfidenceOverride !== null && extractionRow.reviewedBy) {
+            finalConfidenceScore = applyHumanOverride(confidenceScore, {
+              confidence_override: extractionRow.humanConfidenceOverride,
+              reviewed_by: extractionRow.reviewedBy,
+              reviewed_at: extractionRow.reviewedAt || new Date(),
+              review_notes: extractionRow.reviewNotes || '',
+              human_review_status: (extractionRow.humanReviewStatus as any) || 'approved',
+            });
+          }
+
+          // Update extraction with all confidence dimensions + freshness
+          await db
+            .update(extractions)
+            .set({
+              // Legacy confidence field
+              confidence: legacyConfidence as any,
+              // Multi-dimensional confidence (D-07)
+              sourceConfidence: finalConfidenceScore.source_confidence,
+              extractionConfidence: finalConfidenceScore.extraction_confidence,
+              freshnessConfidence: finalConfidenceScore.freshness_confidence,
+              verificationConfidence: finalConfidenceScore.verification_confidence,
+              overallConfidence: finalConfidenceScore.overall_confidence,
+              confidenceLabel: finalConfidenceScore.label,
+              confidenceBreakdown: finalConfidenceScore.breakdown_summary,
+              perFieldConfidence: finalConfidenceScore.per_field_confidence as any,
+              // Freshness metadata (D-03)
+              lastVerifiedAt: freshnessMetadata.last_verified_at,
+              freshnessStatus: freshnessMetadata.freshness_status as any,
+              dataAgeMinutes: freshnessMetadata.data_age_minutes,
+              // Verification status (D-08)
+              verificationStatus: verificationStatus as any,
+              verificationNotes: verificationNotes || null,
+              edgeCaseFlags: (edgeCaseFlags ?? null) as any,
+              updatedAt: new Date(),
+            })
+            .where(eq(extractions.id, extractionRow.id));
+
+          // Track stats
+          if (legacyConfidence === 'verified') verifiedCount++;
+          else if (legacyConfidence === 'likely') likelyCount++;
+          else lowConfidenceCount++;
         } catch (err) {
           // If verification fails (LLM API error), fall back to existing confidence
           console.error(
             `Score worker: verification failed for extraction ${extractionRow.id}, keeping existing confidence:`,
             err instanceof Error ? err.message : err,
           );
-          confidence = extractionRow.confidence as 'verified' | 'likely' | 'low_confidence';
+          legacyConfidence = extractionRow.confidence as 'verified' | 'likely' | 'low_confidence';
           verificationStatus = 'needs_review';
           verificationNotes = `Verification failed: ${err instanceof Error ? err.message : 'Unknown error'}`;
+
+          // Still compute basic freshness for the extraction
+          const freshnessConf = computeFreshnessConfidence(0);
+          const freshnessMetadata = await computeFreshnessMetadata(new Date(), sourceTier);
+
+          await db
+            .update(extractions)
+            .set({
+              confidence: legacyConfidence as any,
+              freshnessConfidence: freshnessConf,
+              freshnessStatus: freshnessMetadata.freshness_status as any,
+              dataAgeMinutes: freshnessMetadata.data_age_minutes,
+              lastVerifiedAt: freshnessMetadata.last_verified_at,
+              verificationStatus: verificationStatus as any,
+              verificationNotes: verificationNotes,
+              updatedAt: new Date(),
+            })
+            .where(eq(extractions.id, extractionRow.id));
+
+          if (legacyConfidence === 'verified') verifiedCount++;
+          else if (legacyConfidence === 'likely') likelyCount++;
+          else lowConfidenceCount++;
         }
-
-        // D-08: Check if edge cases make pricing non-comparable
-        const comparable = edgeCaseFlags ? isComparableTokenPricing(edgeCaseFlags) : true;
-        if (!comparable && verificationStatus === 'verified') {
-          verificationStatus = 'verified_with_warning';
-          verificationNotes += 'Non-comparable pricing model. ';
-        }
-
-        // Update extraction confidence and verification status in database
-        await db
-          .update(extractions)
-          .set({
-            confidence,
-            verificationStatus: verificationStatus as any,
-            verificationNotes: verificationNotes || null,
-            edgeCaseFlags: (edgeCaseFlags ?? null) as any,
-            updatedAt: new Date(),
-          })
-          .where(eq(extractions.id, extractionRow.id));
-
-        // Track stats
-        if (confidence === 'verified') verifiedCount++;
-        else if (confidence === 'likely') likelyCount++;
-        else lowConfidenceCount++;
       }
 
       console.log(
