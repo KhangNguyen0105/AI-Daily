@@ -9,6 +9,9 @@ import {
   pgEnum,
   doublePrecision,
   uniqueIndex,
+  uuid,
+  date,
+  index,
 } from 'drizzle-orm/pg-core';
 
 // Confidence scoring enum (D-06)
@@ -16,6 +19,53 @@ export const confidenceEnum = pgEnum('confidence', [
   'verified',
   'likely',
   'low_confidence',
+]);
+
+// Model status enum (D-04)
+export const modelStatusEnum = pgEnum('model_status', [
+  'announced',
+  'active',
+  'deprecated',
+  'replaced',
+  'quarantined',
+]);
+
+// Freshness status enum (D-02)
+export const freshnessStatusEnum = pgEnum('freshness_status', [
+  'fresh',
+  'recent',
+  'aging',
+  'stale',
+]);
+
+// Event type enum for model status audit (D-04)
+export const eventTypeEnum = pgEnum('event_type', [
+  'created',
+  'renamed',
+  'aliased',
+  'deprecated',
+  'replaced',
+  'quarantined',
+]);
+
+// Pricing model type enum (D-05)
+export const pricingModelTypeEnum = pgEnum('pricing_model_type', [
+  'token_usage',
+  'request_based',
+  'fixed_monthly',
+  'tiered_usage',
+  'credit_based',
+  'free_quota',
+  'enterprise_only',
+  'unknown',
+]);
+
+// Normalization confidence enum (D-05)
+export const normalizationConfidenceEnum = pgEnum('normalization_confidence', [
+  'high',
+  'medium',
+  'low',
+  'unknown',
 ]);
 
 // Sources table - provider information
@@ -58,11 +108,100 @@ export const extractions = pgTable('extractions', {
   confidence: confidenceEnum('confidence').notNull(),
   rawEvidence: jsonb('raw_evidence'),
   collectedAt: timestamp('collected_at').notNull(),
+  // Freshness metadata columns (D-02)
+  lastVerifiedAt: timestamp('last_verified_at'),
+  freshnessStatus: freshnessStatusEnum('freshness_status'),
+  dataAgeMinutes: integer('data_age_minutes'),
+  // Multi-level normalization columns (D-05)
+  pricingModelType: pricingModelTypeEnum('pricing_model_type'),
+  rawPriceText: text('raw_price_text'),
+  rawUnit: varchar('raw_unit', { length: 100 }),
+  rawCurrency: varchar('raw_currency', { length: 3 }),
+  rawBillingModel: varchar('raw_billing_model', { length: 50 }),
+  cachedInputUsdPer1mTokens: doublePrecision('cached_input_usd_per_1m_tokens'),
+  reasoningUsdPer1mTokens: doublePrecision('reasoning_usd_per_1m_tokens'),
+  normalizationConfidence: normalizationConfidenceEnum('normalization_confidence'),
+  normalizationNotes: text('normalization_notes'),
+  // Canonical model reference (D-04)
+  canonicalModelId: uuid('canonical_model_id'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => {
   return {
     sourceModelUnique: uniqueIndex('source_model_unique').on(table.sourceId, table.modelName),
+    canonicalModelIdIdx: index('canonical_model_id_idx').on(table.canonicalModelId),
+  };
+});
+
+// Canonical models table - registry of canonical model records (D-04)
+export const canonicalModels = pgTable('canonical_models', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  canonicalName: varchar('canonical_name', { length: 255 }).notNull().unique(),
+  provider: varchar('provider', { length: 100 }).notNull(),
+  family: varchar('family', { length: 255 }),
+  aliases: text('aliases').array(), // e.g. ["gpt-4o", "gpt-4o-2024-08-06"]
+  apiModelIds: text('api_model_ids').array(), // e.g. ["gpt-4o"] from provider API
+  status: modelStatusEnum('status').notNull().default('active'),
+  firstSeen: timestamp('first_seen').notNull().defaultNow(),
+  lastSeen: timestamp('last_seen'),
+  lineage: jsonb('lineage'), // tracks GPT-4 → GPT-4 Turbo → GPT-4o progression
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => {
+  return {
+    canonicalNameIdx: index('canonical_name_idx').on(table.canonicalName),
+    providerIdx: index('provider_idx').on(table.provider),
+    statusIdx: index('status_idx').on(table.status),
+  };
+});
+
+// Pricing history table - append-only pricing log (D-05)
+export const pricingHistory = pgTable('pricing_history', {
+  id: serial('id').primaryKey(),
+  canonicalModelId: uuid('canonical_model_id')
+    .references(() => canonicalModels.id)
+    .notNull(),
+  extractionId: integer('extraction_id')
+    .references(() => extractions.id)
+    .notNull(),
+  sourceId: integer('source_id')
+    .references(() => sources.id)
+    .notNull(),
+  rawPriceText: text('raw_price_text'),
+  rawUnit: varchar('raw_unit', { length: 100 }),
+  rawCurrency: varchar('raw_currency', { length: 3 }),
+  rawBillingModel: varchar('raw_billing_model', { length: 50 }),
+  inputUsdPer1mTokens: doublePrecision('input_usd_per_1m_tokens'),
+  outputUsdPer1mTokens: doublePrecision('output_usd_per_1m_tokens'),
+  normalizationConfidence: normalizationConfidenceEnum('normalization_confidence'),
+  normalizationNotes: text('normalization_notes'),
+  effectiveDate: date('effective_date'),
+  recordedAt: timestamp('recorded_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => {
+  return {
+    canonicalModelIdIdx: index('pricing_canonical_model_id_idx').on(table.canonicalModelId),
+    extractionIdIdx: index('pricing_extraction_id_idx').on(table.extractionId),
+    recordedAtIdx: index('pricing_recorded_at_idx').on(table.recordedAt),
+  };
+});
+
+// Model status audit table - immutable log of model lifecycle events (D-04)
+export const modelStatusAudit = pgTable('model_status_audit', {
+  id: serial('id').primaryKey(),
+  canonicalModelId: uuid('canonical_model_id')
+    .references(() => canonicalModels.id),
+  eventType: eventTypeEnum('event_type').notNull(),
+  previousStatus: varchar('previous_status', { length: 50 }),
+  newStatus: varchar('new_status', { length: 50 }),
+  details: jsonb('details'), // context for the event
+  triggeredBy: varchar('triggered_by', { length: 50 }), // "auto_detection", "admin", "verification_conflict"
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => {
+  return {
+    canonicalModelIdIdx: index('audit_canonical_model_id_idx').on(table.canonicalModelId),
+    eventTypeIdx: index('audit_event_type_idx').on(table.eventType),
+    createdAtIdx: index('audit_created_at_idx').on(table.createdAt),
   };
 });
 
