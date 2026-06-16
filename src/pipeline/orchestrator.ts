@@ -1,4 +1,4 @@
-import { getAllAdapters } from '../providers/registry';
+import { getAllAdapters, getAllTier1Adapters, isTier1Provider } from '../providers/registry';
 import { collectQueue } from './queues';
 import { db } from '../db/index';
 import { pipelineRuns } from '../db/schema';
@@ -7,12 +7,17 @@ import { eq, sql } from 'drizzle-orm';
 /**
  * Pipeline run statistics tracked across all stages.
  * Stored as JSONB in pipelineRuns.stats.
+ *
+ * Per Wave 4: Added Tier 1-specific stats for tracking tier1_succeeded/tier1_failed.
  */
 export interface PipelineStats {
   totalProviders: number;
+  tier1ProvidersCount: number;
   attempted: number;
   succeeded: number;
   failed: number;
+  tier1_succeeded: number;
+  tier1_failed: number;
   extractions: number;
   verifiedCount: number;
   likelyCount: number;
@@ -23,16 +28,23 @@ export interface PipelineStats {
  * Create a new pipeline run record and enqueue collect jobs for all
  * registered providers.
  *
+ * Per D-01: Tier 1 providers get priority=1 (high priority) in the collect queue.
+ * Per Wave 4: Tracks tier1ProvidersCount, tier1_succeeded, tier1_failed stats.
+ *
  * @returns The ID of the newly created pipeline run
  */
 export async function orchestrateDailyRun(): Promise<number> {
   const adapters = getAllAdapters();
+  const tier1Adapters = getAllTier1Adapters();
 
   const initialStats: PipelineStats = {
     totalProviders: adapters.length,
+    tier1ProvidersCount: tier1Adapters.length,
     attempted: 0,
     succeeded: 0,
     failed: 0,
+    tier1_succeeded: 0,
+    tier1_failed: 0,
     extractions: 0,
     verifiedCount: 0,
     likelyCount: 0,
@@ -52,21 +64,27 @@ export async function orchestrateDailyRun(): Promise<number> {
   const runId = inserted[0].id;
 
   // Enqueue a collect job for each registered provider
+  // Per D-01: Tier 1 providers get priority=1 (processed before Tier 2/3)
   for (const adapter of adapters) {
+    const isT1 = isTier1Provider(adapter.config.name);
     await collectQueue.add(
       'collect',
       {
         providerName: adapter.config.name,
         pipelineRunId: runId,
+        isTier1: isT1,
       },
       {
         jobId: `collect-${adapter.config.name}-${Date.now()}`,
+        // Per D-01: Tier 1 providers get higher priority (lower number = higher priority in BullMQ)
+        priority: isT1 ? 1 : 10,
       },
     );
   }
 
   console.log(
-    `Orchestrator: started pipeline run ${runId} with ${adapters.length} providers`,
+    `Orchestrator: started pipeline run ${runId} with ${adapters.length} providers ` +
+    `(${tier1Adapters.length} Tier 1)`,
   );
 
   return runId;
