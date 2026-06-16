@@ -4,12 +4,14 @@ import { db } from '../../db/index';
 import { articles } from '../../db/schema';
 import { computeDiff } from '../article-diff';
 import { generateArticle } from '../article-generator';
+import { finalizePipelineRun } from '../orchestrator';
 
 /**
  * Job data for the generate queue.
  */
 export interface GenerateJobData {
   extractionIds: number[];
+  pipelineRunId?: number;
 }
 
 /**
@@ -91,6 +93,11 @@ export function createGenerateWorker(): Worker<GenerateJobData, GenerateJobResul
         `Generate worker: Upserted article ${articleId} for ${todayStr} — "${generated.title}"`,
       );
 
+      // CR-08: Finalize pipeline run (generate is the last stage)
+      if (job.data.pipelineRunId) {
+        await finalizePipelineRun(job.data.pipelineRunId, 'completed');
+      }
+
       return { articleId };
     },
     { connection: redisConnection, concurrency: 1 },
@@ -105,8 +112,16 @@ export function createGenerateWorker(): Worker<GenerateJobData, GenerateJobResul
     console.log(`Generate job ${job.id} completed: article ${job.returnvalue.articleId}`);
   });
 
-  worker.on('failed', (job, err) => {
+  worker.on('failed', async (job, err) => {
     console.error(`Generate job ${job?.id} failed:`, err.message);
+    // CR-08: Finalize pipeline run as failed when generate stage fails
+    if (job?.data?.pipelineRunId) {
+      try {
+        await finalizePipelineRun(job.data.pipelineRunId, 'failed');
+      } catch (finalizeErr) {
+        console.error('Generate worker: failed to finalize pipeline run:', finalizeErr);
+      }
+    }
   });
 
   return worker;
