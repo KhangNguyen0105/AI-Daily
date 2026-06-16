@@ -201,8 +201,8 @@ export function TrendChart({ data, modelName }: { data: TrendPoint[]; modelName:
           <XAxis dataKey="date" />
           <YAxis />
           <Tooltip
-            formatter={(value: number, name: string) => [
-              `$${value.toFixed(4)}`,
+            formatter={(value: any, name: any) => [
+              `$${typeof value === 'number' ? value.toFixed(4) : value}`,
               name,
             ]}
           />

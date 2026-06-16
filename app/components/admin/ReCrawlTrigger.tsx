@@ -46,7 +46,7 @@ export function ReCrawlTrigger({ providers, onSuccess, onError }: ReCrawlTrigger
         <select
           value={selectedProvider}
           onChange={(e) => setSelectedProvider(e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-white"
+          className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[180px] shadow-sm"
         >
           <option value="" disabled>Select provider...</option>
           {providers.map((p) => (

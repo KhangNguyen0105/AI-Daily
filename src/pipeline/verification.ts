@@ -7,9 +7,9 @@ import { getAIModel } from '../lib/ai-client';
 
 export interface VerificationModelResult {
   modelName: string;
-  inputPricePer1m: number;
-  outputPricePer1m: number;
-  contextWindow: number;
+  inputPricePer1m: number | null;
+  outputPricePer1m: number | null;
+  contextWindow: number | null;
   supported: boolean;
   evidenceQuote: string;
 }
@@ -23,8 +23,8 @@ export interface VerificationResult {
 export interface Disagreement {
   modelName: string;
   field: 'inputPricePer1m' | 'outputPricePer1m' | 'contextWindow';
-  pass1Value: number;
-  pass2Value: number;
+  pass1Value: number | null;
+  pass2Value: number | null;
   pass2Supported: boolean;
 }
 
@@ -39,10 +39,10 @@ const MAX_HTML_LENGTH = 100_000;
 const verificationSchema = z.object({
   models: z.array(
     z.object({
-      modelName: z.string(),
-      inputPricePer1m: z.number(),
-      outputPricePer1m: z.number(),
-      contextWindow: z.number(),
+      modelName: z.string().describe("The exact name of the model"),
+      inputPricePer1m: z.number().nullable().describe("Input price per 1M tokens as a strictly numeric float (e.g. 0.15). Do NOT include dollar signs."),
+      outputPricePer1m: z.number().nullable().describe("Output price per 1M tokens as a strictly numeric float (e.g. 0.6). Do NOT include dollar signs."),
+      contextWindow: z.number().nullable().describe("Context window size as a strictly numeric integer (e.g. 128000). Do NOT include 'k' or 'm'."),
       supported: z.boolean(),
       evidenceQuote: z.string(),
     }),
@@ -75,7 +75,7 @@ export function compareResults(
           modelName: p1.modelName,
           field: 'inputPricePer1m',
           pass1Value: p1.inputPricePer1m,
-          pass2Value: 0,
+          pass2Value: null,
           pass2Supported: false,
         });
       }
@@ -84,7 +84,7 @@ export function compareResults(
           modelName: p1.modelName,
           field: 'outputPricePer1m',
           pass1Value: p1.outputPricePer1m,
-          pass2Value: 0,
+          pass2Value: null,
           pass2Supported: false,
         });
       }
@@ -93,7 +93,7 @@ export function compareResults(
           modelName: p1.modelName,
           field: 'contextWindow',
           pass1Value: p1.contextWindow,
-          pass2Value: 0,
+          pass2Value: null,
           pass2Supported: false,
         });
       }
@@ -104,7 +104,7 @@ export function compareResults(
     const fields: Array<{
       name: 'inputPricePer1m' | 'outputPricePer1m' | 'contextWindow';
       pass1Value: number | null;
-      pass2Value: number;
+      pass2Value: number | null;
       pass2Supported: boolean;
     }> = [
       {
@@ -144,7 +144,7 @@ export function compareResults(
       }
 
       // Relative tolerance check
-      if (!withinTolerance(f.pass1Value, f.pass2Value)) {
+      if (f.pass2Value === null || !withinTolerance(f.pass1Value, f.pass2Value)) {
         disagreements.push({
           modelName: p1.modelName,
           field: f.name,
@@ -194,6 +194,21 @@ export async function verifyExtraction(
     model: getAIModel(),
     schema: verificationSchema,
     prompt: `You are a verification auditor. Given the following HTML source and previously extracted pricing data, verify EACH data point by finding the exact supporting quote in the source. If a data point cannot be verified from the source text, mark supported: false and set the value to the previously extracted value. Only include models that appear in the previously extracted data. Prices must be per 1M tokens in USD.
+
+IMPORTANT: You MUST return a JSON object with EXACTLY this structure:
+{
+  "models": [
+    {
+      "modelName": "string",
+      "inputPricePer1m": 0.15, // purely numeric float, or null. No dollar signs!
+      "outputPricePer1m": 0.6, // purely numeric float, or null. No dollar signs!
+      "contextWindow": 128000, // purely numeric integer, or null. No 'k'!
+      "supported": true, // boolean
+      "evidenceQuote": "string"
+    }
+  ]
+}
+DO NOT use different keys. DO NOT return strings for numbers.
 
 Previously extracted data:
 ${JSON.stringify(pass1Results, null, 2)}

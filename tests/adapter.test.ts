@@ -4,6 +4,7 @@ import {
   ProviderConfig,
   CrawlResult,
   ExtractionResult,
+  ProviderExtraction,
 } from '../src/providers/base';
 import {
   registerAdapter,
@@ -19,21 +20,27 @@ class TestAdapter extends ProviderAdapter {
     pricingUrl: 'https://test.example.com/pricing',
   };
 
-  async extract(_html: string): Promise<ExtractionResult[]> {
-    return [
-      {
-        modelName: 'test-model',
-        inputPricePer1m: 5.0,
-        outputPricePer1m: 15.0,
-        contextWindow: 128000,
-        confidence: 'likely',
-        rawEvidence: '{}',
-      },
-    ];
+  async extract(_html: string): Promise<ProviderExtraction> {
+    return {
+      models: [
+        {
+          modelName: 'test-model',
+          inputPricePer1m: 5.0,
+          outputPricePer1m: 15.0,
+          contextWindow: 128000,
+          confidence: 'likely',
+          rawEvidence: '{}',
+        },
+      ],
+      promotions: [],
+    };
   }
 
-  normalize(extractions: ExtractionResult[]): ExtractionResult[] {
-    return extractions.map((e) => ({ ...e, confidence: 'likely' as const }));
+  normalize(extractions: ProviderExtraction): ProviderExtraction {
+    return {
+      models: extractions.models.map((e) => ({ ...e, confidence: 'likely' as const })),
+      promotions: extractions.promotions,
+    };
   }
 }
 

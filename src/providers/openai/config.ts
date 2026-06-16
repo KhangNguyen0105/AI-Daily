@@ -8,5 +8,5 @@ import type { ProviderConfig } from '../base';
 export const openaiConfig: ProviderConfig = {
   name: 'openai',
   baseUrl: 'https://openai.com',
-  pricingUrl: 'https://developers.openai.com/api/docs/pricing',
+  pricingUrl: 'https://openai.com/api/pricing/',
 };

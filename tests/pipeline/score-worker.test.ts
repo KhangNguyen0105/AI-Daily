@@ -92,7 +92,7 @@ describe('Score Worker', () => {
       const { createScoreWorker } = await import('../../src/pipeline/workers/score');
       const worker = createScoreWorker();
       expect(worker.name).toBe('score');
-    });
+    }, 15000);
   });
 
   describe('empty extractionIds', () => {

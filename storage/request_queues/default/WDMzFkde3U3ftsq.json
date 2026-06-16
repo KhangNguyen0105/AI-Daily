@@ -1,0 +1,9 @@
+{
+	"id": "WDMzFkde3U3ftsq",
+	"json": "{\"id\":\"WDMzFkde3U3ftsq\",\"url\":\"https://claude.com/pricing\",\"loadedUrl\":\"https://claude.com/pricing\",\"uniqueKey\":\"https://claude.com/pricing\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"__crawlee\":{\"state\":4}},\"handledAt\":\"2026-06-16T07:28:19.955Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "https://claude.com/pricing",
+	"url": "https://claude.com/pricing"
+}

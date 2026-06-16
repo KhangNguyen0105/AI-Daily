@@ -3,7 +3,7 @@ import { getAdapter } from '../../providers/registry';
 import { scoreQueue } from '../queues';
 import { redisConnection } from '../connection';
 import { db } from '../../db/index';
-import { rawData, extractions } from '../../db/schema';
+import { rawData, extractions, promotions } from '../../db/schema';
 import { eq } from 'drizzle-orm';
 
 /**
@@ -76,7 +76,7 @@ export function createExtractWorker(): Worker<ExtractJobData, ExtractJobResult> 
 
       // Insert each extraction into the database
       const extractionIds: number[] = [];
-      for (const result of normalized) {
+      for (const result of normalized.models) {
         const inserted = await db
           .insert(extractions)
           .values({
@@ -90,9 +90,36 @@ export function createExtractWorker(): Worker<ExtractJobData, ExtractJobResult> 
             rawEvidence: result.rawEvidence ?? null,
             collectedAt: new Date(),
           })
+          .onConflictDoUpdate({
+            target: [extractions.sourceId, extractions.modelName],
+            set: {
+              rawDataId,
+              inputPricePer1m: result.inputPricePer1m,
+              outputPricePer1m: result.outputPricePer1m,
+              contextWindow: result.contextWindow,
+              confidence: result.confidence,
+              rawEvidence: result.rawEvidence ?? null,
+              collectedAt: new Date(),
+              updatedAt: new Date(),
+            },
+          })
           .returning({ id: extractions.id });
 
         extractionIds.push(inserted[0].id);
+      }
+
+      // Update promotions: delete old ones for this source and insert new ones
+      if (normalized.promotions && normalized.promotions.length > 0) {
+        await db.delete(promotions).where(eq(promotions.sourceId, sourceId));
+        for (const promo of normalized.promotions) {
+          await db.insert(promotions).values({
+            sourceId,
+            modelPattern: promo.modelPattern,
+            type: promo.type,
+            description: promo.description,
+            credits: promo.credits,
+          });
+        }
       }
 
       // Chain to score stage (D-10: worker-triggered chaining)

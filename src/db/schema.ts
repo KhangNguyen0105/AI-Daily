@@ -8,6 +8,7 @@ import {
   jsonb,
   pgEnum,
   doublePrecision,
+  uniqueIndex,
 } from 'drizzle-orm/pg-core';
 
 // Confidence scoring enum (D-06)
@@ -59,6 +60,10 @@ export const extractions = pgTable('extractions', {
   collectedAt: timestamp('collected_at').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => {
+  return {
+    sourceModelUnique: uniqueIndex('source_model_unique').on(table.sourceId, table.modelName),
+  };
 });
 
 // Articles table - generated daily articles

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState, Fragment } from 'react';
 import { format, differenceInSeconds } from 'date-fns';
 
 interface PipelineStats {
@@ -28,6 +28,22 @@ interface PipelineRunsTableProps {
 
 export function PipelineRunsTable({ runs }: PipelineRunsTableProps) {
   const [expandedRowId, setExpandedRowId] = useState<number | null>(null);
+  const [cancellingId, setCancellingId] = useState<number | null>(null);
+
+  const handleCancel = async (id: number) => {
+    setCancellingId(id);
+    try {
+      await fetch('/api/admin/pipeline/cancel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+    } catch (err) {
+      console.error('Failed to cancel run', err);
+    } finally {
+      setCancellingId(null);
+    }
+  };
 
   if (runs.length === 0) {
     return (
@@ -78,97 +94,101 @@ export function PipelineRunsTable({ runs }: PipelineRunsTableProps) {
             <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500">Started</th>
             <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500">Duration</th>
             <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500">Stats</th>
-            <th className="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500 w-10"></th>
+            <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500 w-24">Actions</th>
           </tr>
         </thead>
         <tbody>
           {runs.map((run) => {
             const isExpanded = expandedRowId === run.id;
             return (
-              <tr key={run.id} className="border-b border-gray-100">
-                <td className="px-4 py-3">{getStatusIcon(run.status)}</td>
-                <td className="px-4 py-3 text-gray-600">
-                  {format(new Date(run.startedAt), 'MMM d, yyyy h:mm a')}
-                </td>
-                <td className="px-4 py-3 text-gray-600">
-                  {getDuration(run.startedAt, run.completedAt)}
-                </td>
-                <td className="px-4 py-3 text-gray-600">
-                  {run.stats ? `${run.stats.succeeded ?? 0}/${run.stats.totalProviders ?? 0}` : '-'}
-                </td>
-                <td className="px-4 py-3 text-center">
-                  <button
-                    onClick={() => setExpandedRowId(isExpanded ? null : run.id)}
-                    className="text-gray-400 hover:text-gray-600"
-                    aria-label={isExpanded ? 'Collapse details' : 'Expand details'}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
-                  </button>
-                </td>
-              </tr>
+              <Fragment key={run.id}>
+                <tr
+                  onClick={() => setExpandedRowId(isExpanded ? null : run.id)}
+                  className={`border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${
+                    isExpanded ? 'bg-gray-50' : ''
+                  }`}
+                >
+                  <td className="px-4 py-3">{getStatusIcon(run.status)}</td>
+                  <td className="px-4 py-3 text-gray-600">
+                    {format(new Date(run.startedAt), 'MMM d, yyyy h:mm a')}
+                  </td>
+                  <td className="px-4 py-3 text-gray-600">
+                    {getDuration(run.startedAt, run.completedAt)}
+                  </td>
+                  <td className="px-4 py-3 text-gray-600">
+                    {run.stats ? `${run.stats.succeeded ?? 0}/${run.stats.totalProviders ?? 0}` : '-'}
+                  </td>
+                  <td className="px-4 py-3 text-right whitespace-nowrap">
+                    {run.status === 'running' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCancel(run.id);
+                        }}
+                        disabled={cancellingId === run.id}
+                        className="mr-3 px-2 py-1 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded border border-red-200 transition-colors"
+                      >
+                        {cancellingId === run.id ? '...' : 'Cancel'}
+                      </button>
+                    )}
+                  </td>
+                </tr>
+                
+                {/* Expanded detail - render directly underneath the row */}
+                {isExpanded && (
+                  <tr>
+                    <td colSpan={5} className="p-0 border-b border-gray-200">
+                      {!run.stats ? (
+                        <div className="px-4 py-4 bg-gray-50 text-sm text-gray-500 text-center">
+                          No details available
+                        </div>
+                      ) : (
+                        <div className="px-4 py-4 bg-gray-50/80 shadow-inner">
+                          <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-3">Provider Breakdown</h4>
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm mb-3">
+                            <div className="bg-white p-3 rounded shadow-sm border border-gray-100">
+                              <div className="text-gray-500 text-xs mb-1">Attempted</div>
+                              <div className="text-gray-900 font-medium">{run.stats.attempted ?? 0}</div>
+                            </div>
+                            <div className="bg-white p-3 rounded shadow-sm border border-gray-100">
+                              <div className="text-gray-500 text-xs mb-1">Succeeded</div>
+                              <div className="text-green-600 font-medium">{run.stats.succeeded ?? 0}</div>
+                            </div>
+                            <div className="bg-white p-3 rounded shadow-sm border border-gray-100">
+                              <div className="text-gray-500 text-xs mb-1">Failed</div>
+                              <div className="text-red-600 font-medium">{run.stats.failed ?? 0}</div>
+                            </div>
+                            <div className="bg-white p-3 rounded shadow-sm border border-gray-100">
+                              <div className="text-gray-500 text-xs mb-1">Extractions</div>
+                              <div className="text-gray-900 font-medium">{run.stats.extractions ?? 0}</div>
+                            </div>
+                          </div>
+                          {run.stats.verifiedCount !== undefined && (
+                            <div className="grid grid-cols-3 gap-4 text-sm">
+                              <div className="bg-white p-3 rounded shadow-sm border border-gray-100">
+                                <div className="text-gray-500 text-xs mb-1">Verified</div>
+                                <div className="text-green-600 font-medium">{run.stats.verifiedCount}</div>
+                              </div>
+                              <div className="bg-white p-3 rounded shadow-sm border border-gray-100">
+                                <div className="text-gray-500 text-xs mb-1">Likely</div>
+                                <div className="text-yellow-600 font-medium">{run.stats.likelyCount ?? 0}</div>
+                              </div>
+                              <div className="bg-white p-3 rounded shadow-sm border border-gray-100">
+                                <div className="text-gray-500 text-xs mb-1">Low Confidence</div>
+                                <div className="text-red-600 font-medium">{run.stats.lowConfidenceCount ?? 0}</div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                )}
+              </Fragment>
             );
           })}
         </tbody>
       </table>
-
-      {/* Expanded detail - render below the table */}
-      {expandedRowId !== null && (() => {
-        const run = runs.find((r) => r.id === expandedRowId);
-        if (!run?.stats) {
-          return (
-            <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 text-sm text-gray-500">
-              No details available
-            </div>
-          );
-        }
-
-        return (
-          <div className="px-4 py-3 bg-gray-50 border-t border-gray-200">
-            <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">Provider Breakdown</h4>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm">
-              <div>
-                <span className="text-gray-500">Attempted:</span>{' '}
-                <span className="text-gray-900">{run.stats.attempted ?? 0}</span>
-              </div>
-              <div>
-                <span className="text-gray-500">Succeeded:</span>{' '}
-                <span className="text-green-600">{run.stats.succeeded ?? 0}</span>
-              </div>
-              <div>
-                <span className="text-gray-500">Failed:</span>{' '}
-                <span className="text-red-600">{run.stats.failed ?? 0}</span>
-              </div>
-              <div>
-                <span className="text-gray-500">Extractions:</span>{' '}
-                <span className="text-gray-900">{run.stats.extractions ?? 0}</span>
-              </div>
-            </div>
-            {run.stats.verifiedCount !== undefined && (
-              <div className="mt-2 grid grid-cols-3 gap-2 text-sm">
-                <div>
-                  <span className="text-gray-500">Verified:</span>{' '}
-                  <span className="text-green-600">{run.stats.verifiedCount}</span>
-                </div>
-                <div>
-                  <span className="text-gray-500">Likely:</span>{' '}
-                  <span className="text-yellow-600">{run.stats.likelyCount ?? 0}</span>
-                </div>
-                <div>
-                  <span className="text-gray-500">Low Confidence:</span>{' '}
-                  <span className="text-red-600">{run.stats.lowConfidenceCount ?? 0}</span>
-                </div>
-              </div>
-            )}
-          </div>
-        );
-      })()}
     </div>
   );
 }

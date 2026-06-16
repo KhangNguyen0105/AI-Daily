@@ -65,10 +65,10 @@ const columnHelper = createColumnHelper<PricingRow>();
 function getColumnResponsiveClass(columnId: string): string {
   switch (columnId) {
     case 'family':
+      return 'hidden lg:table-cell';
+    case 'source':
     case 'contextWindow':
       return 'hidden md:table-cell';
-    case 'source':
-      return 'hidden lg:table-cell';
     case 'collectedAt':
       return 'hidden xl:table-cell';
     default:
@@ -248,7 +248,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
         return (
           <Link
             href={`/model/${slug}`}
-            className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline"
+            className="text-sm font-semibold text-blue-600 hover:text-blue-800 hover:underline"
           >
             {sanitizeDisplayName(info.getValue())}
           </Link>
@@ -292,16 +292,17 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
     }),
     columnHelper.accessor('confidence', {
       header: 'Confidence',
-      cell: (info) => (
-        <span
-          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getConfidenceColor(
-            info.getValue()
-          )}`}
-          title={CONFIDENCE_TOOLTIPS[info.getValue()] ?? info.getValue()}
-        >
-          {info.getValue()}
-        </span>
-      ),
+      cell: (info) => {
+        const val = info.getValue();
+        const solidBg = val === 'verified' ? 'bg-green-500' : val === 'likely' ? 'bg-yellow-500' : val === 'low_confidence' ? 'bg-red-500' : 'bg-gray-500';
+        return (
+          <span
+            className={`inline-block w-3 h-3 rounded-full ${solidBg}`}
+            title={CONFIDENCE_TOOLTIPS[val] ?? val}
+            aria-label={val}
+          />
+        );
+      },
     }),
     columnHelper.accessor('sourceUrl', {
       id: 'source',
@@ -438,7 +439,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                 <button
                   type="button"
                   onClick={() => handleCurrencyChange('usd')}
-                  className={`px-3 py-2 text-sm font-medium rounded-l-md border transition-colors ${
+                  className={`px-3 py-2 text-sm font-semibold rounded-l-md border transition-colors ${
                     effectiveCurrency === 'usd'
                       ? 'bg-blue-600 text-white border-blue-600'
                       : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
@@ -449,7 +450,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                 <button
                   type="button"
                   onClick={() => handleCurrencyChange('vnd')}
-                  className={`px-3 py-2 text-sm font-medium rounded-r-md border-t border-b border-r transition-colors ${
+                  className={`px-3 py-2 text-sm font-semibold rounded-r-md border-t border-b border-r transition-colors ${
                     effectiveCurrency === 'vnd'
                       ? 'bg-blue-600 text-white border-blue-600'
                       : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
@@ -508,7 +509,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
             {showAdvancedFilters && (
               <div className="flex flex-col md:flex-row gap-3 items-start md:items-end p-3 bg-gray-50 rounded-md">
                 <fieldset className="flex flex-col gap-1">
-                  <legend className="text-xs font-medium text-gray-500 uppercase tracking-wide">Input Price ($/1M)</legend>
+                  <legend className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Input Price ($/1M)</legend>
                   <div className="flex gap-2">
                     <input
                       type="number"
@@ -534,7 +535,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                 </fieldset>
 
                 <fieldset className="flex flex-col gap-1">
-                  <legend className="text-xs font-medium text-gray-500 uppercase tracking-wide">Output Price ($/1M)</legend>
+                  <legend className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Output Price ($/1M)</legend>
                   <div className="flex gap-2">
                     <input
                       type="number"
@@ -560,7 +561,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                 </fieldset>
 
                 <fieldset className="flex flex-col gap-1">
-                  <legend className="text-xs font-medium text-gray-500 uppercase tracking-wide">Context Window (tokens)</legend>
+                  <legend className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Context Window (tokens)</legend>
                   <div className="flex gap-2">
                     <input
                       type="number"
@@ -594,7 +595,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
           </p>
 
           {/* Table */}
-          <div className="overflow-x-auto" style={{ maxHeight: '70vh' }}>
+          <div className="overflow-x-auto" style={{ maxHeight: 'calc(100vh - 220px)' }}>
             <table className="w-full border-collapse">
               <thead>
                 {table.getHeaderGroups().map((headerGroup) => (

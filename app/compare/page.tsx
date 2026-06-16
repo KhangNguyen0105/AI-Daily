@@ -84,6 +84,7 @@ export default async function ComparePage({
         .where(inArray(extractions.modelName, modelNames));
 
       for (const cost of costs) {
+        if (!cost.modelName) continue;
         if (!practicalCostsMap[cost.modelName]) {
           practicalCostsMap[cost.modelName] = [];
         }

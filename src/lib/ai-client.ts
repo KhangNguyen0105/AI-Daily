@@ -29,5 +29,5 @@ function resolveProvider() {
  */
 export function getAIModel() {
   const provider = resolveProvider();
-  return provider(env.MIMO_MODEL);
+  return provider.chat(env.MIMO_MODEL);
 }

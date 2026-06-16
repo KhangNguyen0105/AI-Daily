@@ -24,37 +24,46 @@ export function HomePageClient({
   const [currency, setCurrency] = useState<'usd' | 'vnd'>('usd');
 
   return (
-    <>
-      {/* Pricing Data Section */}
-      <div className="max-w-6xl mx-auto px-4 pb-16">
-        <h2 className="text-2xl font-semibold mb-6 text-center">
-          Latest Pricing Data
-        </h2>
+    <div className="max-w-[1600px] mx-auto px-4 pb-8">
+      {/* Side-by-side layout: Pricing Table (left) + Cost Calculator (right) */}
+      <div className="flex flex-col xl:flex-row gap-6">
 
-        <PricingTable
-          data={data}
-          exchangeRate={exchangeRate}
-          currency={currency}
-          onCurrencyChange={setCurrency}
-        />
+        {/* Left: Pricing Data Table */}
+        <div className="xl:w-[60%] xl:min-w-0">
+          <h2 className="text-xl font-semibold mb-4 text-gray-900">
+            Latest Pricing Data
+          </h2>
+          <div className="border border-gray-200 rounded-lg overflow-hidden">
+            <PricingTable
+              data={data}
+              exchangeRate={exchangeRate}
+              currency={currency}
+              onCurrencyChange={setCurrency}
+            />
+          </div>
+        </div>
+
+        {/* Right: Cost Calculator (sticky on scroll) */}
+        <div className="xl:w-[40%] xl:min-w-0">
+          <div className="xl:sticky xl:top-4">
+            <h2 className="text-xl font-semibold mb-1 text-gray-900">
+              What Does It Actually Cost?
+            </h2>
+            <p className="text-sm text-gray-500 mb-4">
+              Per-token pricing is abstract. These scenarios show what real usage actually costs
+              &mdash; like 10 long prompts, a document summary, or a full coding-agent session.
+            </p>
+            <div className="border border-gray-200 rounded-lg p-4 bg-white">
+              <CostCalculator
+                data={data}
+                currency={currency}
+                exchangeRate={exchangeRate}
+              />
+            </div>
+          </div>
+        </div>
+
       </div>
-
-      {/* Practical Cost Calculator Section */}
-      <div className="max-w-6xl mx-auto px-4 pb-16">
-        <h2 className="text-2xl font-semibold mb-2 text-center">
-          What Does It Actually Cost?
-        </h2>
-        <p className="text-sm text-gray-500 text-center mb-6">
-          Per-token pricing is abstract. These scenarios show what real usage actually costs
-          &mdash; like 10 long prompts, a document summary, or a full coding-agent session.
-        </p>
-
-        <CostCalculator
-          data={data}
-          currency={currency}
-          exchangeRate={exchangeRate}
-        />
-      </div>
-    </>
+    </div>
   );
 }

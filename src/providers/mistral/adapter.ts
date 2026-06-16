@@ -1,6 +1,6 @@
 import { generateObject } from 'ai';
 import { ProviderAdapter } from '../base';
-import type { ExtractionResult } from '../base';
+import type { ProviderExtraction, ExtractionResult } from '../base';
 import { pricingSchema } from '../schemas';
 import { getAIModel } from '../../lib/ai-client';
 import { mistralConfig } from './config';
@@ -18,7 +18,7 @@ import { mistralConfig } from './config';
 export class MistralAdapter extends ProviderAdapter {
   config = mistralConfig;
 
-  async extract(html: string): Promise<ExtractionResult[]> {
+  async extract(html: string): Promise<ProviderExtraction> {
     try {
       const maxHtmlLength = 100_000;
       const truncatedHtml = html.length > maxHtmlLength
@@ -29,22 +29,50 @@ export class MistralAdapter extends ProviderAdapter {
         model: getAIModel(),
         schema: pricingSchema,
         prompt: `Extract Mistral model pricing from this HTML page.
-Look for model names like mistral-large, mistral-small, codestral, pixtral, etc.
+Extract every single model listed with explicit pricing, including both the very latest state-of-the-art models and any legacy models.
 Extract input and output prices per million tokens and context window size.
 Only extract models with explicit pricing. Skip models without pricing.
+
+Also extract any news or promotional offers like free trials, free token tiers, or beta access.
+
+
+IMPORTANT: You MUST return a JSON object with EXACTLY these keys and formats:
+{
+  "models": [
+    {
+      "modelName": "string (exact model name)",
+      "inputPricePer1m": 0.15, // strictly numeric float, or null. No dollar signs!
+      "outputPricePer1m": 0.6, // strictly numeric float, or null. No dollar signs!
+      "contextWindow": 128000 // strictly numeric integer, or null. No 'k'!
+    }
+  ],
+  "promotions": [
+    {
+      "modelPattern": "string",
+      "type": "free_tier", // must be "free_tier", "promotion", or "beta"
+      "description": "string",
+      "credits": "string (optional)"
+    }
+  ]
+}
+DO NOT use different keys like "model_name" or "model_pricing".
+DO NOT return strings for numbers.\nReturn ONLY valid JSON and absolutely no other text before or after the JSON. No markdown formatting, no backticks.
 
 HTML content:
 ${truncatedHtml}`,
       });
 
-      return object.models.map((model) => ({
-        modelName: model.modelName,
-        inputPricePer1m: model.inputPricePer1m,
-        outputPricePer1m: model.outputPricePer1m,
-        contextWindow: model.contextWindow,
-        confidence: 'likely' as const,
-        rawEvidence: model,
-      }));
+      return {
+        models: object.models.map((model) => ({
+          modelName: model.modelName,
+          inputPricePer1m: model.inputPricePer1m,
+          outputPricePer1m: model.outputPricePer1m,
+          contextWindow: model.contextWindow,
+          confidence: 'likely' as const,
+          rawEvidence: model,
+        })),
+        promotions: object.promotions || [],
+      };
     } catch (error) {
       console.error('Mistral extraction failed:', error);
       throw error;

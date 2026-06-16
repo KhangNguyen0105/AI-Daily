@@ -33,6 +33,18 @@ export interface ExtractionResult {
   rawEvidence: unknown;
 }
 
+export interface PromotionResult {
+  modelPattern: string;
+  type: 'free_tier' | 'promotion' | 'beta';
+  description: string;
+  credits?: string;
+}
+
+export interface ProviderExtraction {
+  models: ExtractionResult[];
+  promotions: PromotionResult[];
+}
+
 /**
  * Abstract base class for provider adapters.
  *
@@ -51,7 +63,7 @@ export abstract class ProviderAdapter {
    * Extract structured pricing data from crawled HTML.
    * Subclasses implement provider-specific extraction logic.
    */
-  abstract extract(html: string): Promise<ExtractionResult[]>;
+  abstract extract(html: string): Promise<ProviderExtraction>;
 
   /**
    * Normalize extracted data to the standard format.
@@ -59,7 +71,7 @@ export abstract class ProviderAdapter {
    * Only adapters with provider-specific normalization (e.g., DeepSeek, Bedrock)
    * need to override this method.
    */
-  normalize(extractions: ExtractionResult[]): ExtractionResult[] {
+  normalize(extractions: ProviderExtraction): ProviderExtraction {
     return extractions;
   }
 

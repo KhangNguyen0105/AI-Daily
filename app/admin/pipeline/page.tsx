@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { PipelineRunsTable } from '@/app/components/admin/PipelineRunsTable';
 import { ErrorLogTable } from '@/app/components/admin/ErrorLogTable';
 import { ReCrawlTrigger } from '@/app/components/admin/ReCrawlTrigger';
+import { RunFullPipelineTrigger } from '@/app/components/admin/RunFullPipelineTrigger';
 import { RegenerateTrigger } from '@/app/components/admin/RegenerateTrigger';
 import { AutoPublishToggle } from '@/app/components/admin/AutoPublishToggle';
 import { useToast, ToastContainer } from '@/app/components/admin/Toast';
@@ -68,6 +69,26 @@ export default function PipelinePage() {
 
   useEffect(() => {
     loadData();
+
+    // Connect to Server-Sent Events for real-time pipeline run updates
+    const eventSource = new EventSource('/api/admin/pipeline/stream');
+    
+    eventSource.onmessage = (event) => {
+      try {
+        const parsedRuns = JSON.parse(event.data);
+        setRuns(parsedRuns);
+      } catch (e) {
+        console.error('Failed to parse SSE data', e);
+      }
+    };
+
+    eventSource.onerror = (err) => {
+      console.error('SSE Error:', err);
+    };
+
+    return () => {
+      eventSource.close();
+    };
   }, [loadData]);
 
   const handleAutoPublishChange = async (enabled: boolean) => {
@@ -98,13 +119,20 @@ export default function PipelinePage() {
       <div className="mb-8">
         <h2 className="text-lg font-semibold text-gray-900 mb-3">Actions</h2>
         <div className="flex flex-wrap gap-4 items-center">
+          <RunFullPipelineTrigger
+            onSuccess={(msg) => addToast('success', msg)}
+            onError={(msg) => addToast('error', msg)}
+          />
           <ReCrawlTrigger
             providers={providers}
             onSuccess={(msg) => addToast('success', msg)}
             onError={(msg) => addToast('error', msg)}
           />
           <RegenerateTrigger
-            onSuccess={(msg) => addToast('success', msg)}
+            onSuccess={(msg) => {
+              addToast('success', msg);
+              loadData();
+            }}
             onError={(msg) => addToast('error', msg)}
           />
           <AutoPublishToggle

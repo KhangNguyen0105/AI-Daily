@@ -69,14 +69,14 @@ export default async function HomePage() {
   return (
     <main className="min-h-screen bg-white text-gray-900">
       {/* AI Daily Branding */}
-      <div className="flex flex-col items-center justify-center py-8 px-4">
-        <h1 className="text-3xl font-bold tracking-tight">AI Daily</h1>
-        <p className="mt-2 text-sm text-gray-500">
+      <div className="flex flex-col items-center justify-center py-5 px-4">
+        <h1 className="text-2xl font-semibold tracking-tight">AI Daily</h1>
+        <p className="mt-1 text-sm text-gray-500">
           Last updated: {lastUpdated ? format(lastUpdated, 'MMM d, yyyy h:mm a') : 'Unknown'}
         </p>
       </div>
 
-      {/* Pricing Data Section */}
+      {/* Side-by-side: Pricing Table + Cost Calculator */}
       <HomePageClient data={pricingData} exchangeRate={exchangeRate} />
     </main>
   );
