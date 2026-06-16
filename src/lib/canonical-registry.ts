@@ -140,31 +140,23 @@ export class CanonicalRegistry {
     extractedName: string,
     providerModelId?: string,
   ): Promise<{ canonical_id: string; canonical_name: string } | null> {
+    // WR-08: Fetch models once and reuse for all lookups
+    const models = await db.query.canonicalModels.findMany({
+      where: eq(canonicalModels.provider, providerName),
+    });
+
     // 1. Try provider model ID lookup (highest priority per D-04)
     if (providerModelId) {
-      const byProviderId = await this.resolveByProviderId(providerName, providerModelId);
-      if (byProviderId) {
+      const match = models.find(m => m.apiModelIds?.includes(providerModelId));
+      if (match) {
         return {
-          canonical_id: byProviderId.id,
-          canonical_name: byProviderId.canonicalName,
+          canonical_id: match.id,
+          canonical_name: match.canonicalName,
         };
       }
     }
 
     // 2. Try alias exact match
-    const byAlias = await db.query.canonicalModels.findFirst({
-      where: and(
-        eq(canonicalModels.provider, providerName),
-        // Check if extractedName is in aliases array
-        // Note: This requires custom SQL in production; simplified here
-      ),
-    });
-
-    // Fallback: search by alias using ILIKE
-    const models = await db.query.canonicalModels.findMany({
-      where: eq(canonicalModels.provider, providerName),
-    });
-
     for (const model of models) {
       if (model.aliases?.some((alias: string) => alias.toLowerCase() === extractedName.toLowerCase())) {
         return {
@@ -181,29 +173,6 @@ export class CanonicalRegistry {
         return {
           canonical_id: model.id,
           canonical_name: model.canonicalName,
-        };
-      }
-    }
-
-    return null;
-  }
-
-  /**
-   * Resolve by provider model ID with provider context
-   */
-  private async resolveByProviderId(
-    providerName: string,
-    providerModelId: string,
-  ): Promise<{ id: string; canonicalName: string } | null> {
-    const models = await db.query.canonicalModels.findMany({
-      where: eq(canonicalModels.provider, providerName),
-    });
-
-    for (const model of models) {
-      if (model.apiModelIds?.includes(providerModelId)) {
-        return {
-          id: model.id,
-          canonicalName: model.canonicalName,
         };
       }
     }
