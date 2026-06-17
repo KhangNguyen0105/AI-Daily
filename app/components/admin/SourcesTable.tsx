@@ -48,17 +48,6 @@ export function SourcesTable({ sources, onToggleTrust }: SourcesTableProps) {
     }
   };
 
-  if (sources.length === 0) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-sm text-gray-500">No sources found</p>
-        <p className="text-xs text-gray-400 mt-1">
-          Try adjusting your filters, or check that providers have been configured.
-        </p>
-      </div>
-    );
-  }
-
   return (
     <div>
       {/* Filters */}
@@ -84,7 +73,20 @@ export function SourcesTable({ sources, onToggleTrust }: SourcesTableProps) {
         </select>
       </div>
 
+      {/* Empty state */}
+      {filtered.length === 0 && (
+        <div className="text-center py-8">
+          <p className="text-sm text-gray-500">No sources found</p>
+          <p className="text-xs text-gray-400 mt-1">
+            {sources.length === 0
+              ? 'No sources have been configured yet. Check that providers have been configured.'
+              : 'Try adjusting your filters to see more sources.'}
+          </p>
+        </div>
+      )}
+
       {/* Table */}
+      {filtered.length > 0 && (
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
         <table className="w-full text-sm">
           <thead>
@@ -180,6 +182,7 @@ export function SourcesTable({ sources, onToggleTrust }: SourcesTableProps) {
           </tbody>
         </table>
       </div>
+      )}
     </div>
   );
 }
