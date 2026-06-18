@@ -38,7 +38,7 @@ export function DigestArticle({
         &larr; Back to digest
       </Link>
 
-      <h1 className="text-3xl font-bold tracking-tight">{article.title}</h1>
+      <h1 className="text-3xl font-bold tracking-tight text-text-primary">{article.title}</h1>
 
       <p className="text-sm text-text-secondary mt-2">
         Published: {(() => {

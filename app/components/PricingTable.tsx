@@ -113,7 +113,7 @@ function ProviderLogo({ name }: { name: string }) {
   // Fallback: colored circle with initial letter
   return (
     <span
-      className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-text-secondary text-white text-xs font-semibold mr-2 align-middle"
+      className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-bg-tertiary text-text-primary text-xs font-semibold mr-2 align-middle"
       aria-hidden="true"
     >
       {initial}
@@ -296,7 +296,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
       header: 'Confidence',
       cell: (info) => {
         const val = info.getValue();
-        const solidBg = val === 'verified' ? 'bg-green-500' : val === 'likely' ? 'bg-yellow-500' : val === 'low_confidence' ? 'bg-red-500' : 'bg-text-secondary';
+        const solidBg = val === 'verified' ? 'bg-dot-green' : val === 'likely' ? 'bg-dot-yellow' : val === 'low_confidence' ? 'bg-dot-red' : 'bg-text-secondary';
         return (
           <span
             className={`inline-block w-3 h-3 rounded-full ${solidBg}`}

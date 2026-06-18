@@ -54,7 +54,7 @@ export function ModelDetailClient({
       <div className="mb-8">
         <Link
           href="/"
-          className="text-accent-blue hover:text-accent-blue text-sm mb-4 inline-flex items-center gap-1"
+          className="text-accent-blue hover:underline text-sm mb-4 inline-flex items-center gap-1"
         >
           &larr; Back to pricing
         </Link>

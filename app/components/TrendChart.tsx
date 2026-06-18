@@ -207,7 +207,7 @@ export function TrendChart({ data, modelName }: { data: TrendPoint[]; modelName:
       <h3 className="text-lg font-semibold text-text-primary mb-4">{modelName}</h3>
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border-primary)" />
           <XAxis dataKey="date" />
           <YAxis />
           <Tooltip

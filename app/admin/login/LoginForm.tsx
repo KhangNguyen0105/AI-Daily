@@ -82,7 +82,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={isLoading || !password}
-        className="w-full px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full px-4 py-2 bg-accent-blue text-white text-sm font-medium rounded-md hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-accent-blue focus:ring-offset-2 dark:focus:ring-offset-bg-primary disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isLoading ? 'Signing in...' : 'Sign In'}
       </button>
