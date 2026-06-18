@@ -74,7 +74,7 @@ export default async function HomePage() {
       {/* AI Daily Branding */}
       <div className="flex flex-col items-center justify-center py-5 px-4">
         <h1 className="text-2xl font-semibold tracking-tight">AI Daily</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-text-secondary">
           Last updated: {lastUpdated ? lastUpdated.toISOString().replace('T', ' ').slice(0, 16) + ' UTC' : 'Unknown'}
         </p>
       </div>
