@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { ThemeToggle } from '@/app/components/ThemeToggle';
 
 /**
  * Top navigation bar — site-wide nav component.
@@ -26,11 +27,11 @@ export function TopNav() {
 
   return (
     <nav
-      className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200"
+      className="fixed top-0 left-0 right-0 z-50 bg-bg-secondary border-b border-border-primary"
       aria-label="Main navigation"
     >
       <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-        <Link href="/" className="text-lg font-bold text-gray-900">
+        <Link href="/" className="text-lg font-bold text-text-primary">
           AI Daily
         </Link>
 
@@ -47,14 +48,15 @@ export function TopNav() {
                 href={link.href}
                 className={
                   isActive
-                    ? 'text-sm font-bold text-blue-600'
-                    : 'text-sm text-gray-600 hover:text-gray-900'
+                    ? 'text-sm font-bold text-accent-blue'
+                    : 'text-sm text-text-secondary hover:text-text-primary'
                 }
               >
                 {link.label}
               </Link>
             );
           })}
+          <ThemeToggle />
         </div>
       </div>
     </nav>
