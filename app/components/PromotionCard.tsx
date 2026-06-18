@@ -36,35 +36,35 @@ export function PromotionCard({ promo }: { promo: PromotionData }) {
     <div
       className={`border rounded-lg p-4 ${
         isActive
-          ? 'bg-white border-gray-200'
-          : 'bg-gray-50 border-gray-200 opacity-60'
+          ? 'bg-bg-primary border-border-primary'
+          : 'bg-bg-secondary border-border-primary opacity-60'
       }`}
     >
       {/* Top row: type badge + days remaining */}
       <div className="flex items-center justify-between mb-3">
         <span
           className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
-            PROMOTION_BADGE_STYLES[promo.type] ?? 'bg-gray-100 text-gray-800'
+            PROMOTION_BADGE_STYLES[promo.type] ?? 'bg-bg-tertiary text-text-primary'
           }`}
         >
           {PROMOTION_TYPE_LABELS[promo.type] ?? promo.type}
         </span>
         {daysRemaining && (
-          <span className="text-xs text-gray-500">{daysRemaining}</span>
+          <span className="text-xs text-text-secondary">{daysRemaining}</span>
         )}
       </div>
 
       {/* Description */}
-      <p className="text-sm text-gray-900 mb-2">{promo.description}</p>
+      <p className="text-sm text-text-primary mb-2">{promo.description}</p>
 
       {/* Credits */}
       {promo.credits && (
-        <p className="text-xs text-gray-600 mb-2">Credits: {promo.credits}</p>
+        <p className="text-xs text-text-secondary mb-2">Credits: {promo.credits}</p>
       )}
 
       {/* Date range */}
       {(promo.startDate || promo.endDate) && (
-        <p className="text-xs text-gray-500 mb-3">
+        <p className="text-xs text-text-secondary mb-3">
           {promo.startDate && format(new Date(promo.startDate), 'MMM d, yyyy')}
           {promo.startDate && promo.endDate && ' - '}
           {promo.endDate
