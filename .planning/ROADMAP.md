@@ -233,10 +233,31 @@ Plans:
 
 **UI hint**: yes
 
+### Phase 9: Dark Mode & Theme System
+
+**Goal**: Users can toggle between light/dark theme, with preference persisted in localStorage.
+**Mode:** enhancement
+**Depends on**: Phase 3 (Pricing Table), Phase 8 (Admin)
+**Requirements**: UI-01 (theme toggle), UI-02 (dark styles), UI-03 (preference persistence)
+
+**Success Criteria** (what must be TRUE):
+
+  1. User can toggle between light and dark theme via a button in the TopNav
+  2. Theme preference is persisted in localStorage and survives page refresh
+  3. On first visit, system preference (prefers-color-scheme) is used as default
+  4. All public pages render correctly in both themes (no hardcoded white backgrounds)
+  5. Admin pages render correctly in both themes
+  6. No flash of wrong theme on page load (SSR-safe)
+
+**Status**: Not started
+**Plans**: 0 plans
+
+**UI hint**: yes
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -248,3 +269,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 6. Daily Content Engine | 3/3 | Complete | 2026-06-14 |
 | 7. Intelligence & Analytics | 4/4 | Complete | 2026-06-15 |
 | 8. Admin Operations | 7/7 | Complete | 2026-06-15 |
+| 9. Dark Mode & Theme System | 0/0 | Not started | — |
