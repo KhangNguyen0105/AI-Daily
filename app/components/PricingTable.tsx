@@ -296,7 +296,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
       header: 'Confidence',
       cell: (info) => {
         const val = info.getValue();
-        const solidBg = val === 'verified' ? 'bg-green-500' : val === 'likely' ? 'bg-yellow-500' : val === 'low_confidence' ? 'bg-red-500' : 'bg-gray-500';
+        const solidBg = val === 'verified' ? 'bg-green-500' : val === 'likely' ? 'bg-yellow-500' : val === 'low_confidence' ? 'bg-red-500' : 'bg-text-secondary';
         return (
           <span
             className={`inline-block w-3 h-3 rounded-full ${solidBg}`}
@@ -570,7 +570,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
           </div>
 
           {/* Row count indicator */}
-          <p className="text-sm text-gray-500 mb-3">
+          <p className="text-sm text-text-secondary mb-3">
             Showing {filteredRowCount} of {totalRowCount} models
           </p>
 
@@ -626,22 +626,22 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
           </div>
 
           {/* Pagination controls */}
-          <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-200">
-            <p className="text-sm text-gray-500">
+          <div className="flex items-center justify-between mt-4 pt-3 border-t border-border-primary">
+            <p className="text-sm text-text-secondary">
               Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount() || 1}
             </p>
             <div className="flex gap-2">
               <button
                 onClick={() => table.previousPage()}
                 disabled={!table.getCanPreviousPage()}
-                className="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-3 py-1.5 text-sm border border-border-secondary rounded-md hover:bg-bg-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Previous
               </button>
               <button
                 onClick={() => table.nextPage()}
                 disabled={!table.getCanNextPage()}
-                className="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-3 py-1.5 text-sm border border-border-secondary rounded-md hover:bg-bg-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Next
               </button>
