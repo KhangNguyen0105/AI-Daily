@@ -431,7 +431,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                   placeholder="Search models or providers..."
                   value={globalFilter}
                   onChange={(e) => setGlobalFilter(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-border-secondary rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   aria-label="Search models or providers"
                 />
               </div>
@@ -442,7 +442,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
               <select
                 value={providerFilter}
                 onChange={(e) => setProviderFilter(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[160px]"
+                className="px-3 py-2 border border-border-secondary rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[160px]"
                 aria-label="Filter by provider"
               >
                 <option value="">All Providers</option>
@@ -453,12 +453,12 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                 ))}
               </select>
 
-              <label className="flex items-center gap-2 text-sm text-gray-700 whitespace-nowrap cursor-pointer">
+              <label className="flex items-center gap-2 text-sm text-text-primary whitespace-nowrap cursor-pointer">
                 <input
                   type="checkbox"
                   checked={freeTierOnly}
                   onChange={(e) => setFreeTierOnly(e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-border-secondary text-accent-blue focus:ring-blue-500"
                 />
                 Free tier only
               </label>
@@ -466,7 +466,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
               {hasActiveFilters && (
                 <button
                   onClick={clearFilters}
-                  className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors whitespace-nowrap"
+                  className="px-3 py-2 text-sm text-text-secondary hover:text-text-primary border border-border-secondary rounded-md hover:bg-bg-secondary transition-colors whitespace-nowrap"
                   aria-label="Clear all filters"
                 >
                   Clear filters
@@ -478,7 +478,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
             <button
               type="button"
               onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-              className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+              className="text-sm text-accent-blue hover:text-accent-blue flex items-center gap-1"
               aria-expanded={showAdvancedFilters}
             >
               <span className="text-xs">{showAdvancedFilters ? '▲' : '▼'}</span>
