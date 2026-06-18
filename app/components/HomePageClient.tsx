@@ -31,10 +31,10 @@ export function HomePageClient({
 
         {/* Left: Pricing Data Table */}
         <div className="xl:w-[60%] xl:min-w-0">
-          <h2 className="text-xl font-semibold mb-4 text-gray-900">
+          <h2 className="text-xl font-semibold mb-4 text-text-primary">
             Latest Pricing Data
           </h2>
-          <div className="border border-gray-200 rounded-lg overflow-hidden">
+          <div className="border border-border-primary rounded-lg overflow-hidden">
             <PricingTable
               data={data}
               exchangeRate={exchangeRate}
@@ -47,14 +47,14 @@ export function HomePageClient({
         {/* Right: Cost Calculator (sticky on scroll) */}
         <div className="xl:w-[40%] xl:min-w-0">
           <div className="xl:sticky xl:top-4">
-            <h2 className="text-xl font-semibold mb-1 text-gray-900">
+            <h2 className="text-xl font-semibold mb-1 text-text-primary">
               What Does It Actually Cost?
             </h2>
-            <p className="text-sm text-gray-500 mb-4">
+            <p className="text-sm text-text-secondary mb-4">
               Per-token pricing is abstract. These scenarios show what real usage actually costs
               &mdash; like 10 long prompts, a document summary, or a full coding-agent session.
             </p>
-            <div className="border border-gray-200 rounded-lg p-4 bg-white">
+            <div className="border border-border-primary rounded-lg p-4 bg-bg-primary">
               <CostCalculator
                 data={data}
                 currency={currency}
