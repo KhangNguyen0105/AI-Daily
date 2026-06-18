@@ -59,8 +59,8 @@ export function PipelineRunsTable({ runs, onSuccess, onError }: PipelineRunsTabl
   if (runs.length === 0) {
     return (
       <div className="text-center py-8">
-        <p className="text-sm text-gray-500">No pipeline runs recorded</p>
-        <p className="text-xs text-gray-400 mt-1">
+        <p className="text-sm text-text-secondary">No pipeline runs recorded</p>
+        <p className="text-xs text-text-tertiary mt-1">
           Pipeline runs will appear here after the first daily collection completes.
         </p>
       </div>
@@ -76,7 +76,7 @@ export function PipelineRunsTable({ runs, onSuccess, onError }: PipelineRunsTabl
       case 'running':
         return <span className="text-yellow-600">&#10227;</span>;
       default:
-        return <span className="text-gray-400">?</span>;
+        return <span className="text-text-tertiary">?</span>;
     }
   };
 
@@ -97,15 +97,15 @@ export function PipelineRunsTable({ runs, onSuccess, onError }: PipelineRunsTabl
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+    <div className="bg-bg-primary border border-border-primary rounded-lg overflow-hidden">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-gray-200 bg-gray-50">
-            <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500 w-10">Status</th>
-            <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500">Started</th>
-            <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500">Duration</th>
-            <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500">Stats</th>
-            <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500 w-24">Actions</th>
+          <tr className="border-b border-border-primary bg-bg-secondary">
+            <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-text-secondary w-10">Status</th>
+            <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-text-secondary">Started</th>
+            <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-text-secondary">Duration</th>
+            <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-text-secondary">Stats</th>
+            <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-text-secondary w-24">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -115,18 +115,18 @@ export function PipelineRunsTable({ runs, onSuccess, onError }: PipelineRunsTabl
               <Fragment key={run.id}>
                 <tr
                   onClick={() => setExpandedRowId(isExpanded ? null : run.id)}
-                  className={`border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${
-                    isExpanded ? 'bg-gray-50' : ''
+                  className={`border-b border-border-primary cursor-pointer hover:bg-bg-secondary transition-colors ${
+                    isExpanded ? 'bg-bg-secondary' : ''
                   }`}
                 >
                   <td className="px-4 py-3">{getStatusIcon(run.status)}</td>
-                  <td className="px-4 py-3 text-gray-600">
+                  <td className="px-4 py-3 text-text-secondary">
                     {format(new Date(run.startedAt), 'MMM d, yyyy h:mm a')}
                   </td>
-                  <td className="px-4 py-3 text-gray-600">
+                  <td className="px-4 py-3 text-text-secondary">
                     {getDuration(run.startedAt, run.completedAt)}
                   </td>
-                  <td className="px-4 py-3 text-gray-600">
+                  <td className="px-4 py-3 text-text-secondary">
                     {run.stats ? `${run.stats.succeeded ?? 0}/${run.stats.totalProviders ?? 0}` : '-'}
                   </td>
                   <td className="px-4 py-3 text-right whitespace-nowrap">
@@ -148,44 +148,44 @@ export function PipelineRunsTable({ runs, onSuccess, onError }: PipelineRunsTabl
                 {/* Expanded detail - render directly underneath the row */}
                 {isExpanded && (
                   <tr>
-                    <td colSpan={5} className="p-0 border-b border-gray-200">
+                    <td colSpan={5} className="p-0 border-b border-border-primary">
                       {!run.stats ? (
-                        <div className="px-4 py-4 bg-gray-50 text-sm text-gray-500 text-center">
+                        <div className="px-4 py-4 bg-bg-secondary text-sm text-text-secondary text-center">
                           No details available
                         </div>
                       ) : (
-                        <div className="px-4 py-4 bg-gray-50/80 shadow-inner">
-                          <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-3">Provider Breakdown</h4>
+                        <div className="px-4 py-4 bg-bg-secondary/80 shadow-inner">
+                          <h4 className="text-xs font-semibold uppercase tracking-wide text-text-secondary mb-3">Provider Breakdown</h4>
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm mb-3">
-                            <div className="bg-white p-3 rounded shadow-sm border border-gray-100">
-                              <div className="text-gray-500 text-xs mb-1">Attempted</div>
-                              <div className="text-gray-900 font-medium">{run.stats.attempted ?? 0}</div>
+                            <div className="bg-bg-primary p-3 rounded shadow-sm border border-border-primary">
+                              <div className="text-text-secondary text-xs mb-1">Attempted</div>
+                              <div className="text-text-primary font-medium">{run.stats.attempted ?? 0}</div>
                             </div>
-                            <div className="bg-white p-3 rounded shadow-sm border border-gray-100">
-                              <div className="text-gray-500 text-xs mb-1">Succeeded</div>
+                            <div className="bg-bg-primary p-3 rounded shadow-sm border border-border-primary">
+                              <div className="text-text-secondary text-xs mb-1">Succeeded</div>
                               <div className="text-green-600 font-medium">{run.stats.succeeded ?? 0}</div>
                             </div>
-                            <div className="bg-white p-3 rounded shadow-sm border border-gray-100">
-                              <div className="text-gray-500 text-xs mb-1">Failed</div>
+                            <div className="bg-bg-primary p-3 rounded shadow-sm border border-border-primary">
+                              <div className="text-text-secondary text-xs mb-1">Failed</div>
                               <div className="text-red-600 font-medium">{run.stats.failed ?? 0}</div>
                             </div>
-                            <div className="bg-white p-3 rounded shadow-sm border border-gray-100">
-                              <div className="text-gray-500 text-xs mb-1">Extractions</div>
-                              <div className="text-gray-900 font-medium">{run.stats.extractions ?? 0}</div>
+                            <div className="bg-bg-primary p-3 rounded shadow-sm border border-border-primary">
+                              <div className="text-text-secondary text-xs mb-1">Extractions</div>
+                              <div className="text-text-primary font-medium">{run.stats.extractions ?? 0}</div>
                             </div>
                           </div>
                           {run.stats.verifiedCount !== undefined && (
                             <div className="grid grid-cols-3 gap-4 text-sm">
-                              <div className="bg-white p-3 rounded shadow-sm border border-gray-100">
-                                <div className="text-gray-500 text-xs mb-1">Verified</div>
+                              <div className="bg-bg-primary p-3 rounded shadow-sm border border-border-primary">
+                                <div className="text-text-secondary text-xs mb-1">Verified</div>
                                 <div className="text-green-600 font-medium">{run.stats.verifiedCount}</div>
                               </div>
-                              <div className="bg-white p-3 rounded shadow-sm border border-gray-100">
-                                <div className="text-gray-500 text-xs mb-1">Likely</div>
+                              <div className="bg-bg-primary p-3 rounded shadow-sm border border-border-primary">
+                                <div className="text-text-secondary text-xs mb-1">Likely</div>
                                 <div className="text-yellow-600 font-medium">{run.stats.likelyCount ?? 0}</div>
                               </div>
-                              <div className="bg-white p-3 rounded shadow-sm border border-gray-100">
-                                <div className="text-gray-500 text-xs mb-1">Low Confidence</div>
+                              <div className="bg-bg-primary p-3 rounded shadow-sm border border-border-primary">
+                                <div className="text-text-secondary text-xs mb-1">Low Confidence</div>
                                 <div className="text-red-600 font-medium">{run.stats.lowConfidenceCount ?? 0}</div>
                               </div>
                             </div>

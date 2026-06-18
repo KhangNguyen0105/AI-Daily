@@ -22,8 +22,8 @@ export function ErrorLogTable({ errors }: ErrorLogTableProps) {
   if (errors.length === 0) {
     return (
       <div className="text-center py-8">
-        <p className="text-sm text-gray-500">No errors recorded</p>
-        <p className="text-xs text-gray-400 mt-1">
+        <p className="text-sm text-text-secondary">No errors recorded</p>
+        <p className="text-xs text-text-tertiary mt-1">
           All recent pipeline runs completed without errors.
         </p>
       </div>
@@ -31,13 +31,13 @@ export function ErrorLogTable({ errors }: ErrorLogTableProps) {
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+    <div className="bg-bg-primary border border-border-primary rounded-lg overflow-hidden">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-gray-200 bg-gray-50">
-            <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500">Time</th>
-            <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500">Provider</th>
-            <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500">Error</th>
+          <tr className="border-b border-border-primary bg-bg-secondary">
+            <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-text-secondary">Time</th>
+            <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-text-secondary">Provider</th>
+            <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-text-secondary">Error</th>
           </tr>
         </thead>
         <tbody>
@@ -48,21 +48,21 @@ export function ErrorLogTable({ errors }: ErrorLogTableProps) {
               const isExpanded = expandedRowId === key;
               return (
                 <Fragment key={key}>
-                  <tr 
+                  <tr
                     onClick={() => setExpandedRowId(isExpanded ? null : key)}
-                    className={`border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${isExpanded ? 'bg-gray-50' : ''}`}
+                    className={`border-b border-border-primary cursor-pointer hover:bg-bg-secondary transition-colors ${isExpanded ? 'bg-bg-secondary' : ''}`}
                   >
-                    <td className="px-4 py-3 text-gray-600">
+                    <td className="px-4 py-3 text-text-secondary">
                       {format(new Date(errorRun.startedAt), 'h:mm a')}
                     </td>
-                    <td className="px-4 py-3 text-gray-600">Unknown</td>
+                    <td className="px-4 py-3 text-text-secondary">Unknown</td>
                     <td className="px-4 py-3 text-red-600 truncate max-w-xs">Pipeline run failed</td>
                   </tr>
                   {isExpanded && (
                     <tr>
-                      <td colSpan={3} className="p-0 border-b border-gray-200">
-                        <div className="px-4 py-4 bg-gray-50/80 shadow-inner">
-                          <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">Error Details</h4>
+                      <td colSpan={3} className="p-0 border-b border-border-primary">
+                        <div className="px-4 py-4 bg-bg-secondary/80 shadow-inner">
+                          <h4 className="text-xs font-semibold uppercase tracking-wide text-text-secondary mb-2">Error Details</h4>
                           <pre className="text-xs text-red-600 bg-red-50 p-3 rounded border border-red-100 whitespace-pre-wrap overflow-auto max-h-60">
                             Pipeline run failed without specific error details.
                           </pre>
@@ -79,21 +79,21 @@ export function ErrorLogTable({ errors }: ErrorLogTableProps) {
               const isExpanded = expandedRowId === key;
               return (
                 <Fragment key={key}>
-                  <tr 
+                  <tr
                     onClick={() => setExpandedRowId(isExpanded ? null : key)}
-                    className={`border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${isExpanded ? 'bg-gray-50' : ''}`}
+                    className={`border-b border-border-primary cursor-pointer hover:bg-bg-secondary transition-colors ${isExpanded ? 'bg-bg-secondary' : ''}`}
                   >
-                    <td className="px-4 py-3 text-gray-600">
+                    <td className="px-4 py-3 text-text-secondary">
                       {format(new Date(errorRun.startedAt), 'h:mm a')}
                     </td>
-                    <td className="px-4 py-3 text-gray-600">{detail.provider}</td>
+                    <td className="px-4 py-3 text-text-secondary">{detail.provider}</td>
                     <td className="px-4 py-3 text-red-600 truncate max-w-xs">{detail.error}</td>
                   </tr>
                   {isExpanded && (
                     <tr>
-                      <td colSpan={3} className="p-0 border-b border-gray-200">
-                        <div className="px-4 py-4 bg-gray-50/80 shadow-inner">
-                          <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">Error Details</h4>
+                      <td colSpan={3} className="p-0 border-b border-border-primary">
+                        <div className="px-4 py-4 bg-bg-secondary/80 shadow-inner">
+                          <h4 className="text-xs font-semibold uppercase tracking-wide text-text-secondary mb-2">Error Details</h4>
                           <pre className="text-xs text-red-600 bg-red-50 p-3 rounded border border-red-100 whitespace-pre-wrap overflow-auto max-h-60">
                             {detail.error}
                           </pre>
