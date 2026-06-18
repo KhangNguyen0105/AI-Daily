@@ -82,9 +82,9 @@ function getColumnMinWidth(columnId: string): string {
  */
 function SortIndicator({ column }: { column: Column<PricingRow, unknown> }) {
   const sorted = column.getIsSorted();
-  if (!sorted) return <span className="ml-1 text-gray-300">&#8597;</span>;
+  if (!sorted) return <span className="ml-1 text-text-tertiary">&#8597;</span>;
   return (
-    <span className="ml-1 text-gray-700">
+    <span className="ml-1 text-text-primary">
       {sorted === 'asc' ? '▲' : '▼'}
     </span>
   );
@@ -113,7 +113,7 @@ function ProviderLogo({ name }: { name: string }) {
   // Fallback: colored circle with initial letter
   return (
     <span
-      className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-400 text-white text-xs font-semibold mr-2 align-middle"
+      className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-text-secondary text-white text-xs font-semibold mr-2 align-middle"
       aria-hidden="true"
     >
       {initial}
@@ -414,8 +414,8 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
   return (
     <div>
       {data.length === 0 ? (
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
-          <p className="text-gray-500 text-lg">
+        <div className="text-center py-12 bg-bg-secondary rounded-lg">
+          <p className="text-text-secondary text-lg">
             No pricing data collected yet. Pipeline will run shortly.
           </p>
         </div>
@@ -579,11 +579,11 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
             <table className="w-full border-collapse">
               <thead>
                 {table.getHeaderGroups().map((headerGroup) => (
-                  <tr key={headerGroup.id} className="bg-gray-50 border-b-2 border-gray-200">
+                  <tr key={headerGroup.id} className="bg-bg-secondary border-b-2 border-border-primary">
                     {headerGroup.headers.map((header) => (
                       <th
                         key={header.id}
-                        className={`px-4 py-3 text-sm font-semibold text-gray-700 cursor-pointer select-none hover:bg-gray-100 transition-colors sticky top-0 z-10 bg-gray-50 ${getColumnResponsiveClass(header.id)} ${getColumnMinWidth(header.id)} ${
+                        className={`px-4 py-3 text-sm font-semibold text-text-primary cursor-pointer select-none hover:bg-bg-tertiary transition-colors sticky top-0 z-10 bg-bg-secondary ${getColumnResponsiveClass(header.id)} ${getColumnMinWidth(header.id)} ${
                           header.id === 'inputPricePer1m' || header.id === 'outputPricePer1m' || header.id === 'contextWindow'
                             ? 'text-right'
                             : header.id === 'confidence'
