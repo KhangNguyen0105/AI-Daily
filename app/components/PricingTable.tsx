@@ -236,7 +236,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
       header: 'Provider',
       filterFn: providerColumnFilterFn as FilterFn<PricingRow>,
       cell: (info) => (
-        <span className="text-sm text-gray-700 flex items-center">
+        <span className="text-sm text-text-primary flex items-center">
           <ProviderLogo name={info.getValue() ?? 'Unknown'} />
           {sanitizeDisplayName(info.getValue() ?? 'Unknown')}
         </span>
@@ -250,7 +250,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
         return (
           <Link
             href={`/model/${slug}`}
-            className="text-sm font-semibold text-blue-600 hover:text-blue-800 hover:underline"
+            className="text-sm font-semibold text-accent-blue hover:text-accent-blue hover:underline"
           >
             {sanitizeDisplayName(info.getValue())}
           </Link>
@@ -263,7 +263,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
       id: 'family',
       header: 'Family',
       cell: (info) => (
-        <span className="text-sm text-gray-600">
+        <span className="text-sm text-text-secondary">
           {getModelFamily(info.getValue())}
         </span>
       ),
@@ -271,7 +271,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
     columnHelper.accessor('inputPricePer1m', {
       header: effectiveCurrency === 'usd' ? 'Input ($/1M)' : 'Input (₫/1M)',
       cell: (info) => (
-        <span className="text-sm text-right text-gray-700 block">
+        <span className="text-sm text-right text-text-primary block">
           {formatCurrencyPrice(info.getValue(), effectiveCurrency, exchangeRate)}
         </span>
       ),
@@ -279,7 +279,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
     columnHelper.accessor('outputPricePer1m', {
       header: effectiveCurrency === 'usd' ? 'Output ($/1M)' : 'Output (₫/1M)',
       cell: (info) => (
-        <span className="text-sm text-right text-gray-700 block">
+        <span className="text-sm text-right text-text-primary block">
           {formatCurrencyPrice(info.getValue(), effectiveCurrency, exchangeRate)}
         </span>
       ),
@@ -287,7 +287,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
     columnHelper.accessor('contextWindow', {
       header: 'Context Window',
       cell: (info) => (
-        <span className="text-sm text-right text-gray-700 block">
+        <span className="text-sm text-right text-text-primary block">
           {formatContextWindow(info.getValue())}
         </span>
       ),
@@ -317,32 +317,32 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
           try {
             const parsed = new URL(url);
             if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-              return <span className="text-sm text-gray-400">{row.sourceName ?? '—'}</span>;
+              return <span className="text-sm text-text-tertiary">{row.sourceName ?? '—'}</span>;
             }
           } catch {
-            return <span className="text-sm text-gray-400">{row.sourceName ?? '—'}</span>;
+            return <span className="text-sm text-text-tertiary">{row.sourceName ?? '—'}</span>;
           }
           return (
             <a
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-blue-600 hover:text-blue-800 underline"
+              className="text-sm text-accent-blue hover:text-accent-blue underline"
             >
               {row.sourceName ?? 'View source'}
             </a>
           );
         }
-        return <span className="text-sm text-gray-400">{'—'}</span>;
+        return <span className="text-sm text-text-tertiary">{'—'}</span>;
       },
     }),
     columnHelper.accessor('collectedAt', {
       header: 'Collected',
       cell: (info) => {
         const date = info.getValue();
-        if (!date) return <span className="text-sm text-gray-400">{'—'}</span>;
+        if (!date) return <span className="text-sm text-text-tertiary">{'—'}</span>;
         return (
-          <span className="text-sm text-gray-600">
+          <span className="text-sm text-text-secondary">
             {format(new Date(date), 'MMM d, yyyy')}
           </span>
         );
@@ -603,7 +603,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                 {table.getRowModel().rows.map((row) => (
                   <tr
                     key={row.id}
-                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                    className="border-b border-border-primary hover:bg-bg-secondary transition-colors"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <td
