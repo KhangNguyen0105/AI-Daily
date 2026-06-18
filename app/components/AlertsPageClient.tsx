@@ -56,7 +56,7 @@ export function AlertsPageClient() {
           {!clearConfirmVisible ? (
             <button
               onClick={() => setClearConfirmVisible(true)}
-              className="text-sm text-red-600 hover:text-red-800"
+              className="text-sm text-badge-red-text hover:opacity-80"
             >
               Clear All
             </button>
@@ -67,7 +67,7 @@ export function AlertsPageClient() {
               </span>
               <button
                 onClick={handleClearAll}
-                className="text-sm font-medium text-red-600 hover:text-red-800"
+                className="text-sm font-medium text-badge-red-text hover:opacity-80"
               >
                 Confirm
               </button>
@@ -115,7 +115,7 @@ export function AlertsPageClient() {
                     </span>
                     <button
                       onClick={() => handleRemove(alert.modelName, alert.sourceId)}
-                      className="text-xs font-medium text-red-600 hover:text-red-800"
+                      className="text-xs font-medium text-badge-red-text hover:opacity-80"
                     >
                       Confirm
                     </button>
@@ -134,7 +134,7 @@ export function AlertsPageClient() {
                         sourceId: alert.sourceId,
                       })
                     }
-                    className="text-xs text-red-600 hover:text-red-800"
+                    className="text-xs text-badge-red-text hover:opacity-80"
                   >
                     Remove
                   </button>

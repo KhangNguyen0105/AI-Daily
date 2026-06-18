@@ -64,7 +64,7 @@ export default async function DigestArchivePage({
 
         {dbError ? (
           <div className="text-center py-16">
-            <p className="text-red-500">
+            <p className="text-badge-red-text">
               Unable to load articles. Please try again later.
             </p>
           </div>

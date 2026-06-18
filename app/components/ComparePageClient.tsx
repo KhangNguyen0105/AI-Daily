@@ -93,7 +93,7 @@ export function ComparePageClient({
             {selectedModels.length > 2 && (
               <button
                 onClick={() => handleRemove(index)}
-                className="px-2 py-1 text-sm text-red-600 hover:text-red-800"
+                className="px-2 py-1 text-sm text-badge-red-text hover:opacity-80"
               >
                 ✕
               </button>
