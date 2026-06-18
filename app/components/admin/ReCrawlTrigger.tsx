@@ -32,8 +32,8 @@ export function ReCrawlTrigger({ providers, onSuccess, onError }: ReCrawlTrigger
 
       onSuccess(data.message ?? `Re-crawl job queued for ${selectedProvider}. Check the pipeline page for progress.`);
       setSelectedProvider('');
-    } catch {
-      onError('Re-crawl failed to queue. The re-crawl job could not be queued. Check the pipeline status and try again.');
+    } catch (err) {
+      onError(err instanceof Error ? err.message : 'Re-crawl failed to queue. Check the pipeline status and try again.');
     } finally {
       setIsLoading(false);
       setIsConfirmOpen(false);

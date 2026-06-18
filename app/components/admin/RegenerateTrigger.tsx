@@ -31,8 +31,8 @@ export function RegenerateTrigger({ onSuccess, onError }: RegenerateTriggerProps
       }
 
       onSuccess(data.message ?? `Article regeneration queued for ${selectedDate}. Check the pipeline page for progress.`);
-    } catch {
-      onError('Regeneration failed to queue. The regeneration job could not be queued. Check the pipeline status and try again.');
+    } catch (err) {
+      onError(err instanceof Error ? err.message : 'Regeneration failed to queue. Check the pipeline status and try again.');
     } finally {
       setIsLoading(false);
       setIsConfirmOpen(false);

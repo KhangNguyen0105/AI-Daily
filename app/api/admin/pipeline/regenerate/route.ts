@@ -22,6 +22,15 @@ export async function POST(request: NextRequest) {
 
     const { date } = parsed.data;
 
+    // Check if any workers are connected
+    const workers = await generateQueue.getWorkers();
+    if (workers.length === 0) {
+      return NextResponse.json(
+        { error: 'No pipeline workers are running. Start the worker process first: pnpm dev:worker' },
+        { status: 503 },
+      );
+    }
+
     // Enqueue generate job with force flag
     await generateQueue.add(
       'generate',

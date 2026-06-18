@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
+    "dev:worker": "node --import tsx src/pipeline/worker-entry.ts",
     "build": "next build",
     "start": "next start",
     "db:push": "drizzle-kit push",
@@ -34,6 +35,7 @@
     "recharts": "^3.8.1",
     "remark-gfm": "^4.0.1",
     "tailwindcss": "4.3.0",
+    "vite-tsconfig-paths": "^6.1.1",
     "zod": "4.4.3"
   },
   "devDependencies": {

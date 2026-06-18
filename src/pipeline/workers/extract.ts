@@ -79,6 +79,12 @@ export function createExtractWorker(): Worker<ExtractJobData, ExtractJobResult> 
       // Normalize the results
       const normalized = adapter.normalize(extractionResults);
 
+      if (normalized.models.length === 0) {
+        console.warn(
+          `[extract] Provider "${providerName}" produced 0 models from rawData ${rawDataId}. HTML length: ${html.length}`,
+        );
+      }
+
       // Insert each extraction into the database
       const extractionIds: number[] = [];
       const allEvidenceQuotes: Record<number, EvidenceQuotes> = {};

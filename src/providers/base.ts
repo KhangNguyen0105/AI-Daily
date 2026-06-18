@@ -142,7 +142,16 @@ export abstract class ProviderAdapter {
     const crawler = new PlaywrightCrawler({
       maxRequestsPerCrawl: 1,
       headless: true,
+      launchContext: {
+        launchOptions: {
+          executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || undefined,
+        },
+      },
       async requestHandler({ page, request }) {
+        // Wait for JS-rendered content (pricing tables, SPA frameworks)
+        await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+        // Extra wait for client-side rendered pricing tables
+        await page.waitForTimeout(3000);
         const html = await page.content();
         result = {
           url: request.loadedUrl ?? request.url,

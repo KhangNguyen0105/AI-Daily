@@ -7,8 +7,8 @@ import type { ProviderConfig } from '../base';
  */
 export const deepseekConfig: ProviderConfig = {
   name: 'deepseek',
-  baseUrl: 'https://deepseek.com',
-  pricingUrl: 'https://platform.deepseek.com/api-docs/pricing',
+  baseUrl: 'https://api-docs.deepseek.com',
+  pricingUrl: 'https://api-docs.deepseek.com/quick_start/pricing',
   tier: 'tier1',
   currency: 'USD',
   crawlFrequencyHours: 4,
@@ -16,7 +16,7 @@ export const deepseekConfig: ProviderConfig = {
   modelIdFormat: 'deepseek',
   sources: [
     {
-      url: 'https://platform.deepseek.com/api-docs/pricing',
+      url: 'https://api-docs.deepseek.com/quick_start/pricing',
       tier: 'tier1',
       sourceType: 'pricing_page',
     },

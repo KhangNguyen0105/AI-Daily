@@ -36,6 +36,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Provider not found' }, { status: 404 });
     }
 
+    // Check if any workers are connected
+    const workers = await collectQueue.getWorkers();
+    if (workers.length === 0) {
+      return NextResponse.json(
+        { error: 'No pipeline workers are running. Start the worker process first: pnpm dev:worker' },
+        { status: 503 },
+      );
+    }
+
     // Enqueue collect job
     await collectQueue.add(
       'collect',

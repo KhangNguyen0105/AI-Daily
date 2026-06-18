@@ -11,8 +11,8 @@ import {
   createDailyPipelineWorker,
   createTier1RefreshWorker,
   createTier2RefreshWorker,
-  createFeedMonitorWorker,
 } from './scheduler';
+import { createFeedMonitorWorker } from './feed-monitor-worker';
 
 /**
  * Worker process entry point.

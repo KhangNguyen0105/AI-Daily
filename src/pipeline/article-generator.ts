@@ -148,7 +148,10 @@ export async function generateArticle(diff: DiffResult): Promise<GeneratedArticl
       model: getModel(primaryProvider),
       ...callOptions,
     });
-    responseText = result.text;
+    responseText = result.text?.trim() ?? '';
+    if (!responseText) {
+      throw new Error(`${primaryProvider} returned empty response`);
+    }
   } catch (primaryErr) {
     console.warn(
       `Primary AI provider (${primaryProvider}) failed, trying fallback (${fallbackProvider}):`,
@@ -158,10 +161,17 @@ export async function generateArticle(diff: DiffResult): Promise<GeneratedArticl
       model: getModel(fallbackProvider),
       ...callOptions,
     });
-    responseText = result.text;
+    responseText = result.text?.trim() ?? '';
+    if (!responseText) {
+      throw new Error(`Both ${primaryProvider} and ${fallbackProvider} returned empty responses`);
+    }
   }
 
-  return parseArticleResponse(responseText);
+  const article = parseArticleResponse(responseText);
+  if (!article.content || article.content.trim().length === 0) {
+    throw new Error('Generated article has empty content after parsing');
+  }
+  return article;
 }
 
 /**

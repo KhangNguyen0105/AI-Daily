@@ -26,8 +26,8 @@ export function RunFullPipelineTrigger({ onSuccess, onError }: RunFullPipelineTr
       }
 
       onSuccess(data.message ?? `Full pipeline run started. Check the pipeline page for progress.`);
-    } catch {
-      onError('Failed to start full pipeline run. Check the pipeline status and try again.');
+    } catch (err) {
+      onError(err instanceof Error ? err.message : 'Failed to start full pipeline run. Check the pipeline status and try again.');
     } finally {
       setIsLoading(false);
       setIsConfirmOpen(false);
