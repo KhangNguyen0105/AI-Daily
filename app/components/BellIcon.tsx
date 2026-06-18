@@ -70,7 +70,7 @@ export function BellIcon({
         aria-haspopup="true"
         className={`p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg transition-colors ${
           hasAlert
-            ? 'text-blue-600 hover:text-blue-800'
+            ? 'text-accent-blue hover:text-accent-blue/80'
             : 'text-text-tertiary hover:text-text-secondary'
         }`}
         title={hasAlert ? 'Manage price alert' : 'Set price alert'}
@@ -109,7 +109,7 @@ export function BellIcon({
               />
               <button
                 onClick={handleSetAlert}
-                className="w-full px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded hover:bg-blue-700"
+                className="w-full px-3 py-1.5 text-sm font-medium text-white bg-accent-blue rounded hover:bg-accent-blue/90"
               >
                 Set Alert
               </button>
@@ -121,7 +121,7 @@ export function BellIcon({
               </p>
               <button
                 onClick={handleRemoveAlert}
-                className="w-full px-3 py-1.5 text-sm font-medium text-white bg-red-600 rounded hover:bg-red-700"
+                className="w-full px-3 py-1.5 text-sm font-medium text-white bg-accent-red rounded hover:bg-accent-red/90"
               >
                 Remove Alert
               </button>
