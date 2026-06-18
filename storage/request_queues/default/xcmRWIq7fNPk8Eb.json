@@ -1,9 +1,0 @@
-{
-	"id": "xcmRWIq7fNPk8Eb",
-	"json": "{\"id\":\"xcmRWIq7fNPk8Eb\",\"url\":\"https://docs.perplexity.ai/guides/pricing\",\"loadedUrl\":\"https://docs.perplexity.ai/docs/getting-started/pricing\",\"uniqueKey\":\"https://docs.perplexity.ai/guides/pricing-1781597303919\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"__crawlee\":{\"state\":4}},\"handledAt\":\"2026-06-16T08:08:28.104Z\"}",
-	"method": "GET",
-	"orderNo": null,
-	"retryCount": 0,
-	"uniqueKey": "https://docs.perplexity.ai/guides/pricing-1781597303919",
-	"url": "https://docs.perplexity.ai/guides/pricing"
-}

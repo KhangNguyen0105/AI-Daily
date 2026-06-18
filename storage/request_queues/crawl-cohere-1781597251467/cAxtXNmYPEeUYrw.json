@@ -1,9 +1,0 @@
-{
-	"id": "cAxtXNmYPEeUYrw",
-	"json": "{\"id\":\"cAxtXNmYPEeUYrw\",\"url\":\"https://cohere.com/pricing\",\"uniqueKey\":\"https://cohere.com/pricing\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{}}",
-	"method": "GET",
-	"orderNo": 1781597522305,
-	"retryCount": 0,
-	"uniqueKey": "https://cohere.com/pricing",
-	"url": "https://cohere.com/pricing"
-}

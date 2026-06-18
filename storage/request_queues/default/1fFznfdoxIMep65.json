@@ -1,9 +1,0 @@
-{
-	"id": "1fFznfdoxIMep65",
-	"json": "{\"id\":\"1fFznfdoxIMep65\",\"url\":\"https://mistral.ai/products/la-plateforme#pricing\",\"loadedUrl\":\"https://mistral.ai/products/studio/#pricing\",\"uniqueKey\":\"https://mistral.ai/products/la-plateforme#pricing-1781597325746\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"__crawlee\":{\"state\":4}},\"handledAt\":\"2026-06-16T08:08:50.903Z\"}",
-	"method": "GET",
-	"orderNo": null,
-	"retryCount": 0,
-	"uniqueKey": "https://mistral.ai/products/la-plateforme#pricing-1781597325746",
-	"url": "https://mistral.ai/products/la-plateforme#pricing"
-}
