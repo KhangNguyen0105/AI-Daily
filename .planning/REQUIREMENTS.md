@@ -78,6 +78,9 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **FRNT-02**: Site is built with Next.js 16 App Router with SSG for fast page loads
 - [ ] **FRNT-03**: Site is responsive (works on mobile browsers)
 - [ ] **FRNT-04**: All pages display "Last updated: [date]" for data freshness transparency
+- [x] **UI-01**: User can toggle between light and dark theme via a sun/moon button in the navigation bar
+- [x] **UI-02**: All components render correctly in both light and dark themes using semantic CSS token classes
+- [x] **UI-03**: Theme preference persists across page refresh and defaults to system preference on first visit
 
 ## v2 Requirements
 
@@ -163,12 +166,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FRNT-02 | Phase 1 | Pending |
 | FRNT-03 | Phase 3 | Pending |
 | FRNT-04 | Phase 3 | Pending |
+| UI-01 | Phase 9 | Complete |
+| UI-02 | Phase 9 | Complete |
+| UI-03 | Phase 9 | Complete |
 
 **Coverage:**
-- v1 requirements: 44 total
-- Mapped to phases: 44 (roadmap created)
+- v1 requirements: 47 total
+- Mapped to phases: 47 (roadmap created)
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-06-10*
-*Last updated: 2026-06-10 after roadmap creation*
+*Last updated: 2026-06-18 after Phase 9 completion*

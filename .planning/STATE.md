@@ -1,19 +1,19 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
+milestone: v1.1
 milestone_name: milestone
 current_phase: complete
-current_phase_name: v1.0-milestone-complete
+current_phase_name: phase-9-complete
 status: complete
 stopped_at: null
-last_updated: "2026-06-18T17:00:00.000Z"
+last_updated: "2026-06-18T23:00:00.000Z"
 last_activity: 2026-06-18
-last_activity_desc: All 8 phases merged to main — v1.0 milestone complete
+last_activity_desc: Phase 9 Dark Mode & Theme System complete — all 6 plans executed and verified
 progress:
-  total_phases: 8
-  completed_phases: 8
-  total_plans: 39
-  completed_plans: 39
+  total_phases: 9
+  completed_phases: 9
+  total_plans: 45
+  completed_plans: 45
   percent: 100
 ---
 
@@ -24,12 +24,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-10)
 
 **Core value:** Developers can instantly understand what AI models actually cost in real-world usage -- not per-token abstractions, but practical examples like prompts, coding tasks, document processing, and agent sessions.
-**Current focus:** v1.0 milestone complete — ready for deployment or next milestone
+**Current focus:** v1.1 milestone complete — dark mode system implemented, ready for deployment
 
 ## Current Position
 
-Status: COMPLETE — all 8 phases merged to main
-Last activity: 2026-06-18 -- milestone merge (dev → main)
+Status: COMPLETE — all 9 phases executed and verified
+Last activity: 2026-06-18 -- Phase 9 Dark Mode & Theme System complete
 
 Progress: [██████████] 100%
 
@@ -37,9 +37,9 @@ Progress: [██████████] 100%
 
 **Velocity:**
 
-- Total plans completed: 39
-- Average duration: ~7.5 min/plan
-- Total execution time: ~290 minutes
+- Total plans completed: 45
+- Phase 9 plans: 6
+- Phase 9 duration: ~45 min (6 plans)
 
 **By Phase:**
 
@@ -53,9 +53,11 @@ Progress: [██████████] 100%
 | 6. Daily Content Engine | 3/3 | ✅ Complete |
 | 7. Intelligence & Analytics | 4/4 | ✅ Complete |
 | 8. Admin Operations | 7/7 | ✅ Complete |
+| 9. Dark Mode & Theme System | 6/6 | ✅ Complete |
 
 **Milestone merge history:**
-- 2026-06-18: All 8 phases merged to main via dev
+- 2026-06-18: All 8 phases merged to main via dev (v1.0)
+- 2026-06-18: Phase 9 Dark Mode & Theme System complete (v1.1)
 
 ## Accumulated Context
 
@@ -63,15 +65,23 @@ Progress: [██████████] 100%
 
 Decisions are logged in PROJECT.md Key Decisions table and per-phase CONTEXT.md files.
 
+Phase 9 key decisions:
+- CSS custom properties for light/dark themes (not Tailwind-only approach)
+- React context with localStorage persistence (not next-themes library)
+- Inline `<script>` for FOUC prevention (not next/script)
+- Accent colors (blue, green, red, yellow) stay the same in both themes (per D-04)
+- Recharts hex colors stay the same in both themes (per D-05)
+- Toggle switch thumb `bg-white` kept as intentional white circle in both themes
+
 ### Pending Todos
 
-None — v1.0 milestone complete.
+None — v1.1 milestone complete.
 
 ### Blockers/Concerns
 
 None.
 
-### Next Steps (Post-v1.0)
+### Next Steps (Post-v1.1)
 
 - Deploy to production (Docker Compose)
 - Fix 6 pre-existing Phase 7 test gaps
@@ -81,8 +91,8 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-06-18T17:00:00.000Z
-Stopped at: milestone complete — no resume needed
+Last session: 2026-06-18T23:00:00.000Z
+Stopped at: phase 9 complete — no resume needed
 Resume file: none (all phases done)
 
 ## Known Pre-existing Test Gaps (Non-blocking)

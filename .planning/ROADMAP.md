@@ -21,6 +21,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 6: Daily Content Engine** - Auto-generated daily articles with chronological archive
 - [x] **Phase 7: Intelligence & Analytics** - Trend charts, promotion tracker, multi-model comparison, and price alerts
 - [x] **Phase 8: Admin Operations** - Pipeline monitoring, content editing/rollback, source management, and admin auth
+- [x] **Phase 9: Dark Mode & Theme System** - CSS custom properties, theme toggle, and conversion of all hardcoded colors to semantic token classes
 
 ## Phase Details
 
@@ -233,10 +234,45 @@ Plans:
 
 **UI hint**: yes
 
+### Phase 9: Dark Mode & Theme System
+
+**Goal**: Implement a complete dark mode and theme system with CSS custom properties, React context provider, theme toggle, and convert all hardcoded color classes across the entire application to theme-aware token classes.
+**Depends on**: Phase 8
+**Requirements**: UI-01, UI-02, UI-03
+**Success Criteria** (what must be TRUE):
+
+  1. User can see a sun/moon toggle button in the TopNav
+  2. Clicking the toggle switches between light and dark theme
+  3. Theme preference persists across page refresh (localStorage)
+  4. On first visit, system preference (prefers-color-scheme) is used as default
+  5. No flash of wrong theme on page load
+  6. All components render correctly in both light and dark themes
+
+**Status**: ✅ COMPLETE (verified 2026-06-18, 46+ files converted, 202+ theme token occurrences)
+**Plans**: 6 plans
+Plans:
+
+**Wave 1**
+
+- [x] 09-01-PLAN.md — Theme foundation: CSS custom properties, ThemeProvider, ThemeToggle, layout integration
+
+**Wave 2**
+
+- [x] 09-02-PLAN.md — Core page color conversion: HomePageClient, CostCalculator, ModelDetailClient
+- [x] 09-03-PLAN.md — PricingTable color conversion: ~48 class replacements
+- [x] 09-05-PLAN.md — Admin layout and pages: sidebar, header, login, articles, pipeline, sources
+
+**Wave 3**
+
+- [x] 09-04-PLAN.md — Public components: 16 files including DigestArticle, AlertsPageClient, charts, toggles
+- [x] 09-06-PLAN.md — Admin components + final verification: tables, forms, utility files, full-project grep
+
+**UI hint**: yes
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -248,3 +284,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 6. Daily Content Engine | 3/3 | Complete | 2026-06-14 |
 | 7. Intelligence & Analytics | 4/4 | Complete | 2026-06-15 |
 | 8. Admin Operations | 7/7 | Complete | 2026-06-15 |
+| 9. Dark Mode & Theme System | 6/6 | Complete | 2026-06-18 |
