@@ -487,16 +487,16 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
 
             {/* Advanced filters: price range + context window */}
             {showAdvancedFilters && (
-              <div className="flex flex-col md:flex-row gap-3 items-start md:items-end p-3 bg-gray-50 rounded-md">
+              <div className="flex flex-col md:flex-row gap-3 items-start md:items-end p-3 bg-bg-secondary rounded-md">
                 <fieldset className="flex flex-col gap-1">
-                  <legend className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Input Price ({effectiveCurrency === 'usd' ? '$/1M' : '₫/1M'})</legend>
+                  <legend className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Input Price ({effectiveCurrency === 'usd' ? '$/1M' : '₫/1M'})</legend>
                   <div className="flex gap-2">
                     <input
                       type="number"
                       placeholder="Min"
                       value={inputPriceMin}
                       onChange={(e) => setInputPriceMin(e.target.value)}
-                      className="w-24 px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-24 px-2 py-1.5 border border-border-secondary rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       min="0"
                       step="0.01"
                       aria-label="Input price minimum"
@@ -506,7 +506,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                       placeholder="Max"
                       value={inputPriceMax}
                       onChange={(e) => setInputPriceMax(e.target.value)}
-                      className="w-24 px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-24 px-2 py-1.5 border border-border-secondary rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       min="0"
                       step="0.01"
                       aria-label="Input price maximum"
@@ -515,14 +515,14 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                 </fieldset>
 
                 <fieldset className="flex flex-col gap-1">
-                  <legend className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Output Price ({effectiveCurrency === 'usd' ? '$/1M' : '₫/1M'})</legend>
+                  <legend className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Output Price ({effectiveCurrency === 'usd' ? '$/1M' : '₫/1M'})</legend>
                   <div className="flex gap-2">
                     <input
                       type="number"
                       placeholder="Min"
                       value={outputPriceMin}
                       onChange={(e) => setOutputPriceMin(e.target.value)}
-                      className="w-24 px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-24 px-2 py-1.5 border border-border-secondary rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       min="0"
                       step="0.01"
                       aria-label="Output price minimum"
@@ -532,7 +532,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                       placeholder="Max"
                       value={outputPriceMax}
                       onChange={(e) => setOutputPriceMax(e.target.value)}
-                      className="w-24 px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-24 px-2 py-1.5 border border-border-secondary rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       min="0"
                       step="0.01"
                       aria-label="Output price maximum"
@@ -541,14 +541,14 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                 </fieldset>
 
                 <fieldset className="flex flex-col gap-1">
-                  <legend className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Context Window (tokens)</legend>
+                  <legend className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Context Window (tokens)</legend>
                   <div className="flex gap-2">
                     <input
                       type="number"
                       placeholder="Min"
                       value={contextWindowMin}
                       onChange={(e) => setContextWindowMin(e.target.value)}
-                      className="w-28 px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-28 px-2 py-1.5 border border-border-secondary rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       min="0"
                       step="1000"
                       aria-label="Context window minimum"
@@ -558,7 +558,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                       placeholder="Max"
                       value={contextWindowMax}
                       onChange={(e) => setContextWindowMax(e.target.value)}
-                      className="w-28 px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-28 px-2 py-1.5 border border-border-secondary rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       min="0"
                       step="1000"
                       aria-label="Context window maximum"
