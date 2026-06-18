@@ -8,7 +8,7 @@ import type { ProviderConfig } from '../base';
 export const nebiusConfig: ProviderConfig = {
   name: 'nebius',
   baseUrl: 'https://nebius.com',
-  pricingUrl: 'https://nebius.com/pricing',
+  pricingUrl: 'https://nebius.com/ai-services/pricing',
   tier: 'tier2',
   currency: 'USD',
   crawlFrequencyHours: 12,
@@ -16,7 +16,7 @@ export const nebiusConfig: ProviderConfig = {
   modelIdFormat: 'nebius',
   sources: [
     {
-      url: 'https://nebius.com/pricing',
+      url: 'https://nebius.com/ai-services/pricing',
       tier: 'tier2',
       sourceType: 'pricing_page',
     },

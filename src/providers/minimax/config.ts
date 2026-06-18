@@ -11,7 +11,7 @@ import type { ProviderConfig } from '../base';
 export const minimaxConfig: ProviderConfig = {
   name: 'minimax',
   baseUrl: 'https://www.minimaxi.com',
-  pricingUrl: 'https://www.minimaxi.com/pricing',
+  pricingUrl: 'https://platform.minimaxi.com/docs/pricing/overview',
   tier: 'tier1',
   currency: 'CNY',
   crawlFrequencyHours: 4,
@@ -19,7 +19,7 @@ export const minimaxConfig: ProviderConfig = {
   modelIdFormat: 'minimax',
   sources: [
     {
-      url: 'https://www.minimaxi.com/pricing',
+      url: 'https://platform.minimaxi.com/docs/pricing/overview',
       tier: 'tier1',
       sourceType: 'pricing_page',
     },

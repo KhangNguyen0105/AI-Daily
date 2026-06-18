@@ -8,7 +8,7 @@ import type { ProviderConfig } from '../base';
 export const sambanovaConfig: ProviderConfig = {
   name: 'sambanova',
   baseUrl: 'https://sambanova.ai',
-  pricingUrl: 'https://sambanova.ai/pricing',
+  pricingUrl: 'https://cloud.sambanova.ai/plans/pricing',
   tier: 'tier2',
   currency: 'USD',
   crawlFrequencyHours: 12,
@@ -16,7 +16,7 @@ export const sambanovaConfig: ProviderConfig = {
   modelIdFormat: 'sambanova',
   sources: [
     {
-      url: 'https://sambanova.ai/pricing',
+      url: 'https://cloud.sambanova.ai/plans/pricing',
       tier: 'tier2',
       sourceType: 'pricing_page',
     },

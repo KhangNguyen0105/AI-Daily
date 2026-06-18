@@ -8,7 +8,7 @@ import type { ProviderConfig } from '../base';
 export const leptonConfig: ProviderConfig = {
   name: 'lepton',
   baseUrl: 'https://lepton.ai',
-  pricingUrl: 'https://lepton.ai/pricing',
+  pricingUrl: 'https://www.nvidia.com/en-us/data-center/dgx-cloud-lepton/pricing',
   tier: 'tier2',
   currency: 'USD',
   crawlFrequencyHours: 12,
@@ -16,7 +16,7 @@ export const leptonConfig: ProviderConfig = {
   modelIdFormat: 'lepton',
   sources: [
     {
-      url: 'https://lepton.ai/pricing',
+      url: 'https://www.nvidia.com/en-us/data-center/dgx-cloud-lepton/pricing',
       tier: 'tier2',
       sourceType: 'pricing_page',
     },
