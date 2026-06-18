@@ -46,7 +46,7 @@ export function ToastContainer({
         <div
           key={toast.id}
           className={`flex items-center gap-3 px-4 py-3 bg-bg-primary rounded-lg shadow-lg border-l-4 transition-all duration-200 ${
-            toast.type === 'success' ? 'border-green-500' : 'border-red-500'
+            toast.type === 'success' ? 'border-dot-green' : 'border-dot-red'
           }`}
         >
           <span className="text-sm text-text-primary flex-1">{toast.message}</span>
