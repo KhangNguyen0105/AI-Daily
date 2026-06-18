@@ -70,11 +70,11 @@ export function PipelineRunsTable({ runs, onSuccess, onError }: PipelineRunsTabl
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed':
-        return <span className="text-green-600">&#10003;</span>;
+        return <span className="text-badge-green-text">&#10003;</span>;
       case 'failed':
-        return <span className="text-red-600">&#10007;</span>;
+        return <span className="text-badge-red-text">&#10007;</span>;
       case 'running':
-        return <span className="text-yellow-600">&#10227;</span>;
+        return <span className="text-badge-yellow-text">&#10227;</span>;
       default:
         return <span className="text-text-tertiary">?</span>;
     }
@@ -137,7 +137,7 @@ export function PipelineRunsTable({ runs, onSuccess, onError }: PipelineRunsTabl
                           handleCancel(run.id);
                         }}
                         disabled={cancellingId === run.id}
-                        className="mr-3 px-2 py-1 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded border border-red-200 transition-colors"
+                        className="mr-3 px-2 py-1 text-xs font-medium text-badge-red-text bg-badge-red-bg hover:opacity-80 rounded border border-badge-red-border transition-colors"
                       >
                         {cancellingId === run.id ? '...' : 'Cancel'}
                       </button>
@@ -163,11 +163,11 @@ export function PipelineRunsTable({ runs, onSuccess, onError }: PipelineRunsTabl
                             </div>
                             <div className="bg-bg-primary p-3 rounded shadow-sm border border-border-primary">
                               <div className="text-text-secondary text-xs mb-1">Succeeded</div>
-                              <div className="text-green-600 font-medium">{run.stats.succeeded ?? 0}</div>
+                              <div className="text-badge-green-text font-medium">{run.stats.succeeded ?? 0}</div>
                             </div>
                             <div className="bg-bg-primary p-3 rounded shadow-sm border border-border-primary">
                               <div className="text-text-secondary text-xs mb-1">Failed</div>
-                              <div className="text-red-600 font-medium">{run.stats.failed ?? 0}</div>
+                              <div className="text-badge-red-text font-medium">{run.stats.failed ?? 0}</div>
                             </div>
                             <div className="bg-bg-primary p-3 rounded shadow-sm border border-border-primary">
                               <div className="text-text-secondary text-xs mb-1">Extractions</div>
@@ -178,15 +178,15 @@ export function PipelineRunsTable({ runs, onSuccess, onError }: PipelineRunsTabl
                             <div className="grid grid-cols-3 gap-4 text-sm">
                               <div className="bg-bg-primary p-3 rounded shadow-sm border border-border-primary">
                                 <div className="text-text-secondary text-xs mb-1">Verified</div>
-                                <div className="text-green-600 font-medium">{run.stats.verifiedCount}</div>
+                                <div className="text-badge-green-text font-medium">{run.stats.verifiedCount}</div>
                               </div>
                               <div className="bg-bg-primary p-3 rounded shadow-sm border border-border-primary">
                                 <div className="text-text-secondary text-xs mb-1">Likely</div>
-                                <div className="text-yellow-600 font-medium">{run.stats.likelyCount ?? 0}</div>
+                                <div className="text-badge-yellow-text font-medium">{run.stats.likelyCount ?? 0}</div>
                               </div>
                               <div className="bg-bg-primary p-3 rounded shadow-sm border border-border-primary">
                                 <div className="text-text-secondary text-xs mb-1">Low Confidence</div>
-                                <div className="text-red-600 font-medium">{run.stats.lowConfidenceCount ?? 0}</div>
+                                <div className="text-badge-red-text font-medium">{run.stats.lowConfidenceCount ?? 0}</div>
                               </div>
                             </div>
                           )}

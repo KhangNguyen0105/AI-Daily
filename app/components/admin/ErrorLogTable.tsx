@@ -56,14 +56,14 @@ export function ErrorLogTable({ errors }: ErrorLogTableProps) {
                       {format(new Date(errorRun.startedAt), 'h:mm a')}
                     </td>
                     <td className="px-4 py-3 text-text-secondary">Unknown</td>
-                    <td className="px-4 py-3 text-red-600 truncate max-w-xs">Pipeline run failed</td>
+                    <td className="px-4 py-3 text-badge-red-text truncate max-w-xs">Pipeline run failed</td>
                   </tr>
                   {isExpanded && (
                     <tr>
                       <td colSpan={3} className="p-0 border-b border-border-primary">
                         <div className="px-4 py-4 bg-bg-secondary/80 shadow-inner">
                           <h4 className="text-xs font-semibold uppercase tracking-wide text-text-secondary mb-2">Error Details</h4>
-                          <pre className="text-xs text-red-600 bg-red-50 p-3 rounded border border-red-100 whitespace-pre-wrap overflow-auto max-h-60">
+                          <pre className="text-xs text-badge-red-text bg-badge-red-bg p-3 rounded border border-badge-red-border whitespace-pre-wrap overflow-auto max-h-60">
                             Pipeline run failed without specific error details.
                           </pre>
                         </div>
@@ -87,14 +87,14 @@ export function ErrorLogTable({ errors }: ErrorLogTableProps) {
                       {format(new Date(errorRun.startedAt), 'h:mm a')}
                     </td>
                     <td className="px-4 py-3 text-text-secondary">{detail.provider}</td>
-                    <td className="px-4 py-3 text-red-600 truncate max-w-xs">{detail.error}</td>
+                    <td className="px-4 py-3 text-badge-red-text truncate max-w-xs">{detail.error}</td>
                   </tr>
                   {isExpanded && (
                     <tr>
                       <td colSpan={3} className="p-0 border-b border-border-primary">
                         <div className="px-4 py-4 bg-bg-secondary/80 shadow-inner">
                           <h4 className="text-xs font-semibold uppercase tracking-wide text-text-secondary mb-2">Error Details</h4>
-                          <pre className="text-xs text-red-600 bg-red-50 p-3 rounded border border-red-100 whitespace-pre-wrap overflow-auto max-h-60">
+                          <pre className="text-xs text-badge-red-text bg-badge-red-bg p-3 rounded border border-badge-red-border whitespace-pre-wrap overflow-auto max-h-60">
                             {detail.error}
                           </pre>
                         </div>
