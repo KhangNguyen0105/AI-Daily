@@ -4,7 +4,8 @@ import { eq, and, desc } from 'drizzle-orm';
 import { generateSlug, resolveSlug } from '@/app/lib/slug';
 import { ModelDetailClient } from '@/app/components/ModelDetailClient';
 import { notFound } from 'next/navigation';
-import { getLatestExchangeRate, FALLBACK_RATE } from '@/src/pipeline/exchange-rate-worker';
+// IN-01: Import from standalone utility instead of pipeline module
+import { getLatestExchangeRate, FALLBACK_RATE } from '@/src/lib/exchange-rate';
 
 /**
  * ISR: Revalidate every 60 seconds.

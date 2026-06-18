@@ -2,6 +2,7 @@
 
 import { format } from 'date-fns';
 import { isSafeUrl } from '@/app/lib/url-utils';
+import { PROMOTION_BADGE_STYLES } from '@/app/lib/promotion-constants';
 
 export interface PromotionData {
   id: number;
@@ -13,12 +14,6 @@ export interface PromotionData {
   endDate: Date | null;
   sourceUrl: string | null;
 }
-
-const typeBadgeStyles: Record<string, string> = {
-  free_tier: 'bg-green-100 text-green-800',
-  promotion: 'bg-blue-100 text-blue-800',
-  beta: 'bg-purple-100 text-purple-800',
-};
 
 function isActive(promotion: PromotionData): boolean {
   if (promotion.endDate === null) return true;
@@ -65,7 +60,7 @@ export function PromotionsList({
             <div className="flex items-center gap-2 mb-2">
               <span
                 className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
-                  typeBadgeStyles[promo.type] ?? 'bg-gray-100 text-gray-800'
+                  PROMOTION_BADGE_STYLES[promo.type] ?? 'bg-gray-100 text-gray-800'
                 }`}
               >
                 {promo.type}

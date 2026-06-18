@@ -6,10 +6,9 @@ import {
   calculateScenarioCosts,
   formatCurrencyPrice,
   sanitizeDisplayName,
-  getConfidenceColor,
   PracticalCost,
 } from '@/app/lib/pricing-utils';
-import type { PricingRow } from '@/app/components/PricingTable';
+import type { PricingRow } from '@/app/lib/types';
 
 /**
  * Interactive cost calculator component.
@@ -98,32 +97,38 @@ export function CostCalculator({
               {/* Left side: rank, model info */}
               <div className="flex items-center gap-3 min-w-0">
                 <span
-                  className={`text-lg font-bold shrink-0 ${
+                  className={`text-lg font-semibold shrink-0 ${
                     index === 0 ? 'text-green-700' : 'text-gray-400'
                   }`}
                 >
                   #{index + 1}
                 </span>
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
+                  <p className="text-sm font-semibold text-gray-900 truncate">
                     {sanitizeDisplayName(item.modelName)}
                   </p>
                   <p className="text-xs text-gray-500">
                     {sanitizeDisplayName(item.sourceName ?? 'Unknown')}
                   </p>
                   <span
-                    className={`inline-flex items-center mt-1 px-2 py-0.5 rounded-full text-xs font-medium ${getConfidenceColor(
-                      item.confidence
-                    )}`}
-                  >
-                    {item.confidence}
-                  </span>
+                    className={`inline-block w-3 h-3 rounded-full mt-1 ${
+                      item.confidence === 'verified'
+                        ? 'bg-green-500'
+                        : item.confidence === 'likely'
+                        ? 'bg-yellow-500'
+                        : item.confidence === 'low_confidence'
+                        ? 'bg-red-500'
+                        : 'bg-gray-500'
+                    }`}
+                    title={item.confidence}
+                    aria-label={item.confidence}
+                  />
                 </div>
               </div>
 
               {/* Right side: total cost + breakdown */}
               <div className="text-right shrink-0 ml-4">
-                <p className="text-xl font-bold text-gray-900">
+                <p className="text-xl font-semibold text-gray-900">
                   {formatCurrencyPrice(item.totalCost, currency, exchangeRate)}
                 </p>
                 <p className="text-sm text-gray-500">

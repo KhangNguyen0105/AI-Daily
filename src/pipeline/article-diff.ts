@@ -1,6 +1,6 @@
 import { db } from '@/src/db/index';
-import { extractions, promotions } from '@/src/db/schema';
-import { and, gte, lt } from 'drizzle-orm';
+import { extractions, promotions, sources } from '@/src/db/schema';
+import { and, gte, lt, eq } from 'drizzle-orm';
 
 /**
  * Diff result comparing today's extractions with yesterday's.
@@ -47,7 +47,7 @@ function deduplicateByModel(rows: Array<{
   inputPricePer1m: number | null;
   outputPricePer1m: number | null;
   contextWindow: number | null;
-  sourceId: number;
+  sourceName: string;
   collectedAt: Date;
 }>): Map<string, typeof rows[0]> {
   const map = new Map<string, typeof rows[0]>();
@@ -83,10 +83,11 @@ export async function computeDiff(today: Date, yesterday: Date): Promise<DiffRes
         inputPricePer1m: extractions.inputPricePer1m,
         outputPricePer1m: extractions.outputPricePer1m,
         contextWindow: extractions.contextWindow,
-        sourceId: extractions.sourceId,
+        sourceName: sources.name,
         collectedAt: extractions.collectedAt,
       })
       .from(extractions)
+      .leftJoin(sources, eq(extractions.sourceId, sources.id))
       .where(
         and(
           gte(extractions.collectedAt, todayRange.start),
@@ -99,10 +100,11 @@ export async function computeDiff(today: Date, yesterday: Date): Promise<DiffRes
         inputPricePer1m: extractions.inputPricePer1m,
         outputPricePer1m: extractions.outputPricePer1m,
         contextWindow: extractions.contextWindow,
-        sourceId: extractions.sourceId,
+        sourceName: sources.name,
         collectedAt: extractions.collectedAt,
       })
       .from(extractions)
+      .leftJoin(sources, eq(extractions.sourceId, sources.id))
       .where(
         and(
           gte(extractions.collectedAt, yesterdayRange.start),
@@ -140,8 +142,7 @@ export async function computeDiff(today: Date, yesterday: Date): Promise<DiffRes
         inputPricePer1m: row.inputPricePer1m,
         outputPricePer1m: row.outputPricePer1m,
         contextWindow: row.contextWindow,
-        // TODO(I-01): sourceName stores sourceId as string — join with sources table for actual provider name
-        sourceName: String(row.sourceId),
+        sourceName: row.sourceName ?? 'unknown',
       });
     }
   } else {
@@ -155,8 +156,7 @@ export async function computeDiff(today: Date, yesterday: Date): Promise<DiffRes
           inputPricePer1m: todayRow.inputPricePer1m,
           outputPricePer1m: todayRow.outputPricePer1m,
           contextWindow: todayRow.contextWindow,
-          // TODO(I-01): sourceName stores sourceId as string — join with sources table for actual provider name
-          sourceName: String(todayRow.sourceId),
+          sourceName: todayRow.sourceName ?? 'unknown',
         });
       } else {
         // Check for price changes

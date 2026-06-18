@@ -33,31 +33,35 @@ describe('OpenAIAdapter', () => {
     expect(typeof adapter.normalize).toBe('function');
   });
 
-  it('normalize sets confidence to likely for all items', () => {
+  // IN-03: Renamed — normalize is now identity, confidence passes through unchanged
+  it('normalize preserves confidence and sets rawPriceText for USD providers', () => {
     const adapter = new OpenAIAdapter();
-    const input = [
-      {
-        modelName: 'gpt-4o',
-        inputPricePer1m: 2.5,
-        outputPricePer1m: 10.0,
-        contextWindow: 128000,
-        confidence: 'low_confidence' as const,
-        rawEvidence: '{}',
-      },
-      {
-        modelName: 'gpt-4o-mini',
-        inputPricePer1m: 0.15,
-        outputPricePer1m: 0.6,
-        contextWindow: 128000,
-        confidence: 'verified' as const,
-        rawEvidence: '{}',
-      },
-    ];
+    const input = {
+      models: [
+        {
+          modelName: 'gpt-4o',
+          inputPricePer1m: 2.5,
+          outputPricePer1m: 10.0,
+          contextWindow: 128000,
+          confidence: 'low_confidence' as const,
+          rawEvidence: '{}',
+        },
+        {
+          modelName: 'gpt-4o-mini',
+          inputPricePer1m: 0.15,
+          outputPricePer1m: 0.6,
+          contextWindow: 128000,
+          confidence: 'verified' as const,
+          rawEvidence: '{}',
+        },
+      ],
+      promotions: []
+    };
     const result = adapter.normalize(input);
-    expect(result).toHaveLength(2);
+    expect(result.models).toHaveLength(2);
     // IN-04: normalize() is now identity — confidence passes through unchanged
-    expect(result[0].confidence).toBe('low_confidence');
-    expect(result[1].confidence).toBe('verified');
+    expect(result.models[0].confidence).toBe('low_confidence');
+    expect(result.models[1].confidence).toBe('verified');
   });
 });
 

@@ -11,13 +11,13 @@
  *
  * Examples:
  *   ("gpt-4o", 1) -> "gpt-4o--1"
- *   ("Claude 3.5 Sonnet", 2) -> "claude-35-sonnet--2"
- *   ("gemini-1.5-pro", 3) -> "gemini-15-pro--3"
+ *   ("Claude 3.5 Sonnet", 2) -> "claude-3-5-sonnet--2"
+ *   ("gemini-1.5-pro", 3) -> "gemini-1-5-pro--3"
  */
 export function generateSlug(modelName: string, sourceId: number): string {
   const modelSlug = modelName
     .toLowerCase()
-    .replace(/\./g, '') // strip dots (version numbers like 3.5 -> 35)
+    .replace(/\./g, '-') // dots become hyphens (version numbers like 3.5 -> 3-5)
     .replace(/[^a-z0-9]+/g, '-') // non-alphanumeric to hyphens
     .replace(/^-+|-+$/g, ''); // trim leading/trailing hyphens
 

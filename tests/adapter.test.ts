@@ -4,6 +4,7 @@ import {
   ProviderConfig,
   CrawlResult,
   ExtractionResult,
+  ProviderExtraction,
 } from '../src/providers/base';
 import {
   registerAdapter,
@@ -19,21 +20,27 @@ class TestAdapter extends ProviderAdapter {
     pricingUrl: 'https://test.example.com/pricing',
   };
 
-  async extract(_html: string): Promise<ExtractionResult[]> {
-    return [
-      {
-        modelName: 'test-model',
-        inputPricePer1m: 5.0,
-        outputPricePer1m: 15.0,
-        contextWindow: 128000,
-        confidence: 'likely',
-        rawEvidence: '{}',
-      },
-    ];
+  async extract(_html: string): Promise<ProviderExtraction> {
+    return {
+      models: [
+        {
+          modelName: 'test-model',
+          inputPricePer1m: 5.0,
+          outputPricePer1m: 15.0,
+          contextWindow: 128000,
+          confidence: 'likely',
+          rawEvidence: '{}',
+        },
+      ],
+      promotions: [],
+    };
   }
 
-  normalize(extractions: ExtractionResult[]): ExtractionResult[] {
-    return extractions.map((e) => ({ ...e, confidence: 'likely' as const }));
+  normalize(extractions: ProviderExtraction): ProviderExtraction {
+    return {
+      models: extractions.models.map((e) => ({ ...e, confidence: 'likely' as const })),
+      promotions: extractions.promotions,
+    };
   }
 }
 
@@ -67,45 +74,47 @@ describe('ProviderAdapter base class', () => {
     expect(adapter.config).toHaveProperty('pricingUrl');
   });
 
-  it('ExtractionResult confidence type is verified | likely | low_confidence', () => {
-    const adapter = new TestAdapter();
-    // Verify by checking the return type of extract
-    return adapter.extract('<html></html>').then((results) => {
-      expect(results[0].confidence).toBe('likely');
-      // Verify all valid confidence values
-      const validConfidences = ['verified', 'likely', 'low_confidence'];
-      expect(validConfidences).toContain(results[0].confidence);
-    });
-  });
-
-  it('extract returns array of ExtractionResult objects', async () => {
+  it('ExtractionResult confidence type is verified | likely | low_confidence', async () => {
     const adapter = new TestAdapter();
     const results = await adapter.extract('<html></html>');
-    expect(Array.isArray(results)).toBe(true);
-    expect(results.length).toBeGreaterThan(0);
-    expect(results[0]).toHaveProperty('modelName');
-    expect(results[0]).toHaveProperty('inputPricePer1m');
-    expect(results[0]).toHaveProperty('outputPricePer1m');
-    expect(results[0]).toHaveProperty('contextWindow');
-    expect(results[0]).toHaveProperty('confidence');
-    expect(results[0]).toHaveProperty('rawEvidence');
+    expect(results.models[0].confidence).toBe('likely');
+    const validConfidences = ['verified', 'likely', 'low_confidence'];
+    expect(validConfidences).toContain(results.models[0].confidence);
   });
 
-  it('normalize returns array with same length', () => {
+  it('extract returns ProviderExtraction with models array', async () => {
     const adapter = new TestAdapter();
-    const input: ExtractionResult[] = [
-      {
-        modelName: 'test',
-        inputPricePer1m: 1,
-        outputPricePer1m: 2,
-        contextWindow: 1000,
-        confidence: 'low_confidence',
-        rawEvidence: '{}',
-      },
-    ];
+    const results = await adapter.extract('<html></html>');
+    expect(results).toHaveProperty('models');
+    expect(results).toHaveProperty('promotions');
+    expect(Array.isArray(results.models)).toBe(true);
+    expect(results.models.length).toBeGreaterThan(0);
+    expect(results.models[0]).toHaveProperty('modelName');
+    expect(results.models[0]).toHaveProperty('inputPricePer1m');
+    expect(results.models[0]).toHaveProperty('outputPricePer1m');
+    expect(results.models[0]).toHaveProperty('contextWindow');
+    expect(results.models[0]).toHaveProperty('confidence');
+    expect(results.models[0]).toHaveProperty('rawEvidence');
+  });
+
+  it('normalize returns ProviderExtraction with same model count', () => {
+    const adapter = new TestAdapter();
+    const input: ProviderExtraction = {
+      models: [
+        {
+          modelName: 'test',
+          inputPricePer1m: 1,
+          outputPricePer1m: 2,
+          contextWindow: 1000,
+          confidence: 'low_confidence',
+          rawEvidence: '{}',
+        },
+      ],
+      promotions: [],
+    };
     const result = adapter.normalize(input);
-    expect(result).toHaveLength(1);
-    expect(result[0].confidence).toBe('likely');
+    expect(result.models).toHaveLength(1);
+    expect(result.models[0].confidence).toBe('likely');
   });
 });
 

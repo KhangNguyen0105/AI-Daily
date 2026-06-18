@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { getProviderLogo, getUniqueProviders, providerLogos } from '../app/lib/provider-metadata';
-import type { PricingRow } from '../app/components/PricingTable';
+import type { PricingRow } from '../app/lib/types';
 
 describe('providerLogos', () => {
   it('contains entries for all 12 major providers', () => {

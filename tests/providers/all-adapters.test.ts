@@ -14,12 +14,18 @@ const EXPECTED_PROVIDERS = [
   'fireworks',
   'deepseek',
   'bedrock',
+  'moonshot',
+  'minimax',
+  'openrouter',
+  'nebius',
+  'sambanova',
+  'lepton',
 ];
 
 describe('Provider Registry - All Adapters', () => {
-  it('getAllAdapters() returns exactly 12 adapters', () => {
+  it('getAllAdapters() returns exactly 18 adapters', () => {
     const adapters = getAllAdapters();
-    expect(adapters).toHaveLength(12);
+    expect(adapters).toHaveLength(18);
   });
 
   it('each expected provider name is in the registry', () => {

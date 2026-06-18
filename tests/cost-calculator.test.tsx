@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CostCalculator } from '../app/components/CostCalculator';
-import type { PricingRow } from '../app/components/PricingTable';
+import type { PricingRow } from '../app/lib/types';
 
 /** Mock data: models with valid pricing, sorted cheap to expensive by total cost. */
 function createMockData(): PricingRow[] {
