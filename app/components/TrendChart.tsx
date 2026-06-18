@@ -48,17 +48,17 @@ function InputDot(props: RechartsDotProps) {
   const { cx, cy, payload } = props;
   if (!payload || cx === undefined || cy === undefined) return null;
 
-  let fill = '#3b82f6'; // blue-500 default
+  let fill = 'var(--chart-1)'; // blue default
   let r = 4;
 
   if (payload.isFirstPoint) {
     // Star for first point - handled by separate component
     return null;
   } else if (payload.isInputDrop) {
-    fill = '#16a34a'; // green-600
+    fill = 'var(--chart-2)'; // green
     r = 6;
   } else if (payload.isInputIncrease) {
-    fill = '#dc2626'; // red-600
+    fill = 'var(--chart-4)'; // red
     r = 6;
   }
 
@@ -74,17 +74,17 @@ function OutputDot(props: RechartsDotProps) {
   const { cx, cy, payload } = props;
   if (!payload || cx === undefined || cy === undefined) return null;
 
-  let fill = '#ef4444'; // red-500 default
+  let fill = 'var(--chart-4)'; // red default
   let r = 4;
 
   if (payload.isFirstPoint) {
     // Star for first point - handled by separate component
     return null;
   } else if (payload.isOutputDrop) {
-    fill = '#16a34a'; // green-600
+    fill = 'var(--chart-2)'; // green
     r = 6;
   } else if (payload.isOutputIncrease) {
-    fill = '#dc2626'; // red-600
+    fill = 'var(--chart-4)'; // red
     r = 6;
   }
 
@@ -97,7 +97,7 @@ function OutputDot(props: RechartsDotProps) {
 function ActiveDot(props: RechartsDotProps) {
   const { cx, cy } = props;
   if (cx === undefined || cy === undefined) return null;
-  return <circle cx={cx} cy={cy} r={6} fill="#2563eb" stroke="#fff" strokeWidth={2} />;
+  return <circle cx={cx} cy={cy} r={6} fill="var(--chart-1)" stroke="#fff" strokeWidth={2} />;
 }
 
 /**
@@ -114,8 +114,8 @@ function FirstPointStar(props: RechartsDotProps) {
     <g transform={`translate(${cx}, ${cy})`}>
       <polygon
         points="0,-8 2.5,-3 8,-3 3.5,1.5 5.5,7 0,4 -5.5,7 -3.5,1.5 -8,-3 -2.5,-3"
-        fill="#f59e0b"
-        stroke="#f59e0b"
+        fill="var(--chart-3)"
+        stroke="var(--chart-3)"
         strokeWidth={1}
       />
     </g>
@@ -208,9 +208,16 @@ export function TrendChart({ data, modelName }: { data: TrendPoint[]; modelName:
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border-primary)" />
-          <XAxis dataKey="date" />
-          <YAxis />
+          <XAxis dataKey="date" tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} />
+          <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} />
           <Tooltip
+            contentStyle={{
+              backgroundColor: 'var(--bg-primary)',
+              border: '1px solid var(--border-primary)',
+              borderRadius: '8px',
+              color: 'var(--text-primary)',
+            }}
+            labelStyle={{ color: 'var(--text-secondary)' }}
             formatter={(value: string | number | (string | number)[], name: string) => [
               `$${typeof value === 'number' ? value.toFixed(4) : value}`,
               name,
@@ -221,7 +228,7 @@ export function TrendChart({ data, modelName }: { data: TrendPoint[]; modelName:
             type="monotone"
             dataKey="input"
             name="Input $/1M"
-            stroke="#3b82f6"
+            stroke="var(--chart-1)"
             strokeWidth={2}
             dot={<InputDot />}
             activeDot={<ActiveDot />}
@@ -230,7 +237,7 @@ export function TrendChart({ data, modelName }: { data: TrendPoint[]; modelName:
             type="monotone"
             dataKey="output"
             name="Output $/1M"
-            stroke="#ef4444"
+            stroke="var(--chart-4)"
             strokeWidth={2}
             dot={<OutputDot />}
             activeDot={<ActiveDot />}

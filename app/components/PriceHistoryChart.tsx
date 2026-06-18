@@ -49,15 +49,23 @@ export function PriceHistoryChart({ data }: { data: HistoryPoint[] }) {
     <ResponsiveContainer width="100%" height={300}>
       <LineChart data={chartData}>
         <CartesianGrid strokeDasharray="3 3" stroke="var(--border-primary)" />
-        <XAxis dataKey="date" />
-        <YAxis />
-        <Tooltip />
+        <XAxis dataKey="date" tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} />
+        <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} />
+        <Tooltip
+          contentStyle={{
+            backgroundColor: 'var(--bg-primary)',
+            border: '1px solid var(--border-primary)',
+            borderRadius: '8px',
+            color: 'var(--text-primary)',
+          }}
+          labelStyle={{ color: 'var(--text-secondary)' }}
+        />
         <Legend />
         <Line
           type="monotone"
           dataKey="input"
           name="Input $/1M"
-          stroke="#3b82f6"
+          stroke="var(--chart-1)"
           strokeWidth={2}
           dot={{ r: 4 }}
         />
@@ -65,7 +73,7 @@ export function PriceHistoryChart({ data }: { data: HistoryPoint[] }) {
           type="monotone"
           dataKey="output"
           name="Output $/1M"
-          stroke="#ef4444"
+          stroke="var(--chart-4)"
           strokeWidth={2}
           dot={{ r: 4 }}
         />
