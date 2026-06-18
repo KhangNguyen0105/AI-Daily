@@ -46,7 +46,7 @@ export default async function AdminOverviewPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Dashboard Overview</h1>
+      <h1 className="text-2xl font-bold text-text-primary mb-6">Dashboard Overview</h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <SummaryCard label="Last Pipeline Run" value={runValue} status={runStatus} />
@@ -55,7 +55,7 @@ export default async function AdminOverviewPage() {
       </div>
 
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-3">Quick Actions</h2>
+        <h2 className="text-lg font-semibold text-text-primary mb-3">Quick Actions</h2>
         <div className="flex flex-col gap-2">
           <Link href="/admin/articles" className="text-blue-600 hover:text-blue-800 text-sm underline">
             View Articles

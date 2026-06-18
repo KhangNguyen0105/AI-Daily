@@ -106,18 +106,18 @@ export default function PipelinePage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-sm text-gray-500">Loading pipeline data...</div>
+        <div className="text-sm text-text-secondary">Loading pipeline data...</div>
       </div>
     );
   }
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Pipeline Monitor</h1>
+      <h1 className="text-2xl font-bold text-text-primary mb-6">Pipeline Monitor</h1>
 
       {/* Actions */}
       <div className="mb-8">
-        <h2 className="text-lg font-semibold text-gray-900 mb-3">Actions</h2>
+        <h2 className="text-lg font-semibold text-text-primary mb-3">Actions</h2>
         <div className="flex flex-wrap gap-4 items-center">
           <RunFullPipelineTrigger
             onSuccess={(msg) => addToast('success', msg)}
@@ -144,7 +144,7 @@ export default function PipelinePage() {
 
       {/* Pipeline Runs */}
       <div className="mb-8">
-        <h2 className="text-lg font-semibold text-gray-900 mb-3">Pipeline Runs</h2>
+        <h2 className="text-lg font-semibold text-text-primary mb-3">Pipeline Runs</h2>
         <PipelineRunsTable
           runs={runs as Array<{ id: number; status: string; startedAt: string; completedAt: string | null; stats: { totalProviders?: number; succeeded?: number; failed?: number; extractions?: number; verifiedCount?: number; likelyCount?: number; lowConfidenceCount?: number; attempted?: number } | null }>}
           onSuccess={(msg) => addToast('success', msg)}
@@ -154,7 +154,7 @@ export default function PipelinePage() {
 
       {/* Recent Errors */}
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-3">Recent Errors</h2>
+        <h2 className="text-lg font-semibold text-text-primary mb-3">Recent Errors</h2>
         <ErrorLogTable errors={errors as Array<{ id: number; startedAt: string; stats: { failed?: number; errorDetails?: Array<{ provider: string; error: string }> } | null }>} />
       </div>
 
