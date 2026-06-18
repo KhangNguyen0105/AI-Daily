@@ -6,8 +6,8 @@ interface SummaryCardProps {
 
 export function SummaryCard({ label, value, status }: SummaryCardProps) {
   const statusColor = {
-    healthy: 'bg-green-500',
-    error: 'bg-red-500',
+    healthy: 'bg-dot-green',
+    error: 'bg-dot-red',
     unknown: 'bg-text-tertiary',
   };
 
