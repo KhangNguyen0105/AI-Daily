@@ -7,6 +7,7 @@ import { rawData, extractions, promotions } from '../../db/schema';
 import { eq } from 'drizzle-orm';
 import { classifyEdgeCases } from '../edge-case-classifier';
 import { buildEvidenceQuotes, captureEvidence } from '../../lib/evidence-anchor';
+import { updatePipelineStats } from '../orchestrator';
 import type { EdgeCaseFlags } from '../edge-case-classifier';
 import type { EvidenceQuotes } from '../../lib/evidence-anchor';
 
@@ -78,20 +79,20 @@ export function createExtractWorker(): Worker<ExtractJobData, ExtractJobResult> 
       // Normalize the results
       const normalized = adapter.normalize(extractionResults);
 
-      // WR-07: Classify edge cases using all model names from the batch
-      const allModelNames = normalized.models.map(m => m.modelName).join(', ');
-      const edgeCaseFlags = await classifyEdgeCases(html, {
-        modelName: allModelNames,
-        inputPricePer1m: normalized.models[0]?.inputPricePer1m ?? null,
-        outputPricePer1m: normalized.models[0]?.outputPricePer1m ?? null,
-        contextWindow: normalized.models[0]?.contextWindow ?? null,
-      }, providerName);
-
       // Insert each extraction into the database
       const extractionIds: number[] = [];
       const allEvidenceQuotes: Record<number, EvidenceQuotes> = {};
+      const allEdgeCaseFlags: EdgeCaseFlags[] = [];
 
       for (const result of normalized.models) {
+        // CR-02: Classify edge cases per-model using model-specific prices
+        const edgeCaseFlags = await classifyEdgeCases(html, {
+          modelName: result.modelName,
+          inputPricePer1m: result.inputPricePer1m,
+          outputPricePer1m: result.outputPricePer1m,
+          contextWindow: result.contextWindow,
+        }, providerName);
+        allEdgeCaseFlags.push(edgeCaseFlags);
         // Build evidence quotes for this extraction (D-08)
         const sourceUrl = rawRecord.url ?? '';
         const evidenceQuotes = buildEvidenceQuotes(html, {
@@ -105,6 +106,11 @@ export function createExtractWorker(): Worker<ExtractJobData, ExtractJobResult> 
         const modelNameEvidence = captureEvidence(html, 'model_name', result.modelName, sourceUrl);
 
         // Determine verification status based on evidence availability
+        // WR-03: Validate against known enum values before inserting
+        const VALID_VERIFICATION_STATUSES = [
+          'verified', 'verified_with_warning', 'needs_review',
+          'conflicted', 'quarantined', 'unsupported_pricing_model',
+        ] as const;
         let verificationStatus: string | null = null;
         if (result.inputPricePer1m !== null && !evidenceQuotes.input_price) {
           verificationStatus = 'needs_review';
@@ -112,6 +118,10 @@ export function createExtractWorker(): Worker<ExtractJobData, ExtractJobResult> 
         if (result.outputPricePer1m !== null && !evidenceQuotes.output_price) {
           verificationStatus = 'needs_review';
         }
+        const safeVerificationStatus = verificationStatus
+          && (VALID_VERIFICATION_STATUSES as readonly string[]).includes(verificationStatus)
+          ? verificationStatus
+          : verificationStatus === null ? null : 'needs_review';
 
         const inserted = await db
           .insert(extractions)
@@ -135,7 +145,7 @@ export function createExtractWorker(): Worker<ExtractJobData, ExtractJobResult> 
             extractedAt: new Date(),
             evidenceQuotes: evidenceQuotes as any,
             edgeCaseFlags: edgeCaseFlags as any,
-            verificationStatus: verificationStatus as any,
+            verificationStatus: safeVerificationStatus as any,
           })
           .onConflictDoUpdate({
             target: [extractions.sourceId, extractions.modelName],
@@ -158,7 +168,7 @@ export function createExtractWorker(): Worker<ExtractJobData, ExtractJobResult> 
               extractedAt: new Date(),
               evidenceQuotes: evidenceQuotes as any,
               edgeCaseFlags: edgeCaseFlags as any,
-              verificationStatus: verificationStatus as any,
+              verificationStatus: safeVerificationStatus as any,
             },
           })
           .returning({ id: extractions.id });
@@ -168,30 +178,41 @@ export function createExtractWorker(): Worker<ExtractJobData, ExtractJobResult> 
         allEvidenceQuotes[extractionId] = evidenceQuotes;
       }
 
-      // Update promotions: delete old ones for this source and insert new ones
+      // WR-04: Update promotions atomically to prevent data loss on crash
       if (normalized.promotions && normalized.promotions.length > 0) {
-        await db.delete(promotions).where(eq(promotions.sourceId, sourceId));
-        for (const promo of normalized.promotions) {
-          await db.insert(promotions).values({
-            sourceId,
-            modelPattern: promo.modelPattern,
-            type: promo.type,
-            description: promo.description,
-            credits: promo.credits,
-          });
-        }
+        await db.transaction(async (tx) => {
+          await tx.delete(promotions).where(eq(promotions.sourceId, sourceId));
+          for (const promo of normalized.promotions) {
+            await tx.insert(promotions).values({
+              sourceId,
+              modelPattern: promo.modelPattern,
+              type: promo.type,
+              description: promo.description,
+              credits: promo.credits,
+            });
+          }
+        });
       }
 
       // Chain to score stage (D-10: worker-triggered chaining)
       // Pass evidenceQuotes and edgeCaseFlags for evidence-based verification (D-08)
       // WR-01: Propagate pipelineRunId for downstream stats tracking
+      // CR-02: Merge per-model edge case flags for the batch
+      const mergedEdgeCaseFlags: EdgeCaseFlags = {};
+      for (const flags of allEdgeCaseFlags) {
+        for (const [key, value] of Object.entries(flags)) {
+          if (value !== undefined) {
+            (mergedEdgeCaseFlags as Record<string, unknown>)[key] = value;
+          }
+        }
+      }
       await scoreQueue.add('score', {
         extractionIds,
         rawDataId,
         sourceId,
         pipelineRunId,
         evidenceQuotes: allEvidenceQuotes,
-        edgeCaseFlags,
+        edgeCaseFlags: mergedEdgeCaseFlags,
       });
 
       return { extractionIds };
@@ -210,6 +231,14 @@ export function createExtractWorker(): Worker<ExtractJobData, ExtractJobResult> 
 
   worker.on('failed', (job, err) => {
     console.error(`Extract job ${job?.id} failed:`, err.message);
+    // WR-02: Update pipeline stats when extract job fails
+    // Use .catch() to prevent error handler from throwing
+    if (job?.data?.pipelineRunId) {
+      updatePipelineStats(job.data.pipelineRunId, {
+        attempted: 1,
+        failed: 1,
+      }).catch(() => {});
+    }
   });
 
   return worker;

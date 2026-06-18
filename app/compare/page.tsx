@@ -9,6 +9,22 @@ import type { PromotionData } from '@/app/components/PromotionsList';
 export const revalidate = 60;
 
 /**
+ * Check if a model name matches a promotion pattern.
+ * Supports glob-style wildcards: "gpt-4*" matches "gpt-4o", "gpt-4-turbo".
+ * Exact patterns (no wildcard) are checked case-insensitively.
+ */
+function matchesPattern(modelName: string, pattern: string): boolean {
+  if (pattern.includes('*')) {
+    const regex = new RegExp(
+      '^' + pattern.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*') + '$',
+      'i',
+    );
+    return regex.test(modelName);
+  }
+  return modelName.toLowerCase() === pattern.toLowerCase();
+}
+
+/**
  * Multi-model comparison page.
  * Per D-10: /compare route with URL param sync.
  * Per D-12: all dimensions (pricing, context window, practical costs, free tier).
@@ -24,7 +40,14 @@ export default async function ComparePage({
     : [];
 
   let allModels: ModelOption[] = [];
-  let pricingDataMap: Record<string, any> = {};
+  let pricingDataMap: Record<string, {
+    inputPricePer1m: number | null;
+    outputPricePer1m: number | null;
+    contextWindow: number | null;
+    confidence: 'verified' | 'likely' | 'low_confidence';
+    sourceName: string | null;
+    collectedAt: Date;
+  }> = {};
   let practicalCostsMap: Record<string, PracticalCost[]> = {};
   let promotionsMap: Record<string, PromotionData[]> = {};
 
@@ -78,6 +101,7 @@ export default async function ComparePage({
           scenarioName: practicalCosts.scenarioName,
           estimatedCost: practicalCosts.estimatedCost,
           modelName: extractions.modelName,
+          confidence: extractions.confidence,
         })
         .from(practicalCosts)
         .leftJoin(extractions, eq(practicalCosts.extractionId, extractions.id))
@@ -90,9 +114,9 @@ export default async function ComparePage({
         }
         practicalCostsMap[cost.modelName].push({
           modelId: cost.extractionId,
-          modelName: cost.modelName,
+          modelName: cost.scenarioName ?? cost.modelName,
           sourceName: null,
-          confidence: 'verified',
+          confidence: cost.confidence ?? 'low_confidence',
           inputPricePer1m: 0,
           outputPricePer1m: 0,
           inputCost: 0,
@@ -101,8 +125,10 @@ export default async function ComparePage({
         });
       }
 
-      // Query 4: Fetch promotions for selected models
-      const promos = await db
+      // Query 4: Fetch ALL promotions and match client-side via pattern.
+      // modelPattern may be a glob (e.g. "gpt-4*"), so exact inArray
+      // would miss matches — we must iterate and use matchesPattern().
+      const allPromos = await db
         .select({
           id: promotions.id,
           modelPattern: promotions.modelPattern,
@@ -113,23 +139,26 @@ export default async function ComparePage({
           endDate: promotions.endDate,
           sourceUrl: promotions.sourceUrl,
         })
-        .from(promotions)
-        .where(inArray(promotions.modelPattern, modelNames));
+        .from(promotions);
 
-      for (const promo of promos) {
-        if (!promotionsMap[promo.modelPattern]) {
-          promotionsMap[promo.modelPattern] = [];
+      for (const promo of allPromos) {
+        for (const modelName of modelNames) {
+          if (matchesPattern(modelName, promo.modelPattern)) {
+            if (!promotionsMap[modelName]) {
+              promotionsMap[modelName] = [];
+            }
+            promotionsMap[modelName].push({
+              id: promo.id,
+              modelPattern: promo.modelPattern,
+              type: promo.type,
+              description: promo.description,
+              credits: promo.credits,
+              startDate: promo.startDate ? new Date(promo.startDate) : null,
+              endDate: promo.endDate ? new Date(promo.endDate) : null,
+              sourceUrl: promo.sourceUrl,
+            });
+          }
         }
-        promotionsMap[promo.modelPattern].push({
-          id: promo.id,
-          modelPattern: promo.modelPattern,
-          type: promo.type,
-          description: promo.description,
-          credits: promo.credits,
-          startDate: promo.startDate ? new Date(promo.startDate) : null,
-          endDate: promo.endDate ? new Date(promo.endDate) : null,
-          sourceUrl: promo.sourceUrl,
-        });
       }
     }
   } catch (error) {

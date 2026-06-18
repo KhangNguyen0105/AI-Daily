@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { ModelSelector, type ModelOption } from '@/app/components/ModelSelector';
 import { ComparisonCard } from '@/app/components/ComparisonCard';
@@ -28,12 +28,18 @@ export function ComparePageClient({
     inputPricePer1m: number | null;
     outputPricePer1m: number | null;
     contextWindow: number | null;
-    confidence: string;
+    confidence: 'verified' | 'likely' | 'low_confidence';
     sourceName: string | null;
   }>;
 }) {
   const router = useRouter();
   const [selectedModels, setSelectedModels] = useState<ModelOption[]>(initialSelected);
+
+  // WR-05: Memoize filtered models to avoid filtering 3 times per render
+  const validModels = useMemo(
+    () => selectedModels.filter((m) => m.modelName),
+    [selectedModels]
+  );
 
   const handleSelect = (index: number, model: ModelOption) => {
     const newSelected = [...selectedModels];
@@ -44,7 +50,7 @@ export function ComparePageClient({
 
   const handleAdd = () => {
     if (selectedModels.length < 5) {
-      setSelectedModels([...selectedModels, { modelName: '', sourceId: 0, sourceName: '' }]);
+      setSelectedModels([...selectedModels, { modelName: '', sourceId: -1, sourceName: '' }]);
     }
   };
 
@@ -105,14 +111,14 @@ export function ComparePageClient({
       </div>
 
       {/* Comparison cards or empty state */}
-      {selectedModels.filter((m) => m.modelName).length === 0 ? (
+      {validModels.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-lg font-medium text-gray-900 mb-2">Select models to compare</p>
           <p className="text-sm text-gray-600">
             Use the dropdowns above to select 2-5 models for side-by-side comparison.
           </p>
         </div>
-      ) : selectedModels.filter((m) => m.modelName).length === 1 ? (
+      ) : validModels.length === 1 ? (
         <div className="text-center py-12">
           <p className="text-lg font-medium text-gray-900 mb-2">Add another model</p>
           <p className="text-sm text-gray-600">
@@ -121,9 +127,7 @@ export function ComparePageClient({
         </div>
       ) : (
         <div className="flex gap-4 overflow-x-auto pb-4">
-          {selectedModels
-            .filter((m) => m.modelName)
-            .map((model) => {
+          {validModels.map((model) => {
               const key = model.modelName;
               const pricing = pricingDataMap[key] || {
                 inputPricePer1m: null,

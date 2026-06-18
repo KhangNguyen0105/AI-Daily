@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getAlerts, type PriceAlert } from '@/app/lib/alerts';
+import { getAlerts } from '@/app/lib/alerts';
 
 interface TriggeredAlert {
   modelName: string;
@@ -14,41 +14,63 @@ interface TriggeredAlert {
  * Per D-16: check alerts on page load, show if any triggered.
  * Per D-17: below threshold only.
  * Fixed position bottom-right, auto-dismiss 10s.
+ *
+ * Fetches its own current prices from /api/prices so it works
+ * without a parent server component passing data down.
  */
-export function AlertBanner({
-  currentPrices = {},
-}: {
-  currentPrices?: Record<string, number>;
-}) {
+export function AlertBanner() {
   const [triggeredAlerts, setTriggeredAlerts] = useState<TriggeredAlert[]>([]);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const alerts = getAlerts();
-    const triggered: TriggeredAlert[] = [];
+    let cancelled = false;
+    let dismissTimer: ReturnType<typeof setTimeout> | undefined;
 
-    for (const alert of alerts) {
-      const key = `${alert.modelName}:${alert.sourceId}`;
-      const currentPrice = currentPrices[key];
+    async function checkAlerts() {
+      const alerts = getAlerts();
+      if (alerts.length === 0) return;
 
-      if (currentPrice !== undefined && currentPrice < alert.thresholdPrice) {
-        triggered.push({
-          modelName: alert.modelName,
-          thresholdPrice: alert.thresholdPrice,
-          currentPrice,
-        });
+      try {
+        const res = await fetch('/api/prices');
+        if (!res.ok) return;
+        const currentPrices: Record<string, number> = await res.json();
+        if (cancelled) return;
+
+        const triggered: TriggeredAlert[] = [];
+
+        for (const alert of alerts) {
+          const key = `${alert.modelName}:${alert.sourceId}`;
+          const currentPrice = currentPrices[key];
+
+          if (currentPrice !== undefined && currentPrice < alert.thresholdPrice) {
+            triggered.push({
+              modelName: alert.modelName,
+              thresholdPrice: alert.thresholdPrice,
+              currentPrice,
+            });
+          }
+        }
+
+        if (triggered.length > 0) {
+          setTriggeredAlerts(triggered);
+          setVisible(true);
+
+          // Auto-dismiss after 10 seconds
+          dismissTimer = setTimeout(() => {
+            if (!cancelled) setVisible(false);
+          }, 10000);
+        }
+      } catch {
+        // Silently fail — alerts are non-critical UI
       }
     }
 
-    if (triggered.length > 0) {
-      setTriggeredAlerts(triggered);
-      setVisible(true);
-
-      // Auto-dismiss after 10 seconds
-      const timer = setTimeout(() => setVisible(false), 10000);
-      return () => clearTimeout(timer);
-    }
-  }, [currentPrices]);
+    checkAlerts();
+    return () => {
+      cancelled = true;
+      if (dismissTimer) clearTimeout(dismissTimer);
+    };
+  }, []);
 
   const handleDismiss = (index: number) => {
     setTriggeredAlerts((prev) => prev.filter((_, i) => i !== index));

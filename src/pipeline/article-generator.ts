@@ -37,7 +37,7 @@ function getModel(provider: string) {
     case 'openai':
       return openai('gpt-4o');
     case 'mimo':
-      return mimoProvider.chat('mimo-v2.5-pro');
+      return mimoProvider.chat(env.MIMO_MODEL);
     default:
       return anthropic('claude-sonnet-4-5');
   }
@@ -116,6 +116,19 @@ Rules:
 export async function generateArticle(diff: DiffResult): Promise<GeneratedArticle> {
   const primaryProvider = env.AI_PROVIDER;
   const fallbackProvider = env.AI_FALLBACK_PROVIDER;
+
+  // Validate API keys before making calls
+  const keyMap: Record<string, string | undefined> = {
+    anthropic: env.ANTHROPIC_API_KEY,
+    openai: env.OPENAI_API_KEY,
+    mimo: env.MIMO_API_KEY,
+  };
+  if (!keyMap[primaryProvider] && !keyMap[fallbackProvider]) {
+    throw new Error(
+      `No API key configured for primary (${primaryProvider}) or fallback (${fallbackProvider}) provider. ` +
+      `Set ANTHROPIC_API_KEY, OPENAI_API_KEY, or MIMO_API_KEY in your environment.`
+    );
+  }
 
   const diffContext = buildDiffContext(diff);
 

@@ -1,3 +1,4 @@
+import { timingSafeEqual } from 'crypto';
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 
@@ -18,7 +19,12 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
           console.error("ADMIN_PASSWORD environment variable is not set");
           return null;
         }
-        if (credentials.password === adminPassword) {
+        const password = credentials.password ?? '';
+        // WR-04 fix: Use timing-safe comparison to prevent timing attacks
+        if (
+          password.length === adminPassword.length &&
+          timingSafeEqual(Buffer.from(password), Buffer.from(adminPassword))
+        ) {
           return { id: "admin", name: "Admin" };
         }
         return null;

@@ -3,18 +3,7 @@
 import { format } from 'date-fns';
 import { isSafeUrl } from '@/app/lib/url-utils';
 import { PromotionData } from '@/app/components/PromotionsList';
-
-const typeBadgeStyles: Record<string, string> = {
-  free_tier: 'bg-green-100 text-green-800',
-  promotion: 'bg-blue-100 text-blue-800',
-  beta: 'bg-purple-100 text-purple-800',
-};
-
-const typeLabels: Record<string, string> = {
-  free_tier: 'Free Tier',
-  promotion: 'Promotion',
-  beta: 'Beta',
-};
+import { PROMOTION_BADGE_STYLES, PROMOTION_TYPE_LABELS } from '@/app/lib/promotion-constants';
 
 /**
  * Individual promotion card component.
@@ -55,10 +44,10 @@ export function PromotionCard({ promo }: { promo: PromotionData }) {
       <div className="flex items-center justify-between mb-3">
         <span
           className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
-            typeBadgeStyles[promo.type] ?? 'bg-gray-100 text-gray-800'
+            PROMOTION_BADGE_STYLES[promo.type] ?? 'bg-gray-100 text-gray-800'
           }`}
         >
-          {typeLabels[promo.type] ?? promo.type}
+          {PROMOTION_TYPE_LABELS[promo.type] ?? promo.type}
         </span>
         {daysRemaining && (
           <span className="text-xs text-gray-500">{daysRemaining}</span>

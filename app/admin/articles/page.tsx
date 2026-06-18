@@ -24,8 +24,8 @@ export default async function AdminArticlesPage() {
       })
       .from(articles)
       .orderBy(desc(articles.date));
-  } catch {
-    // Database may not be available during build
+  } catch (error) {
+    console.error('Failed to load articles:', error);
   }
 
   return (

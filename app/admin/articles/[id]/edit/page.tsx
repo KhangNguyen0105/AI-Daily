@@ -54,6 +54,8 @@ export default async function EditArticlePage({ params }: { params: Promise<{ id
     collectedAt: Date;
   }> = [];
   try {
+    // WR-07: Date boundaries use explicit UTC to match the convention that
+    // article.date is a UTC date string and collectedAt is stored as UTC.
     const startOfDay = new Date(`${article.date}T00:00:00.000Z`);
     const endOfDay = new Date(`${article.date}T23:59:59.999Z`);
 

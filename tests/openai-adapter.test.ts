@@ -33,7 +33,8 @@ describe('OpenAIAdapter', () => {
     expect(typeof adapter.normalize).toBe('function');
   });
 
-  it('normalize sets confidence to likely for all items', () => {
+  // IN-03: Renamed — normalize is now identity, confidence passes through unchanged
+  it('normalize preserves confidence and sets rawPriceText for USD providers', () => {
     const adapter = new OpenAIAdapter();
     const input = {
       models: [

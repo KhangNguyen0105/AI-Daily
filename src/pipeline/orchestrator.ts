@@ -78,14 +78,14 @@ export async function orchestrateDailyRun(): Promise<number> {
   const runId = inserted[0].id;
 
   // Enqueue a collect job for each registered provider
-  // Per D-01: Tier 1 providers get priority=3 (highest), Tier 2 priority=2, Tier 3 priority=1
-  // BullMQ: lower number = higher priority
+  // Per D-01: Tier 1 providers get highest priority
+  // BullMQ: lower number = higher priority (1 is highest)
   for (const adapter of adapters) {
     const isT1 = isTier1Provider(adapter.config.name);
     const isT2 = isTier2Provider(adapter.config.name);
     const isT3 = isTier3Provider(adapter.config.name);
 
-    const priority = isT1 ? 3 : isT2 ? 2 : isT3 ? 1 : 10;
+    const priority = isT1 ? 1 : isT2 ? 2 : isT3 ? 3 : 10;
 
     await collectQueue.add(
       'collect',

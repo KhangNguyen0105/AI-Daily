@@ -12,7 +12,7 @@ import {
   calculatePracticalCost,
   calculateScenarioCosts,
 } from '../app/lib/pricing-utils';
-import type { PricingRow } from '../app/components/PricingTable';
+import type { PricingRow } from '../app/lib/types';
 
 describe('formatPrice', () => {
   it('returns "N/A" for null', () => {

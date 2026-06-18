@@ -20,8 +20,9 @@ const envSchema = z.object({
     .default('development'),
   AI_PROVIDER: z.enum(['anthropic', 'openai', 'mimo']).default('anthropic'),
   AI_FALLBACK_PROVIDER: z.enum(['anthropic', 'openai', 'mimo']).default('openai'),
-  ADMIN_PASSWORD: z.string().optional(),
-  NEXTAUTH_SECRET: z.string().optional(),
+  // WR-06: Reject empty strings (which are truthy but useless for auth)
+  ADMIN_PASSWORD: z.string().min(1).optional(),
+  NEXTAUTH_SECRET: z.string().min(1).optional(),
 });
 
 export const env = envSchema.parse(process.env);

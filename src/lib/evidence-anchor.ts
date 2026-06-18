@@ -65,7 +65,7 @@ function normalizeForMatch(text: string): string {
   return text
     .toLowerCase()
     .replace(/[\s ]+/g, ' ') // collapse all whitespace including &nbsp;
-    .replace(/[.,;:!?()[\]{}'"<>]/g, '') // strip punctuation
+    .replace(/[.,;:!?()[\]{}'"<>$%]/g, '') // strip punctuation including $ and %
     .trim();
 }
 

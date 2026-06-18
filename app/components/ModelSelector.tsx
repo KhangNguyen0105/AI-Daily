@@ -66,6 +66,7 @@ export function ModelSelector({
     <div ref={containerRef} className="relative w-full">
       <input
         type="text"
+        aria-label="Search and select a model"
         value={open ? query : selected?.modelName ?? ''}
         onChange={(e) => {
           setQuery(e.target.value);

@@ -65,7 +65,8 @@ export function EditArticleClient({ article, initialVersions, initialExtractions
         const { versions: newVersions } = await versionsRes.json();
         setVersions(newVersions);
       }
-    } catch {
+    } catch (error) {
+      console.error('Article save failed:', error);
       addToast('error', 'Article save failed. Your changes were not saved. Please try again.');
     } finally {
       setIsSaving(false);
@@ -89,7 +90,8 @@ export function EditArticleClient({ article, initialVersions, initialExtractions
 
       // Reload page to show restored content
       window.location.reload();
-    } catch {
+    } catch (error) {
+      console.error('Rollback failed:', error);
       addToast('error', 'Rollback failed. The article could not be restored to the selected version. Please try again.');
     }
   };

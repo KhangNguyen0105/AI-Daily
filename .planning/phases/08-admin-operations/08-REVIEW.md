@@ -405,3 +405,95 @@ const interval = setInterval(async () => {
 _Reviewed: 2026-06-17T12:00:00Z_
 _Reviewer: Claude (gsd-code-reviewer)_
 _Depth: standard_
+
+## Fixes Applied
+
+**Applied:** 2026-06-18
+**Fixer:** Claude (gsd-code-fixer)
+
+### Critical Issues Fixed
+
+**CR-01: Run-full background poller timeout** (`app/api/admin/pipeline/run-full/route.ts`)
+- Added `MAX_PIPELINE_DURATION_MS = 30 * 60 * 1000` (30 minutes) constant
+- Changed `while (true)` to `while (Date.now() < deadline)` with deadline check
+- Added timeout finalization: if deadline is exceeded, the pipeline run is marked as `failed`
+
+**CR-02: Pipeline cancel removes BullMQ jobs** (`app/api/admin/pipeline/cancel/route.ts`)
+- Added dynamic import of `collectQueue`, `extractQueue`, `scoreQueue`, `generateQueue`
+- Before updating DB status, iterates all jobs in `active`, `waiting`, and `delayed` states across all four queues
+- Removes any job whose `data.pipelineRunId` matches the cancelled run ID
+
+**CR-03: Concurrency guard on run-full** (`app/api/admin/pipeline/run-full/route.ts`)
+- Before calling `orchestrateDailyRun()`, queries `pipelineRuns` table for any existing `running` status
+- Returns HTTP 409 with `"A pipeline run is already in progress"` if a run is active
+- Prevents duplicate concurrent pipeline runs from double-clicks or multiple admins
+
+**CR-04: Finalize failure loop prevention** (`app/api/admin/pipeline/run-full/route.ts`)
+- Wrapped `finalizePipelineRun` call in its own try/catch inside the `emptyCount >= 2` block
+- Tracks `finalizeAttempts` counter with `MAX_FINALIZE_ATTEMPTS = 3`
+- After 3 failed finalize attempts, exits the loop (pipeline stays `running` for manual cleanup)
+
+**CR-05: Cancel endpoint input validation** (`app/api/admin/pipeline/cancel/route.ts`)
+- Converts `body.id` to `Number()` and validates with `isNaN()` and `Number.isInteger()`
+- Checks that the pipeline run exists (returns 404 if not found)
+- Checks that the run is in `running` state (returns 409 if not)
+
+### Warnings Fixed
+
+**WR-01: SSE poll interval** (`app/api/admin/pipeline/stream/route.ts`)
+- Increased `setInterval` from 1000ms to 5000ms (pipeline events are infrequent)
+
+**WR-02: Silent catch blocks** (`app/admin/page.tsx`, `app/admin/articles/page.tsx`)
+- All 4 silent `catch {}` blocks now capture the error parameter and log with `console.error()`
+
+**WR-03: Settings key allowlist** (`app/api/admin/settings/route.ts`)
+- Added `VALID_KEYS = ['auto_publish'] as const`
+- Changed `updateSchema.key` from `z.string().min(1)` to `z.enum(VALID_KEYS)`
+
+**WR-04: Timing-safe password comparison** (`src/auth.ts`)
+- Imported `timingSafeEqual` from Node.js `crypto` module
+- Replaced `===` comparison with `timingSafeEqual(Buffer.from(password), Buffer.from(adminPassword))`
+- Added length check before `timingSafeEqual` to prevent buffer length mismatch errors
+
+**WR-05: SSE consecutive error tracking** (`app/api/admin/pipeline/stream/route.ts`)
+- Added `consecutiveErrors` counter and `MAX_CONSECUTIVE_ERRORS = 10` threshold
+- Resets counter on successful query, increments on error
+- After 10 consecutive errors, sets `isClosed = true`, clears interval, and closes the stream controller
+
+**WR-06: Cancel button feedback** (`app/components/admin/PipelineRunsTable.tsx`, `app/admin/pipeline/page.tsx`)
+- Added `onSuccess` and `onError` optional callback props to `PipelineRunsTable`
+- `handleCancel` now checks response status and calls appropriate callback
+- Updated `pipeline/page.tsx` to pass `addToast` callbacks to `PipelineRunsTable`
+
+**WR-07: UTC date range documentation** (`app/admin/articles/[id]/edit/page.tsx`, `app/api/admin/articles/[id]/sources/route.ts`)
+- Added code comments documenting the UTC convention for date boundary construction
+
+### Info Issues Fixed
+
+**IN-02: Toast magic number** (`app/components/admin/Toast.tsx`)
+- Extracted `TOAST_AUTO_DISMISS_MS = 5000` as a named constant
+- Replaced hardcoded `5000` with the constant
+
+**IN-03: Catch block error capture** (`app/admin/login/LoginForm.tsx`, `app/admin/articles/[id]/edit/EditArticleClient.tsx`)
+- `LoginForm.tsx`: Changed `catch {` to `catch (error)` with `console.error('Login failed:', error)`
+- `EditArticleClient.tsx`: Fixed two catch blocks (save and rollback) to capture and log errors
+- Note: `ReCrawlTrigger.tsx`, `RegenerateTrigger.tsx`, and `RunFullPipelineTrigger.tsx` already had error parameters
+
+**IN-01: Structured logging** -- Noted but not implemented. This is a recommendation for future improvement (replace `console.error` with a structured logger across all API routes).
+
+### Files Modified
+
+1. `app/api/admin/pipeline/run-full/route.ts` (CR-01, CR-03, CR-04)
+2. `app/api/admin/pipeline/cancel/route.ts` (CR-02, CR-05)
+3. `app/api/admin/pipeline/stream/route.ts` (WR-01, WR-05)
+4. `app/admin/page.tsx` (WR-02)
+5. `app/admin/articles/page.tsx` (WR-02)
+6. `app/api/admin/settings/route.ts` (WR-03)
+7. `src/auth.ts` (WR-04)
+8. `app/components/admin/PipelineRunsTable.tsx` (WR-06)
+9. `app/admin/pipeline/page.tsx` (WR-06)
+10. `app/admin/articles/[id]/edit/page.tsx` (WR-07)
+11. `app/api/admin/articles/[id]/sources/route.ts` (WR-07)
+12. `app/components/admin/Toast.tsx` (IN-02)
+13. `app/admin/login/LoginForm.tsx` (IN-03)
+14. `app/admin/articles/[id]/edit/EditArticleClient.tsx` (IN-03)

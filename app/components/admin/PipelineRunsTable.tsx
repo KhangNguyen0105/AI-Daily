@@ -24,22 +24,33 @@ interface PipelineRun {
 
 interface PipelineRunsTableProps {
   runs: PipelineRun[];
+  onSuccess?: (message: string) => void;
+  onError?: (message: string) => void;
 }
 
-export function PipelineRunsTable({ runs }: PipelineRunsTableProps) {
+export function PipelineRunsTable({ runs, onSuccess, onError }: PipelineRunsTableProps) {
   const [expandedRowId, setExpandedRowId] = useState<number | null>(null);
   const [cancellingId, setCancellingId] = useState<number | null>(null);
 
   const handleCancel = async (id: number) => {
     setCancellingId(id);
     try {
-      await fetch('/api/admin/pipeline/cancel', {
+      const res = await fetch('/api/admin/pipeline/cancel', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id }),
       });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        onError?.(data.error ?? 'Failed to cancel pipeline run.');
+      } else {
+        onSuccess?.('Pipeline run cancelled successfully.');
+      }
     } catch (err) {
       console.error('Failed to cancel run', err);
+      onError?.('Failed to cancel pipeline run. Check the pipeline status and try again.');
     } finally {
       setCancellingId(null);
     }

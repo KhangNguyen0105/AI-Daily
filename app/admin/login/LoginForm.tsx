@@ -27,7 +27,8 @@ export function LoginForm() {
       } else if (result?.ok) {
         router.push('/admin');
       }
-    } catch {
+    } catch (error) {
+      console.error('Login failed:', error);
       setError('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);

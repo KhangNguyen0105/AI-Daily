@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { PricingTable, type PricingRow } from '@/app/components/PricingTable';
+import { PricingTable } from '@/app/components/PricingTable';
+import type { PricingRow } from '@/app/lib/types';
 import { CostCalculator } from '@/app/components/CostCalculator';
 
 /**

@@ -1,10 +1,11 @@
 import { db } from '@/src/db/index';
 import { extractions, sources } from '@/src/db/schema';
 import { eq, desc } from 'drizzle-orm';
-import { format } from 'date-fns';
-import { type PricingRow } from '@/app/components/PricingTable';
+
+import type { PricingRow } from '@/app/lib/types';
 import { HomePageClient } from '@/app/components/HomePageClient';
-import { getLatestExchangeRate, FALLBACK_RATE } from '@/src/pipeline/exchange-rate-worker';
+// IN-01: Import from standalone utility instead of pipeline module
+import { getLatestExchangeRate, FALLBACK_RATE } from '@/src/lib/exchange-rate';
 
 /**
  * ISR: Revalidate every 60 seconds.
@@ -53,16 +54,18 @@ export default async function HomePage() {
     if (pricingData.length > 0) {
       lastUpdated = pricingData[0].collectedAt;
     }
-  } catch {
-    // DB not available during build — show empty state
+  } catch (err) {
+    // DB not available during build or runtime error — show empty state
+    console.warn('[HomePage] Failed to fetch pricing data:', err);
     pricingData = [];
   }
 
   // Fetch exchange rate separately — failure shouldn't hide pricing data
   try {
     exchangeRate = await getLatestExchangeRate();
-  } catch {
+  } catch (err) {
     // Exchange rate table may not exist yet — use fallback
+    console.warn('[HomePage] Failed to fetch exchange rate:', err);
     exchangeRate = FALLBACK_RATE;
   }
 
@@ -72,7 +75,7 @@ export default async function HomePage() {
       <div className="flex flex-col items-center justify-center py-5 px-4">
         <h1 className="text-2xl font-semibold tracking-tight">AI Daily</h1>
         <p className="mt-1 text-sm text-gray-500">
-          Last updated: {lastUpdated ? format(lastUpdated, 'MMM d, yyyy h:mm a') : 'Unknown'}
+          Last updated: {lastUpdated ? lastUpdated.toISOString().replace('T', ' ').slice(0, 16) + ' UTC' : 'Unknown'}
         </p>
       </div>
 

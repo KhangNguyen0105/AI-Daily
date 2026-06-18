@@ -1,6 +1,5 @@
 import { db } from '@/src/db';
-import { promotions, sources } from '@/src/db/schema';
-import { eq } from 'drizzle-orm';
+import { promotions } from '@/src/db/schema';
 import { PromotionsPageClient } from '@/app/components/PromotionsPageClient';
 import { PromotionData } from '@/app/components/PromotionsList';
 
@@ -27,8 +26,7 @@ export default async function PromotionsPage() {
         endDate: promotions.endDate,
         sourceUrl: promotions.sourceUrl,
       })
-      .from(promotions)
-      .leftJoin(sources, eq(promotions.sourceId, sources.id));
+      .from(promotions);
 
     promos = rows.map((row) => ({
       id: row.id,

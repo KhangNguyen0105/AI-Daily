@@ -145,7 +145,11 @@ export default function PipelinePage() {
       {/* Pipeline Runs */}
       <div className="mb-8">
         <h2 className="text-lg font-semibold text-gray-900 mb-3">Pipeline Runs</h2>
-        <PipelineRunsTable runs={runs as Array<{ id: number; status: string; startedAt: string; completedAt: string | null; stats: { totalProviders?: number; succeeded?: number; failed?: number; extractions?: number; verifiedCount?: number; likelyCount?: number; lowConfidenceCount?: number; attempted?: number } | null }>} />
+        <PipelineRunsTable
+          runs={runs as Array<{ id: number; status: string; startedAt: string; completedAt: string | null; stats: { totalProviders?: number; succeeded?: number; failed?: number; extractions?: number; verifiedCount?: number; likelyCount?: number; lowConfidenceCount?: number; attempted?: number } | null }>}
+          onSuccess={(msg) => addToast('success', msg)}
+          onError={(msg) => addToast('error', msg)}
+        />
       </div>
 
       {/* Recent Errors */}

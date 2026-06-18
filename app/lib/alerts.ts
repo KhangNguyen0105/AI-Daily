@@ -24,7 +24,16 @@ export function getAlerts(): PriceAlert[] {
   try {
     const stored = localStorage.getItem(ALERTS_KEY);
     if (!stored) return [];
-    return JSON.parse(stored) as PriceAlert[];
+    const parsed: unknown = JSON.parse(stored);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(
+      (item): item is PriceAlert =>
+        typeof item === 'object' &&
+        item !== null &&
+        typeof item.modelName === 'string' &&
+        typeof item.sourceId === 'number' &&
+        typeof item.thresholdPrice === 'number',
+    );
   } catch {
     return [];
   }

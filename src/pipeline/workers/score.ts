@@ -63,6 +63,12 @@ export function createScoreWorker(): Worker<ScoreJobData, ScoreJobResult> {
     async (job: Job<ScoreJobData>) => {
       const { extractionIds, rawDataId, sourceId, pipelineRunId, evidenceQuotes, edgeCaseFlags } = job.data;
 
+      // WR-03: Validate verification status against known enum values
+      const VALID_VERIFICATION_STATUSES = [
+        'verified', 'verified_with_warning', 'needs_review',
+        'conflicted', 'quarantined', 'unsupported_pricing_model',
+      ] as const;
+
       // Guard: skip generate step when there are no extractions (WR-07)
       if (extractionIds.length === 0) {
         console.log('Score worker: No extractions to score, skipping generate step');
@@ -106,7 +112,11 @@ export function createScoreWorker(): Worker<ScoreJobData, ScoreJobResult> {
         .where(eq(sources.id, sourceId))
         .limit(1);
 
+      // WR-05: Fail fast on missing source instead of silently falling back to tier3
       const providerName = sourceRows[0]?.name;
+      if (!providerName) {
+        throw new Error(`Source not found for sourceId=${sourceId}. Cannot determine provider tier.`);
+      }
       const sourceTier = (getProviderTier(providerName) ?? 'tier3') as SourceTier;
 
       // Track confidence distribution
@@ -138,10 +148,11 @@ export function createScoreWorker(): Worker<ScoreJobData, ScoreJobResult> {
 
         try {
           // Run two-pass verification via LLM
-          // CR-02: Fail fast if no AI provider is configured
-          if (!env.MIMO_API_KEY && !env.OPENAI_API_KEY) {
+          // CR-03: Fail fast if no AI provider is configured
+          // Include ANTHROPIC_API_KEY since AI_PROVIDER defaults to 'anthropic'
+          if (!env.MIMO_API_KEY && !env.OPENAI_API_KEY && !env.ANTHROPIC_API_KEY) {
             throw new Error(
-              'No AI provider configured. Set MIMO_API_KEY or OPENAI_API_KEY in .env'
+              'No AI provider configured. Set ANTHROPIC_API_KEY, MIMO_API_KEY, or OPENAI_API_KEY in .env'
             );
           }
           const verificationResult = await verifyExtraction(
@@ -189,14 +200,14 @@ export function createScoreWorker(): Worker<ScoreJobData, ScoreJobResult> {
 
           // Determine verification status
           if (verificationResult.verified && evidenceVerified) {
-            if (edgeCaseFlags && Object.keys(edgeCaseFlags).length > 0) {
+            if (edgeCaseFlags && Object.values(edgeCaseFlags).some(f => f?.detected === true)) {
               verificationStatus = 'verified_with_warning';
               verificationNotes += 'Edge cases detected in pricing. ';
             } else {
               verificationStatus = 'verified';
             }
           } else if (verificationResult.disagreements.length > 0) {
-            if (edgeCaseFlags && Object.keys(edgeCaseFlags).length > 0) {
+            if (edgeCaseFlags && Object.values(edgeCaseFlags).some(f => f?.detected === true)) {
               verificationStatus = 'verified_with_warning';
               verificationNotes += 'Verification disagreement with edge cases present. ';
             } else {
@@ -242,6 +253,11 @@ export function createScoreWorker(): Worker<ScoreJobData, ScoreJobResult> {
             });
           }
 
+          // WR-03: Validate verification status before inserting
+          const safeVerificationStatus = (VALID_VERIFICATION_STATUSES as readonly string[]).includes(verificationStatus)
+            ? verificationStatus
+            : 'needs_review';
+
           // Update extraction with all confidence dimensions + freshness
           await db
             .update(extractions)
@@ -262,7 +278,7 @@ export function createScoreWorker(): Worker<ScoreJobData, ScoreJobResult> {
               freshnessStatus: freshnessMetadata.freshness_status as any,
               dataAgeMinutes: freshnessMetadata.data_age_minutes,
               // Verification status (D-08)
-              verificationStatus: verificationStatus as any,
+              verificationStatus: safeVerificationStatus as any,
               verificationNotes: verificationNotes || null,
               edgeCaseFlags: (edgeCaseFlags ?? null) as any,
               updatedAt: new Date(),
@@ -295,7 +311,7 @@ export function createScoreWorker(): Worker<ScoreJobData, ScoreJobResult> {
               freshnessStatus: freshnessMetadata.freshness_status as any,
               dataAgeMinutes: freshnessMetadata.data_age_minutes,
               lastVerifiedAt: freshnessMetadata.last_verified_at,
-              verificationStatus: verificationStatus as any,
+              verificationStatus: 'needs_review' as any,
               verificationNotes: verificationNotes,
               updatedAt: new Date(),
             })

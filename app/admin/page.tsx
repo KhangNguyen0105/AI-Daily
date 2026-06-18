@@ -18,8 +18,8 @@ export default async function AdminOverviewPage() {
       .orderBy(desc(pipelineRuns.startedAt))
       .limit(1);
     lastRun = runs[0] ?? null;
-  } catch {
-    // Database may not be available during build
+  } catch (error) {
+    console.error('Failed to load pipeline runs:', error);
   }
 
   try {
@@ -27,8 +27,8 @@ export default async function AdminOverviewPage() {
       .select({ count: sql<number>`count(distinct ${extractions.modelName})` })
       .from(extractions);
     modelCount = Number(models[0]?.count ?? 0);
-  } catch {
-    // Database may not be available during build
+  } catch (error) {
+    console.error('Failed to load model count:', error);
   }
 
   try {
@@ -37,8 +37,8 @@ export default async function AdminOverviewPage() {
       .from(articles)
       .where(sql`${articles.publishedAt} IS NOT NULL`);
     articleCount = Number(articlesResult[0]?.count ?? 0);
-  } catch {
-    // Database may not be available during build
+  } catch (error) {
+    console.error('Failed to load article count:', error);
   }
 
   const runStatus = lastRun?.status === 'completed' ? 'healthy' : lastRun?.status === 'failed' ? 'error' : 'unknown';

@@ -59,25 +59,27 @@ export interface HumanReviewOverride {
 /**
  * Check if an extraction has ALL required fields populated.
  * All fields: modelName, inputPricePer1m, outputPricePer1m, contextWindow.
+ * Prices must be non-negative, context window must be positive.
  */
 export function hasAllFields(e: ExtractionResult): boolean {
   return (
     e.modelName.trim().length > 0 &&
-    e.inputPricePer1m !== null &&
-    e.outputPricePer1m !== null &&
-    e.contextWindow !== null
+    e.inputPricePer1m !== null && e.inputPricePer1m >= 0 &&
+    e.outputPricePer1m !== null && e.outputPricePer1m >= 0 &&
+    e.contextWindow !== null && e.contextWindow > 0
   );
 }
 
 /**
  * Check if an extraction has CORE fields populated.
  * Core fields: modelName, inputPricePer1m, outputPricePer1m.
+ * Prices must be non-negative.
  */
 export function hasCoreFields(e: ExtractionResult): boolean {
   return (
     e.modelName.trim().length > 0 &&
-    e.inputPricePer1m !== null &&
-    e.outputPricePer1m !== null
+    e.inputPricePer1m !== null && e.inputPricePer1m >= 0 &&
+    e.outputPricePer1m !== null && e.outputPricePer1m >= 0
   );
 }
 
@@ -320,7 +322,7 @@ function applyCriticalRules(
   }
 
   // Rule 4: Edge case detected
-  if (edgeCaseFlags && Object.keys(edgeCaseFlags).length > 0) {
+  if (edgeCaseFlags && Object.values(edgeCaseFlags).some(f => f?.detected === true)) {
     notes.push('verified_with_warning');
   }
 

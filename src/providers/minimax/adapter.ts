@@ -6,6 +6,13 @@ import { getAIModel } from '../../lib/ai-client';
 import { minimaxConfig } from './config';
 
 /**
+ * CNY to USD fallback exchange rate.
+ * ~7.25 CNY/USD as of 2026. For production accuracy, fetch the daily rate
+ * from the exchange_rates table (which already exists in the schema).
+ */
+const CNY_TO_USD_FALLBACK = 0.138;
+
+/**
  * MiniMax provider adapter.
  *
  * Chinese AI provider offering abab series models.
@@ -96,24 +103,28 @@ ${truncatedHtml}`,
 
   /**
    * Normalize MiniMax extractions.
-   * CNY prices are stored as-is; USD conversion happens at the score/register stage
-   * using the daily exchange rate from the exchange_rates table.
+   * CNY prices are converted to USD using a fallback exchange rate.
    *
    * Per D-05: Preserve raw_price_text alongside normalized values.
    */
   normalize(extractions: ProviderExtraction): ProviderExtraction {
     for (const e of extractions.models) {
-      // Store raw price text for evidence anchoring
       if (e.inputPricePer1m !== null) {
+        // Store raw CNY value in rawPriceText
         e.rawPriceText = `${e.inputPricePer1m} CNY per 1M input tokens`;
         e.rawUnit = 'per 1M tokens';
         e.rawCurrency = 'CNY';
+        // Convert to USD for the normalized price field
+        e.inputPricePer1m = Math.round(e.inputPricePer1m * CNY_TO_USD_FALLBACK * 1000) / 1000;
       }
       // CR-06: Also capture output price text for evidence anchoring
       if (e.outputPricePer1m !== null) {
+        const rawOutputCNY = e.outputPricePer1m;
         e.rawPriceText = e.rawPriceText
-          ? `${e.rawPriceText}; ${e.outputPricePer1m} CNY per 1M output tokens`
-          : `${e.outputPricePer1m} CNY per 1M output tokens`;
+          ? `${e.rawPriceText}; ${rawOutputCNY} CNY per 1M output tokens`
+          : `${rawOutputCNY} CNY per 1M output tokens`;
+        // Convert to USD for the normalized price field
+        e.outputPricePer1m = Math.round(e.outputPricePer1m * CNY_TO_USD_FALLBACK * 1000) / 1000;
       }
     }
     return extractions;

@@ -31,8 +31,11 @@ export async function GET() {
   }
 }
 
+// WR-03 fix: Restrict setting keys to known values
+const VALID_KEYS = ['auto_publish'] as const;
+
 const updateSchema = z.object({
-  key: z.string().min(1),
+  key: z.enum(VALID_KEYS),
   value: z.string(),
 });
 

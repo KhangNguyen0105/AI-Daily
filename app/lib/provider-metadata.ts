@@ -6,7 +6,7 @@
  * Per PRIC-04: Provider filter dropdown with unique providers.
  */
 
-import type { PricingRow } from '@/app/components/PricingTable';
+import type { PricingRow } from '@/app/lib/types';
 
 /**
  * Map of normalized provider names (lowercase) to logo file paths.

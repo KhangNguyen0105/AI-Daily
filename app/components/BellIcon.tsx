@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getAlerts, addAlert, removeAlert } from '@/app/lib/alerts';
 
 /**
@@ -20,6 +20,20 @@ export function BellIcon({
   const [hasAlert, setHasAlert] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [thresholdInput, setThresholdInput] = useState('');
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Close popup on click outside
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setShowForm(false);
+      }
+    }
+    if (showForm) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showForm]);
 
   // Check if alert exists on mount
   useEffect(() => {
@@ -49,9 +63,11 @@ export function BellIcon({
   };
 
   return (
-    <div className="inline-block">
+    <div ref={containerRef} className="inline-block">
       <button
         onClick={() => setShowForm(!showForm)}
+        aria-expanded={showForm}
+        aria-haspopup="true"
         className={`p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg transition-colors ${
           hasAlert
             ? 'text-blue-600 hover:text-blue-800'
@@ -73,7 +89,7 @@ export function BellIcon({
       </button>
 
       {showForm && (
-        <div className="absolute mt-2 p-3 bg-gray-50 rounded-lg border border-gray-200 shadow-lg z-10 w-64">
+        <div role="dialog" aria-label="Price alert settings" className="absolute mt-2 p-3 bg-gray-50 rounded-lg border border-gray-200 shadow-lg z-10 w-64">
           {currentPrice !== null && (
             <p className="text-xs text-gray-600 mb-2">
               Current price: ${currentPrice.toFixed(4)}/1M tokens

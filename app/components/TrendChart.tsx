@@ -30,11 +30,21 @@ interface ChartDataPoint {
 }
 
 /**
+ * Props passed by Recharts to custom dot components.
+ */
+interface RechartsDotProps {
+  cx?: number;
+  cy?: number;
+  payload?: ChartDataPoint;
+  [key: string]: unknown;
+}
+
+/**
  * Custom dot component for input price line.
  * Green for drops, red for increases, blue default.
  * Defined outside render function per Pitfall 1.
  */
-function InputDot(props: any) {
+function InputDot(props: RechartsDotProps) {
   const { cx, cy, payload } = props;
   if (!payload || cx === undefined || cy === undefined) return null;
 
@@ -60,7 +70,7 @@ function InputDot(props: any) {
  * Green for drops, red for increases, red default.
  * Defined outside render function per Pitfall 1.
  */
-function OutputDot(props: any) {
+function OutputDot(props: RechartsDotProps) {
   const { cx, cy, payload } = props;
   if (!payload || cx === undefined || cy === undefined) return null;
 
@@ -84,7 +94,7 @@ function OutputDot(props: any) {
 /**
  * Custom active dot for hover state.
  */
-function ActiveDot(props: any) {
+function ActiveDot(props: RechartsDotProps) {
   const { cx, cy } = props;
   if (cx === undefined || cy === undefined) return null;
   return <circle cx={cx} cy={cy} r={6} fill="#2563eb" stroke="#fff" strokeWidth={2} />;
@@ -94,7 +104,7 @@ function ActiveDot(props: any) {
  * Star marker for first data point (new model launch).
  * Per D-04: New model launches get a star icon in amber (#f59e0b).
  */
-function FirstPointStar(props: any) {
+function FirstPointStar(props: RechartsDotProps) {
   const { cx, cy, payload } = props;
   if (!payload || !payload.isFirstPoint || cx === undefined || cy === undefined) {
     return null;
@@ -201,7 +211,7 @@ export function TrendChart({ data, modelName }: { data: TrendPoint[]; modelName:
           <XAxis dataKey="date" />
           <YAxis />
           <Tooltip
-            formatter={(value: any, name: any) => [
+            formatter={(value: string | number | (string | number)[], name: string) => [
               `$${typeof value === 'number' ? value.toFixed(4) : value}`,
               name,
             ]}
@@ -225,7 +235,13 @@ export function TrendChart({ data, modelName }: { data: TrendPoint[]; modelName:
             dot={<OutputDot />}
             activeDot={<ActiveDot />}
           />
-          {/* Star markers for first point - rendered as separate Line with custom shape */}
+          {/* Star markers for first point (new model launches per D-04).
+            Uses a hidden Line with legendType="none" to position
+            FirstPointStar dots at the correct chart coordinates.
+            Recharts may still include this in tooltip data — the
+            transparent stroke participates in hit-testing but is
+            visually invisible. If this causes issues, consider using
+            Recharts' <Customized> or <ReferenceDot> instead. */}
           <Line
             type="monotone"
             dataKey="input"

@@ -24,7 +24,7 @@ export function ComparisonCard({
   inputPricePer1m: number | null;
   outputPricePer1m: number | null;
   contextWindow: number | null;
-  confidence: string;
+  confidence: 'verified' | 'likely' | 'low_confidence';
   practicalCosts: PracticalCost[];
   promotions: PromotionData[];
 }) {

@@ -8,6 +8,9 @@ interface Toast {
   message: string;
 }
 
+// IN-02: Named constant for toast auto-dismiss timeout
+const TOAST_AUTO_DISMISS_MS = 5000;
+
 export function useToast() {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const counterRef = useRef(0);
@@ -18,7 +21,7 @@ export function useToast() {
 
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 5000);
+    }, TOAST_AUTO_DISMISS_MS);
   }, []);
 
   const removeToast = useCallback((id: string) => {

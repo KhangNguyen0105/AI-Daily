@@ -12,6 +12,9 @@ vi.mock('../../src/db/index', () => ({
       selectCallIndex++;
       return {
         from: vi.fn(() => ({
+          leftJoin: vi.fn(() => ({
+            where: vi.fn(() => Promise.resolve(result)),
+          })),
           where: vi.fn(() => Promise.resolve(result)),
         })),
       };

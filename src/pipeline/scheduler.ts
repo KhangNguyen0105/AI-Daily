@@ -296,11 +296,14 @@ export function createTier1RefreshWorker(): Worker {
             pipelineRunId: runId,
             isScheduled: true,
             isTier1Refresh: true,
+            isTier1: true,
+            isTier2: false,
+            isTier3: false,
           },
           {
             jobId: `tier1-refresh-${adapter.config.name}-${Date.now()}`,
-            // Per D-01: Tier 1 refresh jobs get priority=2 (higher than routine collects at priority=10)
-            priority: 2,
+            // Per D-01: Tier 1 refresh jobs get highest priority (1)
+            priority: 1,
           },
         );
         enqueued++;
@@ -363,11 +366,14 @@ export function createTier2RefreshWorker(): Worker {
             pipelineRunId: runId,
             isScheduled: true,
             isTier2Refresh: true,
+            isTier1: false,
+            isTier2: true,
+            isTier3: false,
           },
           {
             jobId: `tier2-refresh-${adapter.config.name}-${Date.now()}`,
-            // Per D-01: Tier 2 refresh jobs get priority=5 (medium priority)
-            priority: 5,
+            // Per D-01: Tier 2 refresh jobs get priority=2 (second highest)
+            priority: 2,
           },
         );
         enqueued++;

@@ -1,0 +1,42 @@
+'use client';
+
+/**
+ * Shared currency toggle button group (USD / VND).
+ * Extracted from ModelDetailClient and PricingTable per IN-03 (DRY).
+ *
+ * Controlled component: parent owns the state via `currency` + `onCurrencyChange`.
+ */
+export function CurrencyToggle({
+  currency,
+  onCurrencyChange,
+}: {
+  currency: 'usd' | 'vnd';
+  onCurrencyChange: (c: 'usd' | 'vnd') => void;
+}) {
+  return (
+    <div className="flex gap-1" role="group" aria-label="Toggle currency">
+      <button
+        type="button"
+        onClick={() => onCurrencyChange('usd')}
+        className={`px-3 py-1 text-sm rounded-l border transition-colors ${
+          currency === 'usd'
+            ? 'bg-blue-600 text-white border-blue-600'
+            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+        }`}
+      >
+        USD
+      </button>
+      <button
+        type="button"
+        onClick={() => onCurrencyChange('vnd')}
+        className={`px-3 py-1 text-sm rounded-r border-t border-b border-r transition-colors ${
+          currency === 'vnd'
+            ? 'bg-blue-600 text-white border-blue-600'
+            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+        }`}
+      >
+        VND
+      </button>
+    </div>
+  );
+}

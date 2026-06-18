@@ -408,8 +408,34 @@ All fixes verified. No new issues. **266 tests pass across 21 test files.**
 
 ---
 
+## Fixes Applied
+
+This section documents the remaining fixes applied in the code-fixer pass (iteration 4). Previous iterations (1-3) are documented in the Fix Report above. This pass focused on the two findings that were originally skipped: IN-03 (currency toggle duplication) and IN-04 (slug dot-stripping collision).
+
+### IN-04: Dot-stripping in generateSlug changed to dot-to-hyphen conversion
+
+**File modified:** `app/lib/slug-utils.ts:20`
+**Test updated:** `tests/slug.test.ts` (3 test expectations updated, 1 new collision-avoidance test added)
+
+**What changed:** The `generateSlug` function previously stripped all dots via `.replace(/\./g, '')`, which meant `"model.v1"` and `"modelv1"` (same sourceId) produced identical slugs, causing a silent collision. Now dots are converted to hyphens via `.replace(/\./g, '-')`, so `"model.v1"` produces `"model-v1"` while `"modelv1"` remains `"modelv1"` -- no collision.
+
+**Impact on existing URLs:** Slugs for models with dots in their names will change (e.g., `"gemini-15-pro--3"` becomes `"gemini-1-5-pro--3"`). Because the project uses ISR with 60-second revalidation and `generateStaticParams` regenerates slugs at each build, old cached slugs will naturally expire. Any externally shared links to old-format slugs would 404 until the next ISR cycle.
+
+**Tests:** All 20 slug tests pass, including the new collision-avoidance test.
+
+### IN-03: Shared CurrencyToggle component extracted
+
+**Files modified:** `app/components/ModelDetailClient.tsx`, `app/components/PricingTable.tsx`
+**File created:** `app/components/CurrencyToggle.tsx`
+
+**What changed:** The USD/VND toggle button group was duplicated across `ModelDetailClient` (inline buttons in the "Current Pricing" section header) and `PricingTable` (inline buttons in the filter toolbar). Both used identical markup and Tailwind classes. A shared `CurrencyToggle` component was extracted to `app/components/CurrencyToggle.tsx` as a controlled component accepting `currency` and `onCurrencyChange` props. Both consumers now import and render `<CurrencyToggle>` instead of inline buttons.
+
+**Design:** The component is a controlled component (parent owns state), which is consistent with how both consumers already worked: `ModelDetailClient` manages its own `useState`, while `PricingTable` receives `currency` and `onCurrencyChange` from `HomePageClient`. Adding a future currency (e.g., EUR) now requires updating only the shared component.
+
+---
+
 _Reviewed: 2026-06-14T00:00:00Z_
 _Reviewer: Claude (gsd-code-reviewer)_
 _Depth: deep_
-_Fix iterations: 3_
+_Fix iterations: 4_
 _Status: resolved_

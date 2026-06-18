@@ -32,6 +32,8 @@ export async function GET(
     }
 
     const articleDate = article[0].date;
+    // WR-07: Date boundaries use explicit UTC to match the convention that
+    // article.date is a UTC date string and collectedAt is stored as UTC.
     const startOfDay = new Date(`${articleDate}T00:00:00.000Z`);
     const endOfDay = new Date(`${articleDate}T23:59:59.999Z`);
 

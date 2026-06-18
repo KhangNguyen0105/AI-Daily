@@ -86,6 +86,8 @@ export async function GET() {
         lastVerifiedAt: extractions.lastVerifiedAt,
         freshnessStatus: extractions.freshnessStatus,
         dataAgeMinutes: extractions.dataAgeMinutes,
+        // Updated at for fallback freshness
+        updatedAt: extractions.updatedAt,
         // Verification
         verificationStatus: extractions.verificationStatus,
         // Human review (D-07)
@@ -147,10 +149,10 @@ export async function GET() {
           contextWindow: row.contextWindow,
           confidence,
           freshness: {
-            last_verified_at: row.lastVerifiedAt?.toISOString() || new Date().toISOString(),
-            status: freshnessStatus,
-            badge_color: badge.badge_color,
-            data_age_hours: dataAgeHours,
+            last_verified_at: row.lastVerifiedAt?.toISOString() || row.updatedAt?.toISOString() || null,
+            status: row.lastVerifiedAt ? freshnessStatus : 'unknown',
+            badge_color: row.lastVerifiedAt ? badge.badge_color : 'gray',
+            data_age_hours: row.lastVerifiedAt ? dataAgeHours : null,
           },
           sourceUrl: row.sourceUrl,
           humanReviewStatus: row.humanReviewStatus || 'unreviewed',

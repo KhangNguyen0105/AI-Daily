@@ -22,7 +22,7 @@ const mockPromotions: PromotionData[] = [
     description: '50% off Claude Sonnet',
     credits: null,
     startDate: new Date('2026-06-01'),
-    endDate: new Date('2026-06-10'), // Expired
+    endDate: new Date(Date.now() - 24 * 60 * 60 * 1000), // Yesterday (always expired)
     sourceUrl: null,
   },
   {

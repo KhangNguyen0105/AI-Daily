@@ -13,13 +13,15 @@ export async function GET(request: NextRequest) {
   }
 
   let isClosed = false;
+  let consecutiveErrors = 0;
+  const MAX_CONSECUTIVE_ERRORS = 10;
 
   const stream = new ReadableStream({
     async start(controller) {
       // Send initial connection keep-alive to flush headers
       controller.enqueue(new TextEncoder().encode(': keep-alive\n\n'));
 
-      // 1-second server-side poll for true real-time feel without client-side HTTP overhead
+      // WR-01 fix: Poll every 5 seconds (pipeline events are infrequent)
       const interval = setInterval(async () => {
         if (isClosed) {
           clearInterval(interval);
@@ -35,10 +37,18 @@ export async function GET(request: NextRequest) {
 
           const dataString = JSON.stringify(runsData);
           controller.enqueue(new TextEncoder().encode(`data: ${dataString}\n\n`));
+          consecutiveErrors = 0;
         } catch (error) {
+          consecutiveErrors++;
           console.error('SSE Error:', error);
+          // WR-05 fix: Stop polling after too many consecutive errors
+          if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+            isClosed = true;
+            clearInterval(interval);
+            try { controller.close(); } catch {}
+          }
         }
-      }, 1000);
+      }, 5000);
 
       request.signal.addEventListener('abort', () => {
         isClosed = true;

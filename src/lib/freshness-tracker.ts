@@ -1,4 +1,8 @@
 import type { SourceTier } from '../providers/types';
+import { db } from '../db/index';
+import { sources } from '../db/schema';
+import { eq } from 'drizzle-orm';
+import { collectQueue } from '../pipeline/queues';
 
 /**
  * Freshness tracking and SLA enforcement (D-03).
@@ -211,14 +215,39 @@ export async function markStaleData(
 
 /**
  * Trigger a priority recrawl for a source.
- * This is a stub that logs the recrawl request — full BullMQ integration in Phase 4.
+ * Enqueues a high-priority collect job in BullMQ when SLA breach is detected.
  */
 export async function triggerPriorityRecrawl(
   sourceId: number,
   reason: string,
 ): Promise<void> {
-  // Phase 4 integration: enqueue highest priority in BullMQ
+  // Look up provider name from sourceId
+  const sourceRows = await db
+    .select({ name: sources.name })
+    .from(sources)
+    .where(eq(sources.id, sourceId))
+    .limit(1);
+
+  if (sourceRows.length === 0) {
+    console.warn(`triggerPriorityRecrawl: source ${sourceId} not found`);
+    return;
+  }
+
+  const providerName = sourceRows[0].name;
   console.warn(
-    `Freshness: Priority recrawl triggered for source ${sourceId}. Reason: ${reason}`
+    `Freshness: Priority recrawl triggered for ${providerName} (source ${sourceId}). Reason: ${reason}`
+  );
+
+  await collectQueue.add(
+    'priority-recrawl',
+    {
+      providerName,
+      sourceId,
+      isPriorityRecrawl: true,
+    },
+    {
+      jobId: `priority-recrawl-${providerName}-${Date.now()}`,
+      priority: 1, // Highest priority
+    },
   );
 }

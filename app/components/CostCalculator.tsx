@@ -8,7 +8,7 @@ import {
   sanitizeDisplayName,
   PracticalCost,
 } from '@/app/lib/pricing-utils';
-import type { PricingRow } from '@/app/components/PricingTable';
+import type { PricingRow } from '@/app/lib/types';
 
 /**
  * Interactive cost calculator component.
