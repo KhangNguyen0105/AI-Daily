@@ -54,7 +54,7 @@ export function ModelDetailClient({
       <div className="mb-8">
         <Link
           href="/"
-          className="text-blue-600 hover:text-blue-800 text-sm mb-4 inline-flex items-center gap-1"
+          className="text-accent-blue hover:text-accent-blue text-sm mb-4 inline-flex items-center gap-1"
         >
           &larr; Back to pricing
         </Link>
@@ -70,7 +70,7 @@ export function ModelDetailClient({
 
         <div className="flex items-center gap-3 mt-3 flex-wrap">
           {model.sourceName && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-100 rounded-full text-sm">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-bg-tertiary rounded-full text-sm">
               {providerLogo && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -89,7 +89,7 @@ export function ModelDetailClient({
             {model.confidence.replace('_', ' ')}
           </span>
 
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-text-secondary">
             Collected {format(model.collectedAt, 'MMM d, yyyy h:mm a')}
           </span>
         </div>
@@ -122,19 +122,19 @@ export function ModelDetailClient({
         <h2 className="text-xl font-semibold mb-4">Specifications</h2>
         <dl className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <dt className="text-sm text-gray-500">Context Window</dt>
+            <dt className="text-sm text-text-secondary">Context Window</dt>
             <dd className="text-lg font-medium">
               {formatContextWindow(model.contextWindow)}
             </dd>
           </div>
           <div>
-            <dt className="text-sm text-gray-500">Model Family</dt>
+            <dt className="text-sm text-text-secondary">Model Family</dt>
             <dd className="text-lg font-medium">
               {getModelFamily(model.modelName)}
             </dd>
           </div>
           <div>
-            <dt className="text-sm text-gray-500">First Collected</dt>
+            <dt className="text-sm text-text-secondary">First Collected</dt>
             <dd className="text-lg font-medium">
               {format(model.collectedAt, 'MMM d, yyyy')}
             </dd>
@@ -162,7 +162,7 @@ export function ModelDetailClient({
       {/* Digest Mentions (placeholder until Phase 6) */}
       <section className="py-8">
         <h2 className="text-xl font-semibold mb-4">Daily Digest Mentions</h2>
-        <p className="text-gray-500 text-sm">
+        <p className="text-text-secondary text-sm">
           Daily digest mentions will appear here once the content engine is
           active.
         </p>
