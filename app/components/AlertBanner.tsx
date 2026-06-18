@@ -109,7 +109,7 @@ export function AlertBanner() {
       {triggeredAlerts.length > 1 && (
         <button
           onClick={handleDismissAll}
-          className="w-full text-xs text-gray-600 hover:text-gray-800 text-center py-1"
+          className="w-full text-xs text-text-secondary hover:text-text-primary text-center py-1"
         >
           Dismiss all
         </button>
