@@ -36,7 +36,7 @@ export function AutoPublishToggle({ initialValue, onChange }: AutoPublishToggleP
         onClick={handleToggle}
         disabled={isLoading}
         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-          enabled ? 'bg-blue-600' : 'bg-gray-300'
+          enabled ? 'bg-blue-600' : 'bg-bg-tertiary'
         } ${isLoading ? 'opacity-50' : ''}`}
       >
         <span
@@ -45,7 +45,7 @@ export function AutoPublishToggle({ initialValue, onChange }: AutoPublishToggleP
           }`}
         />
       </button>
-      <span className="text-sm text-gray-700">Auto-publish</span>
+      <span className="text-sm text-text-primary">Auto-publish</span>
     </div>
   );
 }

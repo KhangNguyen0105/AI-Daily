@@ -67,7 +67,7 @@ export function getConfidenceColor(confidence: string): string {
     case 'low_confidence':
       return 'bg-red-100 text-red-800';
     default:
-      return 'bg-gray-100 text-gray-800';
+      return 'bg-bg-tertiary text-text-primary';
   }
 }
 

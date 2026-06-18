@@ -8,18 +8,18 @@ export function SummaryCard({ label, value, status }: SummaryCardProps) {
   const statusColor = {
     healthy: 'bg-green-500',
     error: 'bg-red-500',
-    unknown: 'bg-gray-400',
+    unknown: 'bg-text-tertiary',
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-6">
+    <div className="bg-bg-primary border border-border-primary rounded-lg p-6">
       <div className="flex items-center gap-2">
-        <span className="text-2xl font-bold text-gray-900">{value}</span>
+        <span className="text-2xl font-bold text-text-primary">{value}</span>
         {status && (
           <span className={`w-2 h-2 rounded-full ${statusColor[status]}`} />
         )}
       </div>
-      <p className="text-sm text-gray-500 mt-1">{label}</p>
+      <p className="text-sm text-text-secondary mt-1">{label}</p>
     </div>
   );
 }

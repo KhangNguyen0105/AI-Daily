@@ -29,7 +29,7 @@ export function ArticleEditForm({ article, onSave, isSaving }: ArticleEditFormPr
   return (
     <form onSubmit={handleSubmit}>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Edit Article</h1>
+        <h1 className="text-2xl font-bold text-text-primary">Edit Article</h1>
         <button
           type="submit"
           disabled={isSaving || !title || !content}
@@ -41,7 +41,7 @@ export function ArticleEditForm({ article, onSave, isSaving }: ArticleEditFormPr
 
       <div className="space-y-4">
         <div>
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="title" className="block text-sm font-medium text-text-primary mb-1">
             Title
           </label>
           <input
@@ -49,13 +49,13 @@ export function ArticleEditForm({ article, onSave, isSaving }: ArticleEditFormPr
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+            className="w-full px-3 py-2 border border-border-secondary rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
             required
           />
         </div>
 
         <div>
-          <label htmlFor="summary" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="summary" className="block text-sm font-medium text-text-primary mb-1">
             Summary
           </label>
           <input
@@ -63,13 +63,13 @@ export function ArticleEditForm({ article, onSave, isSaving }: ArticleEditFormPr
             type="text"
             value={summary}
             onChange={(e) => setSummary(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+            className="w-full px-3 py-2 border border-border-secondary rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
           />
         </div>
 
         <div>
           <div className="flex items-center gap-4 mb-1">
-            <label className="block text-sm font-medium text-gray-700">Content</label>
+            <label className="block text-sm font-medium text-text-primary">Content</label>
             <div className="flex gap-2">
               <button
                 type="button"
@@ -77,7 +77,7 @@ export function ArticleEditForm({ article, onSave, isSaving }: ArticleEditFormPr
                 className={`text-sm pb-1 ${
                   activeTab === 'edit'
                     ? 'text-blue-600 border-b-2 border-blue-600 font-semibold'
-                    : 'text-gray-500'
+                    : 'text-text-secondary'
                 }`}
               >
                 Edit
@@ -88,7 +88,7 @@ export function ArticleEditForm({ article, onSave, isSaving }: ArticleEditFormPr
                 className={`text-sm pb-1 ${
                   activeTab === 'preview'
                     ? 'text-blue-600 border-b-2 border-blue-600 font-semibold'
-                    : 'text-gray-500'
+                    : 'text-text-secondary'
                 }`}
               >
                 Preview
@@ -100,11 +100,11 @@ export function ArticleEditForm({ article, onSave, isSaving }: ArticleEditFormPr
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              className="w-full min-h-[400px] font-mono text-sm border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+              className="w-full min-h-[400px] font-mono text-sm border border-border-secondary rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
               required
             />
           ) : (
-            <div className="min-h-[400px] border border-gray-300 rounded-md p-3 prose prose-sm max-w-none">
+            <div className="min-h-[400px] border border-border-secondary rounded-md p-3 prose prose-sm max-w-none">
               <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
             </div>
           )}
