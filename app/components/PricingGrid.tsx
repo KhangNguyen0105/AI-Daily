@@ -45,9 +45,9 @@ export function PricingGrid({
       {getCards(currency).map((card) => (
         <div
           key={card.key}
-          className="bg-white border rounded-lg p-6 text-center"
+          className="bg-bg-primary border rounded-lg p-6 text-center"
         >
-          <p className="text-sm text-gray-500 mb-2">{card.label}</p>
+          <p className="text-sm text-text-secondary mb-2">{card.label}</p>
           <p className="text-2xl font-bold">{getValue(card.key)}</p>
         </div>
       ))}
