@@ -36,7 +36,7 @@ export function PromotionsList({
 }) {
   if (promotions.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
+      <div className="text-center py-8 text-text-secondary">
         No active promotions or free tier offers.
       </div>
     );
@@ -54,31 +54,31 @@ export function PromotionsList({
             className={`border-l-4 p-4 rounded-r-lg ${
               active
                 ? 'border-green-500 bg-green-50'
-                : 'border-gray-300 bg-gray-50 opacity-75'
+                : 'border-border-secondary bg-bg-secondary opacity-75'
             }`}
           >
             <div className="flex items-center gap-2 mb-2">
               <span
                 className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
-                  PROMOTION_BADGE_STYLES[promo.type] ?? 'bg-gray-100 text-gray-800'
+                  PROMOTION_BADGE_STYLES[promo.type] ?? 'bg-bg-tertiary text-text-primary'
                 }`}
               >
                 {promo.type}
               </span>
               {!active && (
-                <span className="text-xs text-gray-500 font-medium">
+                <span className="text-xs text-text-secondary font-medium">
                   Expired
                 </span>
               )}
             </div>
-            <p className="text-sm text-gray-900 mb-1">{promo.description}</p>
+            <p className="text-sm text-text-primary mb-1">{promo.description}</p>
             {promo.credits && (
-              <p className="text-sm text-gray-600 mb-1">
+              <p className="text-sm text-text-secondary mb-1">
                 Credits: {promo.credits}
               </p>
             )}
             {dateRange && (
-              <p className="text-xs text-gray-500 mb-2">{dateRange}</p>
+              <p className="text-xs text-text-secondary mb-2">{dateRange}</p>
             )}
             {promo.sourceUrl && isSafeUrl(promo.sourceUrl) && (
               <a
