@@ -90,7 +90,7 @@ export function CostCalculator({
               key={item.modelId}
               className={`flex items-center justify-between p-4 rounded-lg border ${
                 index === 0
-                  ? 'border-l-4 border-green-500 bg-green-50'
+                  ? 'border-l-4 border-badge-green-border bg-badge-green-bg'
                   : 'bg-bg-primary border-border-primary'
               }`}
             >
@@ -98,7 +98,7 @@ export function CostCalculator({
               <div className="flex items-center gap-3 min-w-0">
                 <span
                   className={`text-lg font-semibold shrink-0 ${
-                    index === 0 ? 'text-green-700' : 'text-text-tertiary'
+                    index === 0 ? 'text-badge-green-text' : 'text-text-tertiary'
                   }`}
                 >
                   #{index + 1}
@@ -113,11 +113,11 @@ export function CostCalculator({
                   <span
                     className={`inline-block w-3 h-3 rounded-full mt-1 ${
                       item.confidence === 'verified'
-                        ? 'bg-green-500'
+                        ? 'bg-dot-green'
                         : item.confidence === 'likely'
-                        ? 'bg-yellow-500'
+                        ? 'bg-dot-yellow'
                         : item.confidence === 'low_confidence'
-                        ? 'bg-red-500'
+                        ? 'bg-dot-red'
                         : 'bg-text-secondary'
                     }`}
                     title={item.confidence}
