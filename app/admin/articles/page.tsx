@@ -66,7 +66,7 @@ export default async function AdminArticlesPage() {
                   </td>
                   <td className="px-4 py-3">
                     {article.publishedAt ? (
-                      <span className="inline-block px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded">
+                      <span className="inline-block px-2 py-0.5 text-xs font-medium bg-badge-green-bg text-badge-green-text rounded">
                         Published
                       </span>
                     ) : (

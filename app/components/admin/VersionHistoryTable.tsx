@@ -49,13 +49,13 @@ export function VersionHistoryTable({ versions, onRollback, currentVersion }: Ve
               <td className="py-2 text-text-secondary max-w-xs truncate">{version.title}</td>
               <td className="py-2 text-right">
                 {isCurrent ? (
-                  <span className="inline-block px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded">
+                  <span className="inline-block px-2 py-0.5 text-xs font-medium bg-badge-green-bg text-badge-green-text rounded">
                     Current
                   </span>
                 ) : (
                   <button
                     onClick={() => onRollback(version.id)}
-                    className="text-sm text-red-600 hover:text-red-800 underline"
+                    className="text-sm text-badge-red-text hover:opacity-80 underline"
                   >
                     Rollback to This Version
                   </button>

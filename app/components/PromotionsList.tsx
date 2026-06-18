@@ -53,7 +53,7 @@ export function PromotionsList({
             key={promo.id}
             className={`border-l-4 p-4 rounded-r-lg ${
               active
-                ? 'border-green-500 bg-green-50'
+                ? 'border-badge-green-border bg-badge-green-bg'
                 : 'border-border-secondary bg-bg-secondary opacity-75'
             }`}
           >

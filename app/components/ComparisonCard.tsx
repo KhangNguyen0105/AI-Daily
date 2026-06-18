@@ -97,10 +97,10 @@ export function ComparisonCard({
                 key={promo.id}
                 className={`inline-block px-2 py-0.5 rounded text-xs font-medium mr-1 ${
                   promo.type === 'free_tier'
-                    ? 'bg-green-100 text-green-800'
+                    ? 'bg-badge-green-bg text-badge-green-text'
                     : promo.type === 'promotion'
-                      ? 'bg-blue-100 text-blue-800'
-                      : 'bg-purple-100 text-purple-800'
+                      ? 'bg-badge-blue-bg text-badge-blue-text'
+                      : 'bg-badge-purple-bg text-badge-purple-text'
                 }`}
               >
                 {promo.type === 'free_tier' ? 'Free tier' : promo.type}
