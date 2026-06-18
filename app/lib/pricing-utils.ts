@@ -4,7 +4,7 @@
  * Extracted from app/page.tsx per D-01 (server/client split).
  */
 
-import type { PricingRow } from '@/app/components/PricingTable';
+import type { PricingRow } from '@/app/lib/types';
 
 /**
  * Format price per 1M tokens for display.
@@ -26,7 +26,11 @@ export function formatPrice(price: number | null | undefined): string {
 export function formatContextWindow(tokens: number | null | undefined): string {
   if (tokens === null || tokens === undefined) return 'N/A';
   if (tokens >= 1_000_000) return `${(tokens / 1_000_000).toFixed(0)}M`;
-  if (tokens >= 1_000) return `${(tokens / 1_000).toFixed(0)}K`;
+  if (tokens >= 1_000) {
+    const k = tokens / 1_000;
+    if (k >= 1000) return '1M'; // handles 999,500-999,999 rounding edge
+    return `${k.toFixed(0)}K`;
+  }
   return tokens.toString();
 }
 
@@ -127,8 +131,20 @@ export function getModelFamily(modelName: string): string {
   if (name.startsWith('claude-3.5') || name.startsWith('claude-3.6')) return 'Claude 3.5';
   if (name.startsWith('claude-3')) return 'Claude 3';
   if (name.startsWith('claude-2')) return 'Claude 2';
+  // Fallback for future Claude versions (e.g., claude-4-sonnet)
+  if (name.startsWith('claude-')) {
+    const match = name.match(/^claude-(\d+)/);
+    if (match) return `Claude ${match[1]}`;
+    return 'Claude';
+  }
   if (name.startsWith('gpt-4')) return 'GPT-4';
   if (name.startsWith('gpt-3')) return 'GPT-3';
+  // Fallback for future GPT versions (e.g., gpt-5)
+  if (name.startsWith('gpt-')) {
+    const match = name.match(/^gpt-(\d+)/);
+    if (match) return `GPT-${match[1]}`;
+    return 'GPT';
+  }
   if (name.startsWith('gemini')) return 'Gemini';
   if (name.startsWith('mistral')) return 'Mistral';
   if (name.startsWith('llama')) return 'Llama';

@@ -11,7 +11,7 @@ vi.mock('../../src/lib/ai-client', () => ({
   getAIModel: vi.fn(() => 'mock-model'),
 }));
 
-import { compareResults, verifyExtraction } from '../../src/pipeline/verification';
+import { compareResults, verifyExtraction, compareNumericValues, detectLargeChange, verifyWithEvidenceQuotes } from '../../src/pipeline/verification';
 import { generateObject } from 'ai';
 
 // --- Fixtures ---
@@ -268,5 +268,161 @@ describe('verifyExtraction', () => {
     await expect(
       verifyExtraction('<html>pricing</html>', pass1AllFields),
     ).rejects.toThrow('API rate limit');
+  });
+});
+
+// --- compareNumericValues tests ---
+
+describe('compareNumericValues', () => {
+  it('matches within same-unit tolerance (0.1%)', () => {
+    const result = compareNumericValues(2.5, 2.502, 'same');
+    expect(result.matches).toBe(true);
+    expect(result.percentDiff).toBeLessThan(0.001);
+  });
+
+  it('rejects beyond same-unit tolerance', () => {
+    const result = compareNumericValues(2.5, 3.0, 'same');
+    expect(result.matches).toBe(false);
+    expect(result.percentDiff).toBeGreaterThan(0.001);
+  });
+
+  it('matches within converted-unit tolerance (0.5%)', () => {
+    const result = compareNumericValues(3.0, 3.01, 'converted');
+    expect(result.matches).toBe(true);
+  });
+
+  it('rejects beyond converted-unit tolerance', () => {
+    const result = compareNumericValues(3.0, 3.2, 'converted');
+    expect(result.matches).toBe(false);
+  });
+
+  it('handles zero values', () => {
+    const result = compareNumericValues(0, 0, 'same');
+    expect(result.matches).toBe(true);
+    expect(result.percentDiff).toBe(0);
+  });
+
+  it('handles custom tolerance', () => {
+    const result = compareNumericValues(100, 105, 'same', 0.06);
+    expect(result.matches).toBe(true); // 5% diff, 6% tolerance
+  });
+});
+
+// --- detectLargeChange tests ---
+
+describe('detectLargeChange', () => {
+  const baseExtraction: ExtractionResult = {
+    modelName: 'gpt-4o',
+    inputPricePer1m: 2.5,
+    outputPricePer1m: 10.0,
+    contextWindow: 128000,
+    confidence: 'verified',
+    rawEvidence: '{}',
+  };
+
+  it('returns not changed when no previous extraction', () => {
+    const result = detectLargeChange(baseExtraction, null);
+    expect(result.changed).toBe(false);
+    expect(result.percentChange).toBe(0);
+  });
+
+  it('detects large price increase (>20%)', () => {
+    const newExtraction = { ...baseExtraction, inputPricePer1m: 3.5 }; // 40% increase
+    const result = detectLargeChange(newExtraction, baseExtraction);
+    expect(result.changed).toBe(true);
+    expect(result.changeType).toBe('price_increase');
+    expect(result.percentChange).toBeGreaterThan(0.2);
+  });
+
+  it('detects large price decrease (>20%)', () => {
+    const newExtraction = { ...baseExtraction, inputPricePer1m: 1.5 }; // 40% decrease
+    const result = detectLargeChange(newExtraction, baseExtraction);
+    expect(result.changed).toBe(true);
+    expect(result.changeType).toBe('price_decrease');
+    expect(result.percentChange).toBeGreaterThan(0.2);
+  });
+
+  it('does not flag small price changes (<20%)', () => {
+    const newExtraction = { ...baseExtraction, inputPricePer1m: 2.7 }; // 8% increase
+    const result = detectLargeChange(newExtraction, baseExtraction);
+    expect(result.changed).toBe(false);
+  });
+
+  it('detects field disappearance', () => {
+    const newExtraction = { ...baseExtraction, outputPricePer1m: null };
+    const result = detectLargeChange(newExtraction, baseExtraction);
+    expect(result.changed).toBe(true);
+    expect(result.changeType).toBe('field_disappear');
+  });
+
+  it('detects unit change via output price change', () => {
+    // Simulate a huge change that might indicate unit change
+    const newExtraction = { ...baseExtraction, outputPricePer1m: 100.0 }; // 10x increase
+    const result = detectLargeChange(newExtraction, baseExtraction);
+    expect(result.changed).toBe(true);
+    expect(result.changeType).toBe('price_increase');
+    expect(result.percentChange).toBeGreaterThan(0.2);
+  });
+});
+
+// --- verifyWithEvidenceQuotes tests ---
+
+describe('verifyWithEvidenceQuotes', () => {
+  const html = '<html><p>GPT-4o costs $2.50 per 1M input tokens</p></html>';
+
+  it('returns verified when all evidence quotes match', async () => {
+    const extraction: ExtractionResult = {
+      modelName: 'GPT-4o',
+      inputPricePer1m: 2.5,
+      outputPricePer1m: 10.0,
+      contextWindow: 128000,
+      confidence: 'verified',
+      rawEvidence: '{}',
+    };
+    const evidenceQuotes = {
+      model_name: { source_url: 'url', extracted_text_snippet: 'GPT-4o', evidence_quote: 'GPT-4o', evidence_hash: 'abc', extracted_at: new Date() },
+      input_price: { source_url: 'url', extracted_text_snippet: '$2.50', evidence_quote: '$2.50', evidence_hash: 'abc', extracted_at: new Date() },
+      output_price: { source_url: 'url', extracted_text_snippet: '$10.00', evidence_quote: '$10.00', evidence_hash: 'abc', extracted_at: new Date() },
+    };
+    const result = await verifyWithEvidenceQuotes(extraction, evidenceQuotes, html);
+    expect(result.verified).toBe(true);
+    expect(result.missingEvidence).toHaveLength(0);
+    expect(result.quoteMismatches).toHaveLength(0);
+  });
+
+  it('reports missing evidence for core fields', async () => {
+    const extraction: ExtractionResult = {
+      modelName: 'GPT-4o',
+      inputPricePer1m: 2.5,
+      outputPricePer1m: 10.0,
+      contextWindow: 128000,
+      confidence: 'verified',
+      rawEvidence: '{}',
+    };
+    const evidenceQuotes = {}; // no evidence at all
+    const result = await verifyWithEvidenceQuotes(extraction, evidenceQuotes, html);
+    expect(result.verified).toBe(false);
+    expect(result.missingEvidence).toContain('model_name');
+    expect(result.missingEvidence).toContain('input_price');
+    expect(result.missingEvidence).toContain('output_price');
+  });
+
+  it('reports quote mismatches when value does not match quote', async () => {
+    const extraction: ExtractionResult = {
+      modelName: 'GPT-4o',
+      inputPricePer1m: 2.5,
+      outputPricePer1m: 10.0,
+      contextWindow: 128000,
+      confidence: 'verified',
+      rawEvidence: '{}',
+    };
+    const evidenceQuotes = {
+      model_name: { source_url: 'url', extracted_text_snippet: 'GPT-4o', evidence_quote: 'GPT-4o', evidence_hash: 'abc', extracted_at: new Date() },
+      input_price: { source_url: 'url', extracted_text_snippet: '$15.00', evidence_quote: '$15.00', evidence_hash: 'abc', extracted_at: new Date() }, // mismatch
+      output_price: { source_url: 'url', extracted_text_snippet: '$10.00', evidence_quote: '$10.00', evidence_hash: 'abc', extracted_at: new Date() },
+    };
+    const result = await verifyWithEvidenceQuotes(extraction, evidenceQuotes, html);
+    expect(result.verified).toBe(false);
+    expect(result.quoteMismatches).toContain('input_price');
   });
 });

@@ -35,6 +35,8 @@ services:
       DATABASE_URL: postgresql://aidaily:aidaily_dev@postgres:5432/aidaily
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-dev-secret-change-me}
     depends_on:
       postgres:
         condition: service_healthy
@@ -50,6 +52,12 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       CRAWLEE_STORAGE_DIR: /tmp/crawlee-storage
+      PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH: /usr/bin/chromium-browser
+      MIMO_API_KEY: ${MIMO_API_KEY:-}
+      MIMO_BASE_URL: ${MIMO_BASE_URL:-}
+      MIMO_MODEL: ${MIMO_MODEL:-}
+      AI_PROVIDER: mimo
+      AI_FALLBACK_PROVIDER: openai
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
     depends_on:

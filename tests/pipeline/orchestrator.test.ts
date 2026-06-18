@@ -40,15 +40,21 @@ vi.mock('../../src/db/index', () => ({
   },
 }));
 
-// Mock providers registry with 3 fake adapters
+// Mock providers registry with 3 fake adapters (2 tier1, 1 tier2)
 const mockAdapters = [
   { config: { name: 'openai', baseUrl: 'https://openai.com', pricingUrl: 'https://openai.com/pricing' } },
   { config: { name: 'anthropic', baseUrl: 'https://anthropic.com', pricingUrl: 'https://anthropic.com/pricing' } },
-  { config: { name: 'google', baseUrl: 'https://google.com', pricingUrl: 'https://google.com/pricing' } },
+  { config: { name: 'together', baseUrl: 'https://together.ai', pricingUrl: 'https://together.ai/pricing' } },
 ];
 
 vi.mock('../../src/providers/registry', () => ({
   getAllAdapters: vi.fn(() => mockAdapters),
+  getAllTier1Adapters: vi.fn(() => mockAdapters.filter(a => ['openai', 'anthropic'].includes(a.config.name))),
+  getAllTier2Adapters: vi.fn(() => mockAdapters.filter(a => a.config.name === 'together')),
+  getAllTier3Adapters: vi.fn(() => []),
+  isTier1Provider: vi.fn((name: string) => ['openai', 'anthropic'].includes(name)),
+  isTier2Provider: vi.fn((name: string) => name === 'together'),
+  isTier3Provider: vi.fn(() => false),
 }));
 
 describe('Orchestrator', () => {
@@ -83,7 +89,7 @@ describe('Orchestrator', () => {
       const providerNames = addCalls.map((call: any[]) => call[1].providerName);
       expect(providerNames).toContain('openai');
       expect(providerNames).toContain('anthropic');
-      expect(providerNames).toContain('google');
+      expect(providerNames).toContain('together');
     });
 
     it('returns the pipelineRun id', async () => {

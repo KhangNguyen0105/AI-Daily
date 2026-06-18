@@ -12,7 +12,7 @@ import {
   calculatePracticalCost,
   calculateScenarioCosts,
 } from '../app/lib/pricing-utils';
-import type { PricingRow } from '../app/components/PricingTable';
+import type { PricingRow } from '../app/lib/types';
 
 describe('formatPrice', () => {
   it('returns "N/A" for null', () => {
@@ -423,6 +423,7 @@ describe('calculateScenarioCosts', () => {
   it('excludes models with null inputPricePer1m', () => {
     const withNull = [...models, {
       id: 4,
+      sourceId: 4,
       modelName: 'no-input-price',
       inputPricePer1m: null,
       outputPricePer1m: 10,
@@ -440,6 +441,7 @@ describe('calculateScenarioCosts', () => {
   it('excludes models with null outputPricePer1m', () => {
     const withNull = [...models, {
       id: 5,
+      sourceId: 5,
       modelName: 'no-output-price',
       inputPricePer1m: 5,
       outputPricePer1m: null,

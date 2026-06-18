@@ -14,6 +14,8 @@ import { PricingGrid } from './PricingGrid';
 import { PriceHistoryChart, type HistoryPoint } from './PriceHistoryChart';
 import { PromotionsList, type PromotionData } from './PromotionsList';
 import { ProviderLinks } from './ProviderLinks';
+import { BellIcon } from './BellIcon';
+import { CurrencyToggle } from './CurrencyToggle';
 
 export interface ModelDetailData {
   id: number;
@@ -57,7 +59,14 @@ export function ModelDetailClient({
           &larr; Back to pricing
         </Link>
 
-        <h1 className="text-3xl font-bold mt-2">{displayName}</h1>
+        <div className="flex items-center gap-2 mt-2">
+          <h1 className="text-3xl font-bold">{displayName}</h1>
+          <BellIcon
+            modelName={model.modelName}
+            sourceId={model.sourceId}
+            currentPrice={model.inputPricePer1m}
+          />
+        </div>
 
         <div className="flex items-center gap-3 mt-3 flex-wrap">
           {model.sourceName && (
@@ -90,28 +99,7 @@ export function ModelDetailClient({
       <section className="border-b py-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold">Current Pricing</h2>
-          <div className="flex gap-1">
-            <button
-              onClick={() => setCurrency('usd')}
-              className={`px-3 py-1 text-sm rounded-l border ${
-                currency === 'usd'
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              USD
-            </button>
-            <button
-              onClick={() => setCurrency('vnd')}
-              className={`px-3 py-1 text-sm rounded-r border-t border-b border-r ${
-                currency === 'vnd'
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              VND
-            </button>
-          </div>
+          <CurrencyToggle currency={currency} onCurrencyChange={setCurrency} />
         </div>
 
         <PricingGrid

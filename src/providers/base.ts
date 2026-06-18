@@ -1,13 +1,29 @@
 import { PlaywrightCrawler } from 'crawlee';
+import type { SourceTier, ProviderSource } from './types';
 
 /**
  * Configuration for a provider adapter.
  * Each adapter provides its name, base URL, and pricing page URL.
+ *
+ * Per Wave 4: Extended with tier classification, source URLs, crawl frequency,
+ * and API key configuration for Tier 1 providers.
  */
 export interface ProviderConfig {
   name: string;
   baseUrl: string;
   pricingUrl: string;
+  /** Provider tier for SLA enforcement and scheduling priority */
+  tier?: SourceTier;
+  /** Multiple source URLs with tier classification */
+  sources?: ProviderSource[];
+  /** Crawl frequency in hours (Tier 1: 4, Tier 2: 12, Tier 3: 24) */
+  crawlFrequencyHours?: number;
+  /** Whether the provider API key is optional (some Tier 1 providers need it for /models endpoint) */
+  apiKeyOptional?: boolean;
+  /** Provider-specific model ID format identifier */
+  modelIdFormat?: string;
+  /** Currency used by this provider's pricing page */
+  currency?: 'USD' | 'CNY' | 'EUR';
 }
 
 /**
@@ -21,8 +37,34 @@ export interface CrawlResult {
 }
 
 /**
+ * Evidence anchoring data for a single extracted field.
+ * Per D-08: Every extracted field must include the source text snippet and selector.
+ */
+export interface EvidenceQuote {
+  /** The exact text extracted from the source page */
+  quote: string;
+  /** CSS selector or path to locate the text in the HTML */
+  selector?: string;
+}
+
+/**
+ * Evidence bundle attached to an extraction.
+ * Per D-08: Evidence anchoring required for all extractions.
+ */
+export interface ExtractionEvidence {
+  /** The URL where the data was extracted from */
+  source_url: string;
+  /** A text snippet from the source page around the extraction point */
+  extracted_text_snippet: string;
+  /** Per-field evidence quotes mapping field name to quote */
+  evidence_quotes: Record<string, EvidenceQuote>;
+}
+
+/**
  * Structured extraction of pricing data from a provider.
  * Maps to the `extractions` table in the database.
+ *
+ * Per Wave 4: Extended with evidence anchoring fields (D-05, D-08).
  */
 export interface ExtractionResult {
   modelName: string;
@@ -31,6 +73,30 @@ export interface ExtractionResult {
   contextWindow: number | null;
   confidence: 'verified' | 'likely' | 'low_confidence';
   rawEvidence: unknown;
+  /** Per D-05: Raw price text before normalization */
+  rawPriceText?: string;
+  /** Per D-05: Raw unit string (e.g., "per 1M tokens", "per 1K tokens") */
+  rawUnit?: string;
+  /** Per D-05: Raw currency from source (e.g., "USD", "CNY") */
+  rawCurrency?: string;
+  /** Per D-05: Pricing model type classification */
+  pricingModelType?: 'token_usage' | 'request_based' | 'fixed_monthly' | 'tiered' | 'free';
+  /** Per D-08: Evidence anchoring data */
+  evidence?: ExtractionEvidence;
+  /** Per D-04: Provider-specific model ID for canonical registry matching */
+  providerModelId?: string;
+}
+
+export interface PromotionResult {
+  modelPattern: string;
+  type: 'free_tier' | 'promotion' | 'beta';
+  description: string;
+  credits?: string | null;
+}
+
+export interface ProviderExtraction {
+  models: ExtractionResult[];
+  promotions: PromotionResult[];
 }
 
 /**
@@ -51,7 +117,7 @@ export abstract class ProviderAdapter {
    * Extract structured pricing data from crawled HTML.
    * Subclasses implement provider-specific extraction logic.
    */
-  abstract extract(html: string): Promise<ExtractionResult[]>;
+  abstract extract(html: string): Promise<ProviderExtraction>;
 
   /**
    * Normalize extracted data to the standard format.
@@ -59,7 +125,7 @@ export abstract class ProviderAdapter {
    * Only adapters with provider-specific normalization (e.g., DeepSeek, Bedrock)
    * need to override this method.
    */
-  normalize(extractions: ExtractionResult[]): ExtractionResult[] {
+  normalize(extractions: ProviderExtraction): ProviderExtraction {
     return extractions;
   }
 
@@ -76,7 +142,16 @@ export abstract class ProviderAdapter {
     const crawler = new PlaywrightCrawler({
       maxRequestsPerCrawl: 1,
       headless: true,
+      launchContext: {
+        launchOptions: {
+          executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || undefined,
+        },
+      },
       async requestHandler({ page, request }) {
+        // Wait for JS-rendered content (pricing tables, SPA frameworks)
+        await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+        // Extra wait for client-side rendered pricing tables
+        await page.waitForTimeout(3000);
         const html = await page.content();
         result = {
           url: request.loadedUrl ?? request.url,
@@ -86,7 +161,10 @@ export abstract class ProviderAdapter {
       },
     });
 
-    await crawler.run([this.config.pricingUrl]);
+    await crawler.run([
+      { url: this.config.pricingUrl, uniqueKey: `${this.config.pricingUrl}-${Date.now()}` }
+    ]);
+
     if (!result) {
       throw new Error(`Failed to crawl ${this.config.name} pricing page at ${this.config.pricingUrl}`);
     }

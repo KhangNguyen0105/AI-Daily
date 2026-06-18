@@ -18,10 +18,13 @@ import Link from 'next/link';
 import { formatPrice, formatContextWindow, sanitizeDisplayName, getConfidenceColor, getModelFamily, formatCurrencyPrice } from '@/app/lib/pricing-utils';
 import { getProviderLogo, getUniqueProviders } from '@/app/lib/provider-metadata';
 import { generateSlug } from '@/app/lib/slug-utils';
+import { CurrencyToggle } from './CurrencyToggle';
+import type { PricingRow } from '@/app/lib/types';
+// Re-export for backward compatibility with existing consumers
+export type { PricingRow } from '@/app/lib/types';
 
 // Factory functions: create once at module level, not per render.
 // TanStack Table docs recommend this to avoid re-creating on every render.
-// Type parameters erased at runtime; using PricingRow interface defined below.
 const coreRowModel = getCoreRowModel();
 const sortedRowModel = getSortedRowModel();
 const filteredRowModel = getFilteredRowModel();
@@ -36,23 +39,6 @@ const CONFIDENCE_TOOLTIPS: Record<string, string> = {
   low_confidence: 'Low confidence: Data may be incomplete or unverified',
 };
 
-/**
- * Row type matching the shape passed from the server component.
- * Derived from Drizzle JOIN query (extractions + sources).
- */
-export interface PricingRow {
-  id: number;
-  sourceId: number;
-  modelName: string;
-  inputPricePer1m: number | null;
-  outputPricePer1m: number | null;
-  contextWindow: number | null;
-  confidence: 'verified' | 'likely' | 'low_confidence';
-  collectedAt: Date;
-  sourceName: string | null;
-  sourceUrl: string | null;
-}
-
 const columnHelper = createColumnHelper<PricingRow>();
 
 /**
@@ -65,10 +51,10 @@ const columnHelper = createColumnHelper<PricingRow>();
 function getColumnResponsiveClass(columnId: string): string {
   switch (columnId) {
     case 'family':
+      return 'hidden lg:table-cell';
+    case 'source':
     case 'contextWindow':
       return 'hidden md:table-cell';
-    case 'source':
-      return 'hidden lg:table-cell';
     case 'collectedAt':
       return 'hidden xl:table-cell';
     default:
@@ -161,7 +147,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
   const [internalCurrency, setInternalCurrency] = useState<'usd' | 'vnd'>('usd');
   const effectiveCurrency = currency ?? internalCurrency;
   const handleCurrencyChange = onCurrencyChange ?? setInternalCurrency;
-  const [pageSize] = useState(50);
+  const pageSize = 50;
 
   // Deferred search value for performance (debounce without external dependency)
   const deferredGlobalFilter = useDeferredValue(globalFilter);
@@ -181,8 +167,15 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
     }
 
     // 2. Price range filter (input price)
-    const inputMin = inputPriceMin !== '' ? parseFloat(inputPriceMin) : null;
-    const inputMax = inputPriceMax !== '' ? parseFloat(inputPriceMax) : null;
+    // CR-01: Convert filter values to USD when currency is VND, since row prices are stored in USD.
+    const rawInputMin = inputPriceMin !== '' ? parseFloat(inputPriceMin) : null;
+    const inputMin = rawInputMin !== null && Number.isFinite(rawInputMin) && rawInputMin >= 0
+      ? (effectiveCurrency === 'vnd' && exchangeRate ? rawInputMin / exchangeRate : rawInputMin)
+      : null;
+    const rawInputMax = inputPriceMax !== '' ? parseFloat(inputPriceMax) : null;
+    const inputMax = rawInputMax !== null && Number.isFinite(rawInputMax) && rawInputMax >= 0
+      ? (effectiveCurrency === 'vnd' && exchangeRate ? rawInputMax / exchangeRate : rawInputMax)
+      : null;
     if (inputMin !== null || inputMax !== null) {
       result = result.filter((row) => {
         if (row.inputPricePer1m === null) return true; // null values pass through
@@ -193,8 +186,15 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
     }
 
     // 3. Price range filter (output price)
-    const outputMin = outputPriceMin !== '' ? parseFloat(outputPriceMin) : null;
-    const outputMax = outputPriceMax !== '' ? parseFloat(outputPriceMax) : null;
+    // CR-01: Convert filter values to USD when currency is VND, since row prices are stored in USD.
+    const rawOutputMin = outputPriceMin !== '' ? parseFloat(outputPriceMin) : null;
+    const outputMin = rawOutputMin !== null && Number.isFinite(rawOutputMin) && rawOutputMin >= 0
+      ? (effectiveCurrency === 'vnd' && exchangeRate ? rawOutputMin / exchangeRate : rawOutputMin)
+      : null;
+    const rawOutputMax = outputPriceMax !== '' ? parseFloat(outputPriceMax) : null;
+    const outputMax = rawOutputMax !== null && Number.isFinite(rawOutputMax) && rawOutputMax >= 0
+      ? (effectiveCurrency === 'vnd' && exchangeRate ? rawOutputMax / exchangeRate : rawOutputMax)
+      : null;
     if (outputMin !== null || outputMax !== null) {
       result = result.filter((row) => {
         if (row.outputPricePer1m === null) return true; // null values pass through
@@ -205,8 +205,10 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
     }
 
     // 4. Context window filter
-    const ctxMin = contextWindowMin !== '' ? parseFloat(contextWindowMin) : null;
-    const ctxMax = contextWindowMax !== '' ? parseFloat(contextWindowMax) : null;
+    const rawCtxMin = contextWindowMin !== '' ? parseFloat(contextWindowMin) : null;
+    const ctxMin = rawCtxMin !== null && Number.isFinite(rawCtxMin) && rawCtxMin >= 0 ? rawCtxMin : null;
+    const rawCtxMax = contextWindowMax !== '' ? parseFloat(contextWindowMax) : null;
+    const ctxMax = rawCtxMax !== null && Number.isFinite(rawCtxMax) && rawCtxMax >= 0 ? rawCtxMax : null;
     if (ctxMin !== null || ctxMax !== null) {
       result = result.filter((row) => {
         if (row.contextWindow === null) return true; // null values pass through
@@ -217,16 +219,16 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
     }
 
     return result;
-  }, [data, freeTierOnly, inputPriceMin, inputPriceMax, outputPriceMin, outputPriceMax, contextWindowMin, contextWindowMax]);
+  }, [data, freeTierOnly, inputPriceMin, inputPriceMax, outputPriceMin, outputPriceMax, contextWindowMin, contextWindowMax, effectiveCurrency, exchangeRate]);
 
-  // Provider column filter function (matches TanStack FilterFn signature)
+  // Provider column filter function — uses filterValue param per TanStack Table contract (IN-05)
   const providerColumnFilterFn = useCallback(
-    (row: { getValue: (id: string) => unknown }, _columnId: string) => {
-      if (!providerFilter) return true;
+    (row: { getValue: (id: string) => unknown }, _columnId: string, filterValue: string) => {
+      if (!filterValue) return true;
       const sourceName = row.getValue('sourceName') as string | null;
-      return sourceName === providerFilter;
+      return sourceName === filterValue;
     },
-    [providerFilter]
+    []
   );
 
   const columns = useMemo(() => [
@@ -248,7 +250,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
         return (
           <Link
             href={`/model/${slug}`}
-            className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline"
+            className="text-sm font-semibold text-blue-600 hover:text-blue-800 hover:underline"
           >
             {sanitizeDisplayName(info.getValue())}
           </Link>
@@ -292,16 +294,17 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
     }),
     columnHelper.accessor('confidence', {
       header: 'Confidence',
-      cell: (info) => (
-        <span
-          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getConfidenceColor(
-            info.getValue()
-          )}`}
-          title={CONFIDENCE_TOOLTIPS[info.getValue()] ?? info.getValue()}
-        >
-          {info.getValue()}
-        </span>
-      ),
+      cell: (info) => {
+        const val = info.getValue();
+        const solidBg = val === 'verified' ? 'bg-green-500' : val === 'likely' ? 'bg-yellow-500' : val === 'low_confidence' ? 'bg-red-500' : 'bg-gray-500';
+        return (
+          <span
+            className={`inline-block w-3 h-3 rounded-full ${solidBg}`}
+            title={CONFIDENCE_TOOLTIPS[val] ?? val}
+            aria-label={val}
+          />
+        );
+      },
     }),
     columnHelper.accessor('sourceUrl', {
       id: 'source',
@@ -434,30 +437,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
               </div>
 
               {/* Currency toggle */}
-              <div className="flex" role="group" aria-label="Toggle currency">
-                <button
-                  type="button"
-                  onClick={() => handleCurrencyChange('usd')}
-                  className={`px-3 py-2 text-sm font-medium rounded-l-md border transition-colors ${
-                    effectiveCurrency === 'usd'
-                      ? 'bg-blue-600 text-white border-blue-600'
-                      : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                  }`}
-                >
-                  USD
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleCurrencyChange('vnd')}
-                  className={`px-3 py-2 text-sm font-medium rounded-r-md border-t border-b border-r transition-colors ${
-                    effectiveCurrency === 'vnd'
-                      ? 'bg-blue-600 text-white border-blue-600'
-                      : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                  }`}
-                >
-                  VND
-                </button>
-              </div>
+              <CurrencyToggle currency={effectiveCurrency} onCurrencyChange={handleCurrencyChange} />
 
               <select
                 value={providerFilter}
@@ -496,6 +476,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
 
             {/* Advanced filters toggle */}
             <button
+              type="button"
               onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
               className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
               aria-expanded={showAdvancedFilters}
@@ -508,7 +489,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
             {showAdvancedFilters && (
               <div className="flex flex-col md:flex-row gap-3 items-start md:items-end p-3 bg-gray-50 rounded-md">
                 <fieldset className="flex flex-col gap-1">
-                  <legend className="text-xs font-medium text-gray-500 uppercase tracking-wide">Input Price ($/1M)</legend>
+                  <legend className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Input Price ({effectiveCurrency === 'usd' ? '$/1M' : '₫/1M'})</legend>
                   <div className="flex gap-2">
                     <input
                       type="number"
@@ -534,7 +515,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                 </fieldset>
 
                 <fieldset className="flex flex-col gap-1">
-                  <legend className="text-xs font-medium text-gray-500 uppercase tracking-wide">Output Price ($/1M)</legend>
+                  <legend className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Output Price ({effectiveCurrency === 'usd' ? '$/1M' : '₫/1M'})</legend>
                   <div className="flex gap-2">
                     <input
                       type="number"
@@ -560,7 +541,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                 </fieldset>
 
                 <fieldset className="flex flex-col gap-1">
-                  <legend className="text-xs font-medium text-gray-500 uppercase tracking-wide">Context Window (tokens)</legend>
+                  <legend className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Context Window (tokens)</legend>
                   <div className="flex gap-2">
                     <input
                       type="number"
@@ -594,7 +575,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
           </p>
 
           {/* Table */}
-          <div className="overflow-x-auto" style={{ maxHeight: '70vh' }}>
+          <div className="overflow-x-auto" style={{ maxHeight: 'calc(100vh - 220px)' }}>
             <table className="w-full border-collapse">
               <thead>
                 {table.getHeaderGroups().map((headerGroup) => (

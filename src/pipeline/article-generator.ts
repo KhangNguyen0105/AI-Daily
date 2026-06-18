@@ -37,7 +37,7 @@ function getModel(provider: string) {
     case 'openai':
       return openai('gpt-4o');
     case 'mimo':
-      return mimoProvider.chat('mimo-v2.5-pro');
+      return mimoProvider.chat(env.MIMO_MODEL);
     default:
       return anthropic('claude-sonnet-4-5');
   }
@@ -117,6 +117,19 @@ export async function generateArticle(diff: DiffResult): Promise<GeneratedArticl
   const primaryProvider = env.AI_PROVIDER;
   const fallbackProvider = env.AI_FALLBACK_PROVIDER;
 
+  // Validate API keys before making calls
+  const keyMap: Record<string, string | undefined> = {
+    anthropic: env.ANTHROPIC_API_KEY,
+    openai: env.OPENAI_API_KEY,
+    mimo: env.MIMO_API_KEY,
+  };
+  if (!keyMap[primaryProvider] && !keyMap[fallbackProvider]) {
+    throw new Error(
+      `No API key configured for primary (${primaryProvider}) or fallback (${fallbackProvider}) provider. ` +
+      `Set ANTHROPIC_API_KEY, OPENAI_API_KEY, or MIMO_API_KEY in your environment.`
+    );
+  }
+
   const diffContext = buildDiffContext(diff);
 
   const userPrompt = `Here is today's AI pricing diff context:\n\n${diffContext}\n\nGenerate the daily digest article.`;
@@ -135,7 +148,10 @@ export async function generateArticle(diff: DiffResult): Promise<GeneratedArticl
       model: getModel(primaryProvider),
       ...callOptions,
     });
-    responseText = result.text;
+    responseText = result.text?.trim() ?? '';
+    if (!responseText) {
+      throw new Error(`${primaryProvider} returned empty response`);
+    }
   } catch (primaryErr) {
     console.warn(
       `Primary AI provider (${primaryProvider}) failed, trying fallback (${fallbackProvider}):`,
@@ -145,10 +161,17 @@ export async function generateArticle(diff: DiffResult): Promise<GeneratedArticl
       model: getModel(fallbackProvider),
       ...callOptions,
     });
-    responseText = result.text;
+    responseText = result.text?.trim() ?? '';
+    if (!responseText) {
+      throw new Error(`Both ${primaryProvider} and ${fallbackProvider} returned empty responses`);
+    }
   }
 
-  return parseArticleResponse(responseText);
+  const article = parseArticleResponse(responseText);
+  if (!article.content || article.content.trim().length === 0) {
+    throw new Error('Generated article has empty content after parsing');
+  }
+  return article;
 }
 
 /**

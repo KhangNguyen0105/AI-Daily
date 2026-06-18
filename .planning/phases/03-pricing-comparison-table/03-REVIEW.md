@@ -1,164 +1,297 @@
 ---
 phase: 03-pricing-comparison-table
-reviewed: 2026-06-13
+reviewed: 2026-06-18T18:30:00Z
 depth: deep
-files_reviewed: 7
+files_reviewed: 6
 files_reviewed_list:
+  - app/compare/page.tsx
+  - app/components/CostCalculator.tsx
+  - app/components/HomePageClient.tsx
   - app/components/PricingTable.tsx
-  - app/lib/pricing-utils.ts
+  - app/components/TrendChart.tsx
   - app/page.tsx
-  - src/db/schema.ts
-  - src/pipeline/exchange-rate-worker.ts
-  - tests/pricing-utils.test.ts
-  - tests/pipeline/exchange-rate-worker.test.ts
 findings:
-  critical: 0
-  warning: 4
-  info: 3
-  total: 7
-status: fixed
+  critical: 2
+  warning: 6
+  info: 4
+  total: 12
+status: issues_found
 ---
 
-# Phase 03: Code Review Report (Deep — Task 3 Dynamic Exchange Rate)
+# Phase 03: Code Review Report
 
-**Reviewed:** 2026-06-13
+**Reviewed:** 2026-06-18T18:30:00Z
 **Depth:** deep
-**Files Reviewed:** 7
-**Status:** fixed (4 warnings auto-fixed, 3 info documented)
+**Files Reviewed:** 6
+**Status:** issues_found
 
 ## Summary
 
-Deep review of Phase 3 Task 3 (dynamic exchange rate) implementation. Found 4 warnings and 3 info items. All 4 warnings were auto-fixed. 201 tests pass. Build succeeds.
+Reviewed 6 source files comprising the pricing comparison table, cost calculator, trend chart, home page, and compare page. The code is well-structured with clean separation between server and client components, good use of `@tanstack/react-table`, and thoughtful accessibility (ARIA roles/labels). However, two critical issues were found: the price range filters are broken when currency is toggled to VND (filter labels say USD but table shows VND, so the filter operates on the wrong scale), and timestamps are rendered in server timezone rather than the user's local timezone. Additional warnings cover type safety gaps, NaN handling in filters, and missing memoization in the compare page.
 
-## Previous Findings Verification
+## Critical Issues
 
-### CR-01: SortIndicator renders HTML entities as literal text -- **FIXED**
+### CR-01: Price filter inputs ignore currency mode -- filters broken when VND selected
 
-**File:** `app/components/PricingTable.tsx:86-93`
+**File:** `app/components/PricingTable.tsx:512-587`
+**Issue:** The advanced price filter inputs have hardcoded labels "Input Price ($/1M)" and "Output Price ($/1M)" (lines 512, 537) and accept raw numeric values. When the user switches the currency toggle to VND, the table displays prices in VND (via `formatCurrencyPrice` with `effectiveCurrency`), but the filter logic in `preFilteredData` (lines 184-205) compares the raw `row.inputPricePer1m` and `row.outputPricePer1m` values (which are always stored in USD) against the user-entered filter values. A user filtering "Min: 100" in VND mode intends 100 VND, but the filter compares against 100 USD (the raw value), which is ~2550x larger than intended. The filter is silently wrong whenever currency is VND.
 
-The `SortIndicator` component now uses Unicode characters `'▲'` (U+25B2) and `'▼'` (U+25BC) as string literals inside the JSX `{}` expression. The unsorted state uses `&#8597;` directly in JSX markup (not inside `{}`), which renders correctly. Verified by visual inspection of the code -- no HTML entity strings inside `{}` expressions.
+**Fix:** Either (a) convert filter values to USD before comparison when currency is VND, or (b) label the inputs with the correct currency and convert appropriately:
 
-### CR-02: `freeTierOnly` filter treats null prices as free -- **FIXED**
+```tsx
+// Option A: Convert filter values to USD for comparison (recommended)
+const inputMinRaw = inputPriceMin !== '' ? parseFloat(inputPriceMin) : null;
+const inputMaxRaw = inputPriceMax !== '' ? parseFloat(inputPriceMax) : null;
+const inputMin = (inputMinRaw !== null && effectiveCurrency === 'vnd' && exchangeRate)
+  ? inputMinRaw / exchangeRate : inputMinRaw;
+const inputMax = (inputMaxRaw !== null && effectiveCurrency === 'vnd' && exchangeRate)
+  ? inputMaxRaw / exchangeRate : inputMaxRaw;
 
-**File:** `app/components/PricingTable.tsx:161-165`
+// And update labels to show current currency:
+<legend>Input Price ({effectiveCurrency === 'usd' ? '$/1M' : '₫/1M'})</legend>
+```
 
-The filter now reads `row.inputPricePer1m === 0 && row.outputPricePer1m === 0`. The `|| null` conditions have been removed. Models with unknown (`null`) pricing no longer appear in "free tier only" results.
+### CR-02: Server-side timestamp display uses server timezone, not user timezone
 
-### WR-01: Duplicate condition in `getModelFamily` -- **FIXED**
+**File:** `app/page.tsx:75`
+**Issue:** `format(lastUpdated, 'MMM d, yyyy h:mm a')` uses `date-fns` `format()`, which operates in the server's local timezone (or UTC in Docker). The "Last updated" timestamp on the public landing page will be incorrect for users in different timezones. For a Vietnamese-audience site where the server may run in UTC, users would see times that are 7 hours behind their local time, causing confusion about data freshness.
 
-**File:** `app/lib/pricing-utils.ts:70`
+**Fix:** Use UTC display or include timezone offset so the time is unambiguous:
 
-Line 70 now reads `name.startsWith('claude-3.5') || name.startsWith('claude-3.6')`. The duplicate `claude-3.5` condition has been replaced with `claude-3.6`. Future Claude 3.6 models will now correctly map to the 'Claude 3.5' family group.
+```tsx
+// Option A: Display in UTC with explicit label
+<p>Last updated: {lastUpdated ? format(lastUpdated, "MMM d, yyyy HH:mm") + ' UTC' : 'Unknown'}</p>
 
-### WR-02: `filterFn` cast to `any` suppresses type safety -- **IMPROVED**
+// Option B: Use ISO format which is timezone-unambiguous
+<p>Last updated: {lastUpdated ? lastUpdated.toISOString().replace('T', ' ').slice(0, 16) + ' UTC' : 'Unknown'}</p>
+```
 
-**File:** `app/components/PricingTable.tsx:219`
+## Warnings
 
-The cast now reads `as FilterFn<PricingRow>` instead of `as any`. This is a meaningful improvement -- the TypeScript compiler will now verify that the function's return type and general shape are compatible with TanStack Table's `FilterFn<PricingRow>`, even though the exact parameter list differs (the callback ignores unused trailing parameters, which is safe in JavaScript).
+### WR-01: `pricingDataMap` typed as `Record<string, any>` -- bypasses type safety
 
-### WR-03: "Last updated" timestamp displayed twice -- **FIXED**
+**File:** `app/compare/page.tsx:28`
+**Issue:** `pricingDataMap` is declared as `Record<string, any>`, which disables TypeScript checking on all downstream accesses. The `ComparePageClient` component (line 27-33 of ComparePageClient.tsx) expects a specific shape with `inputPricePer1m`, `outputPricePer1m`, `contextWindow`, `confidence`, and `sourceName`. If the schema changes or a field is renamed, the `any` type will not catch the mismatch, leading to silent runtime failures.
 
-**File:** `app/page.tsx:71` (sole location)
+**Fix:** Define and use a concrete type:
 
-The duplicate rendering in `PricingTable.tsx` has been removed. The "Last updated" timestamp now only appears in the page header (`page.tsx:71`).
+```tsx
+interface PricingDataEntry {
+  inputPricePer1m: number | null;
+  outputPricePer1m: number | null;
+  contextWindow: number | null;
+  confidence: 'verified' | 'likely' | 'low_confidence';
+  sourceName: string | null;
+}
+let pricingDataMap: Record<string, PricingDataEntry> = {};
+```
 
-## Previous Findings Verification
+### WR-02: Price filter does not guard against NaN from `parseFloat`
 
-### CR-01: SortIndicator renders HTML entities as literal text -- **FIXED**
+**File:** `app/components/PricingTable.tsx:184-205`
+**Issue:** The price filter uses `parseFloat(inputPriceMin)` after checking `inputPriceMin !== ''`. While `<input type="number" />` largely prevents non-numeric input, the `value` attribute is a string state variable that could theoretically contain non-numeric text (e.g., pasted content). `parseFloat('abc')` returns `NaN`, and since `NaN !== null` is `true`, the filter condition `if (inputMin !== null && row.inputPricePer1m < inputMin)` evaluates to `false` for all rows (NaN comparisons always return false), silently passing all rows through the filter.
 
-**File:** `app/components/PricingTable.tsx:86-93`
+**Fix:** Add NaN guard after parseFloat:
 
-The `SortIndicator` component now uses Unicode characters `'▲'` (U+25B2) and `'▼'` (U+25BC) as string literals inside the JSX `{}` expression. The unsorted state uses `&#8597;` directly in JSX markup (not inside `{}`), which renders correctly. Verified by visual inspection of the code -- no HTML entity strings inside `{}` expressions.
+```tsx
+const rawInputMin = inputPriceMin !== '' ? parseFloat(inputPriceMin) : null;
+const inputMin = rawInputMin !== null && !Number.isNaN(rawInputMin) ? rawInputMin : null;
+```
 
-### CR-02: `freeTierOnly` filter treats null prices as free -- **FIXED**
+### WR-03: `ComparisonCard` accepts `confidence: string` -- loose type allows invalid values
 
-**File:** `app/components/PricingTable.tsx:161-165`
+**File:** `app/components/ComparisonCard.tsx:29`
+**Issue:** The `confidence` prop is typed as `string` instead of `'verified' | 'likely' | 'low_confidence'`. This means `ComparePageClient` can pass any string (including the hardcoded `'low_confidence'` fallback on line 133), and the `.replace('_', ' ')` call on line 42 will process arbitrary strings. More importantly, the `getConfidenceColor()` function in `pricing-utils.ts` only handles three known values -- any other string silently falls through to the default gray styling. While not a runtime crash, this undermines the value of TypeScript's type system.
 
-The filter now reads `row.inputPricePer1m === 0 && row.outputPricePer1m === 0`. The `|| null` conditions have been removed. Models with unknown (`null`) pricing no longer appear in "free tier only" results.
+**Fix:** Import and use the shared confidence type:
 
-### WR-01: Duplicate condition in `getModelFamily` -- **FIXED**
+```tsx
+type ConfidenceLevel = 'verified' | 'likely' | 'low_confidence';
+// ...
+confidence: ConfidenceLevel;
+```
 
-**File:** `app/lib/pricing-utils.ts:70`
+### WR-04: Practical costs map in compare page hardcodes `'verified'` confidence
 
-Line 70 now reads `name.startsWith('claude-3.5') || name.startsWith('claude-3.6')`. The duplicate `claude-3.5` condition has been replaced with `claude-3.6`. Future Claude 3.6 models will now correctly map to the 'Claude 3.5' family group.
+**File:** `app/compare/page.tsx:93-101`
+**Issue:** When building `practicalCostsMap`, every cost entry is assigned `confidence: 'verified'` (line 95) regardless of the actual extraction's confidence level. A model with `low_confidence` extraction data will show as "verified" in the comparison card's practical costs section, misleading users about data reliability.
 
-### WR-02: `filterFn` cast to `any` suppresses type safety -- **IMPROVED**
+**Fix:** Join the confidence from the extraction query and propagate it:
 
-**File:** `app/components/PricingTable.tsx:219`
+```tsx
+const costs = await db
+  .select({
+    // ... existing fields
+    confidence: extractions.confidence,  // add this
+  })
+  .from(practicalCosts)
+  // ...
 
-The cast now reads `as FilterFn<PricingRow>` instead of `as any`. This is a meaningful improvement -- the TypeScript compiler will now verify that the function's return type and general shape are compatible with TanStack Table's `FilterFn<PricingRow>`, even though the exact parameter list differs (the callback ignores unused trailing parameters, which is safe in JavaScript).
-
-### WR-03: "Last updated" timestamp displayed twice -- **FIXED**
-
-**File:** `app/page.tsx:71` (sole location)
-
-The duplicate rendering in `PricingTable.tsx` has been removed. The "Last updated" timestamp now only appears in the page header (`page.tsx:71`).
-
-## New Findings (Task 3 — Dynamic Exchange Rate)
-
-### CR-04 (Warning): Hardcoded fallback rate duplicates constant — **FIXED**
-**File:** `app/page.tsx:26`
-**Issue:** `let exchangeRate: number = 25500` used a magic number instead of importing `FALLBACK_RATE`.
-**Fix:** Imported `FALLBACK_RATE` from `exchange-rate-worker` and used it as the initial value.
-
-### CR-05 (Warning): Exchange rate DB query missing `toCurrency` filter — **FIXED**
-**File:** `src/pipeline/exchange-rate-worker.ts:61`
-**Issue:** `getRateFromDb()` filtered only by `fromCurrency = 'USD'` but not `toCurrency = 'VND'`. Could return wrong rate if other currency pairs are stored.
-**Fix:** Added `eq(exchangeRates.toCurrency, 'VND')` to the where clause using `and()`.
-
-### CR-06 (Warning): Exchange rate fetch shares try-catch with pricing data — **FIXED**
-**File:** `app/page.tsx:56`
-**Issue:** `getLatestExchangeRate()` was inside the same try-catch as the main DB query. If the `exchange_rates` table doesn't exist (fresh deployment), it would hide the entire pricing table.
-**Fix:** Moved exchange rate fetch to its own try-catch block after the main data query.
-
-### CR-07 (Warning): No duplicate rate prevention in `storeRate` — **FIXED**
-**File:** `src/pipeline/exchange-rate-worker.ts:77`
-**Issue:** `storeRate()` inserted a new row every time. Duplicate rates accumulate if pipeline runs multiple times per day.
-**Fix:** Added existence check before insert — skips if a rate with the same value already exists.
-
-### IN-04 (Info): Module-level generics reference `PricingRow` before definition — **FIXED**
-**File:** `app/components/PricingTable.tsx:22-25`
-**Issue:** `getCoreRowModel<PricingRow>()` called at module level before `PricingRow` interface definition. TypeScript hoists types so it compiles, but reads confusingly.
-**Fix:** Removed type parameters from factory calls since they're erased at runtime anyway.
-
-### IN-05 (Info): `convertToVND` doesn't guard against NaN rate
-**File:** `app/lib/pricing-utils.ts:83`
-**Issue:** If `rate` is `NaN`, `price * NaN` returns `NaN`, which flows to `formatVND` and returns "N/A". Handled gracefully but implicitly.
-**Fix:** No action needed — `formatVND` already handles NaN correctly.
-
-### IN-06 (Info): `AbortSignal.timeout` requires Node.js 17.3+
-**File:** `src/pipeline/exchange-rate-worker.ts:27`
-**Issue:** `AbortSignal.timeout(10_000)` requires Node.js 17.3+. Older Node versions will throw.
-**Fix:** No action needed — Next.js 16 requires Node.js 18+.
-
-## Info (from previous review, still applicable)
-
-### IN-01: Silent database error catch with no logging
-
-**File:** `app/page.tsx:52-55`
-**Issue:** The `catch` block silently swallows all database errors. No error is logged, making production debugging difficult.
-**Fix:** Add `console.error('Failed to fetch pricing data:', err);` inside the catch block.
-
-### IN-02: `PricingRow` interface exported from component file creates unnecessary coupling
-
-**File:** `app/components/PricingTable.tsx:31-41` imported by `app/lib/provider-metadata.ts:9`
-**Issue:** The `PricingRow` interface is defined in the UI component file and imported by the utility module, creating a `utility -> component` dependency direction.
-**Fix:** Move the `PricingRow` interface to a shared types file (e.g., `app/lib/types.ts`).
-
-### IN-03: Test suite does not cover Claude 3.6 model family variants
-
-**File:** `tests/pricing-utils.test.ts:111-172`
-**Issue:** No test case covers `getModelFamily('claude-3.6-sonnet')` to verify the WR-01 fix. Adding one would prevent regressions.
-**Fix:** Add test case:
-```ts
-it('returns "Claude 3.5" for "claude-3.6-sonnet"', () => {
-  expect(getModelFamily('claude-3.6-sonnet')).toBe('Claude 3.5');
+// Then in the loop:
+practicalCostsMap[cost.modelName].push({
+  // ...
+  confidence: cost.confidence ?? 'low_confidence',
 });
 ```
 
+### WR-05: `ComparePageClient` filters selected models 3 times per render
+
+**File:** `app/components/ComparePageClient.tsx:108, 115, 124`
+**Issue:** `selectedModels.filter((m) => m.modelName)` is called three separate times in the JSX: once to check if length is 0 (line 108), once to check if length is 1 (line 115), and once to render the comparison cards (line 124). Each call iterates the entire array and creates a new array object. While not a correctness bug, this is a missed memoization opportunity that causes unnecessary work on every render, especially relevant since this is a client component that re-renders on every model selection change.
+
+**Fix:** Memoize the filtered list:
+
+```tsx
+const validModels = useMemo(
+  () => selectedModels.filter((m) => m.modelName),
+  [selectedModels]
+);
+```
+
+### WR-06: `autoResetPageIndex: true` causes misleading "Page 1 of 1" flash
+
+**File:** `app/components/PricingTable.tsx:376`
+**Issue:** `autoResetPageIndex: true` resets the pagination index to 0 whenever `preFilteredData` changes. Combined with TanStack Table's internal update cycle, this can cause the page indicator to briefly show "Page 1 of 1" before the filtered row count is recalculated, creating a visual flash. This is especially noticeable when toggling the "Free tier only" checkbox, which dramatically changes the dataset size.
+
+**Fix:** Either remove `autoResetPageIndex` and handle pagination reset manually in the filter state setters, or accept the brief flash as cosmetic:
+
+```tsx
+// Option: Manual reset in clearFilters and filter setters
+const handleFreeTierChange = (checked: boolean) => {
+  setFreeTierOnly(checked);
+  table.setPageIndex(0);  // explicit reset
+};
+```
+
+## Info
+
+### IN-01: Recharts `Tooltip` formatter uses untyped `any` parameters
+
+**File:** `app/components/TrendChart.tsx:204-207`
+**Issue:** The `Tooltip` `formatter` callback uses `(value: any, name: any)` instead of typed parameters. This is a minor type safety gap that could mask bugs if the tooltip data shape changes.
+
+**Fix:** Use `number | string` or Recharts' exported types:
+
+```tsx
+formatter={(value: number | string, name: string) => [
+  `$${typeof value === 'number' ? value.toFixed(4) : value}`,
+  name,
+]}
+```
+
+### IN-02: Custom dot components in TrendChart use `props: any`
+
+**File:** `app/components/TrendChart.tsx:37, 63, 87, 97`
+**Issue:** `InputDot`, `OutputDot`, `ActiveDot`, and `FirstPointStar` all use `props: any`, bypassing type checking for the Recharts dot component props. This makes it easy to accidentally access undefined properties without compile-time warnings.
+
+**Fix:** Define an interface for the dot props:
+
+```tsx
+interface DotProps {
+  cx?: number;
+  cy?: number;
+  payload?: ChartDataPoint;
+  // ... other Recharts dot props as needed
+}
+function InputDot(props: DotProps) { /* ... */ }
+```
+
+### IN-03: Duplicate filter computation in `ComparePageClient` (see WR-05)
+
+**File:** `app/components/ComparePageClient.tsx:108, 115, 124`
+**Issue:** Same as WR-05 -- listed here as informational since the performance impact is minor for small arrays (max 5 models).
+
+### IN-04: Module-level row model factories in PricingTable are correct
+
+**File:** `app/components/PricingTable.tsx:25-28`
+**Issue:** `coreRowModel`, `sortedRowModel`, `filteredRowModel`, `paginationRowModel` are created at module level. This is the correct pattern per TanStack Table documentation -- these are stateless factory functions, not expensive computations. No action needed.
+
 ---
 
-_Reviewed: 2026-06-13_
+_Reviewed: 2026-06-18T18:30:00Z_
 _Reviewer: Claude (gsd-code-reviewer)_
 _Depth: deep_
-_Iterations: 1 (all 4 warnings fixed in single pass)_
+
+## Fixes Applied
+
+**Applied:** 2026-06-18
+**Fixer:** Claude (gsd-code-fixer)
+
+### Summary
+
+- Findings in scope: 12 (2 Critical, 6 Warning, 4 Info)
+- Fixed: 8
+- Already fixed (pre-existing): 3 (WR-02, IN-01, IN-02)
+- Not applicable: 1 (IN-04 -- informational, no action needed)
+- Skipped: 1 (WR-06 -- cosmetic issue, accepted as-is)
+
+### CR-01: Price filter inputs ignore currency mode -- FIXED
+
+**File:** `app/components/PricingTable.tsx`
+**Changes:**
+- Added VND-to-USD conversion in price filter logic: when `effectiveCurrency === 'vnd'` and `exchangeRate` is available, filter values entered by the user are divided by the exchange rate before comparison against the USD-stored row prices.
+- Updated `useMemo` dependency array to include `effectiveCurrency` and `exchangeRate`.
+- Updated filter legend labels from hardcoded `$/1M` to dynamic `{effectiveCurrency === 'usd' ? '$/1M' : '₫/1M'}` for both Input Price and Output Price fieldsets.
+
+### CR-02: Server-side timestamp display uses server timezone -- FIXED
+
+**File:** `app/page.tsx`
+**Changes:**
+- Replaced `format(lastUpdated, 'MMM d, yyyy h:mm a')` with `lastUpdated.toISOString().replace('T', ' ').slice(0, 16) + ' UTC'` to display an unambiguous UTC timestamp.
+- Removed unused `format` import from `date-fns`.
+
+### WR-01: `pricingDataMap` typed as `Record<string, any>` -- FIXED
+
+**File:** `app/compare/page.tsx`
+**Changes:**
+- Replaced `Record<string, any>` with a concrete type definition including `inputPricePer1m`, `outputPricePer1m`, `contextWindow`, `confidence` (with union type `'verified' | 'likely' | 'low_confidence'`), `sourceName`, and `collectedAt`.
+
+### WR-02: Price filter does not guard against NaN -- ALREADY FIXED
+
+**File:** `app/components/PricingTable.tsx`
+**Status:** The NaN guard using `Number.isFinite()` and `>= 0` checks was already present in the codebase prior to this fix session.
+
+### WR-03: `ComparisonCard` accepts `confidence: string` -- FIXED
+
+**Files:** `app/components/ComparisonCard.tsx`, `app/components/ComparePageClient.tsx`
+**Changes:**
+- Changed `confidence: string` to `confidence: 'verified' | 'likely' | 'low_confidence'` in `ComparisonCard` props type.
+- Updated `pricingDataMap` prop type in `ComparePageClient` to use the same union type for `confidence`.
+
+### WR-04: Practical costs map hardcodes 'verified' confidence -- FIXED
+
+**File:** `app/compare/page.tsx`
+**Changes:**
+- Added `confidence: extractions.confidence` to the practical costs SQL query select fields.
+- Changed hardcoded `confidence: 'verified'` to `confidence: cost.confidence ?? 'low_confidence'` in the practical costs map building loop.
+
+### WR-05: `ComparePageClient` filters selected models 3 times per render -- FIXED
+
+**File:** `app/components/ComparePageClient.tsx`
+**Changes:**
+- Added `useMemo` import from React.
+- Created `validModels` memoized value: `useMemo(() => selectedModels.filter((m) => m.modelName), [selectedModels])`.
+- Replaced all three `selectedModels.filter((m) => m.modelName)` calls in JSX with `validModels`.
+
+### WR-06: `autoResetPageIndex: true` causes "Page 1 of 1" flash -- NOT FIXED (accepted)
+
+**File:** `app/components/PricingTable.tsx`
+**Reason:** This is a cosmetic issue. The alternative (manual page reset in each filter setter) would require significant refactoring of the component structure since `table` is created after the filter state setters. The brief flash is acceptable for the current use case.
+
+### IN-01: Recharts `Tooltip` formatter uses untyped `any` -- ALREADY FIXED
+
+**File:** `app/components/TrendChart.tsx`
+**Status:** The Tooltip formatter already uses `string | number | (string | number)[]` type instead of `any`.
+
+### IN-02: Custom dot components use `props: any` -- ALREADY FIXED
+
+**File:** `app/components/TrendChart.tsx`
+**Status:** A `RechartsDotProps` interface was already defined and used by all dot components (`InputDot`, `OutputDot`, `ActiveDot`, `FirstPointStar`).
+
+### IN-03: Duplicate filter computation (see WR-05) -- FIXED
+
+**Status:** Resolved by WR-05 fix (memoized `validModels`).
+
+### IN-04: Module-level row model factories -- NO ACTION
+
+**Status:** Informational. The pattern is correct per TanStack Table documentation. No fix needed.

@@ -6,12 +6,19 @@ describe('generateSlug', () => {
     expect(generateSlug('gpt-4o', 1)).toBe('gpt-4o--1');
   });
 
-  it('lowercases and hyphenates spaces', () => {
-    expect(generateSlug('Claude 3.5 Sonnet', 2)).toBe('claude-35-sonnet--2');
+  it('converts dots to hyphens to avoid collision', () => {
+    expect(generateSlug('model.v1', 1)).toBe('model-v1--1');
+    expect(generateSlug('modelv1', 1)).toBe('modelv1--1');
+    // These two must NOT collide
+    expect(generateSlug('model.v1', 1)).not.toBe(generateSlug('modelv1', 1));
   });
 
-  it('strips dots and hyphenates', () => {
-    expect(generateSlug('gemini-1.5-pro', 3)).toBe('gemini-15-pro--3');
+  it('lowercases and hyphenates spaces', () => {
+    expect(generateSlug('Claude 3.5 Sonnet', 2)).toBe('claude-3-5-sonnet--2');
+  });
+
+  it('converts dots to hyphens and collapses', () => {
+    expect(generateSlug('gemini-1.5-pro', 3)).toBe('gemini-1-5-pro--3');
   });
 
   it('handles mixed case with spaces', () => {
@@ -35,7 +42,7 @@ describe('generateSlug', () => {
   });
 
   it('handles already-lowercase name', () => {
-    expect(generateSlug('llama-3.1-70b', 4)).toBe('llama-31-70b--4');
+    expect(generateSlug('llama-3.1-70b', 4)).toBe('llama-3-1-70b--4');
   });
 
   it('handles special characters', () => {

@@ -1,0 +1,48 @@
+{
+  "version": "1.0",
+  "timestamp": "2026-06-18T16:55:00+07:00",
+  "phase": "8",
+  "phase_name": "admin-operations",
+  "phase_dir": ".planning/phases/08-admin-operations",
+  "plan": 0,
+  "task": 0,
+  "total_tasks": 0,
+  "status": "paused",
+  "completed_tasks": [
+    {"id": 1, "name": "Fix Playwright browser launch in Docker", "status": "done", "detail": "Added PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium-browser to docker-compose.yml and launchContext.launchOptions.executablePath to base.ts"},
+    {"id": 2, "name": "Add MIMO env vars to docker-compose", "status": "done", "detail": "Added MIMO_API_KEY, MIMO_BASE_URL, MIMO_MODEL, AI_PROVIDER=mimo, AI_FALLBACK_PROVIDER=openai"},
+    {"id": 3, "name": "Sync database schema", "status": "done", "detail": "Ran drizzle-kit push to add missing columns (source_confidence etc.)"},
+    {"id": 4, "name": "Fix empty article content", "status": "done", "detail": "Added empty response validation in article-generator.ts, post-parse validation, and generate worker guard"},
+    {"id": 5, "name": "Fix Anthropic wrong URL", "status": "done", "detail": "Changed from claude.com/pricing to docs.anthropic.com/en/docs/about-claude/pricing. Result: 0→13 Claude models"},
+    {"id": 6, "name": "Fix DeepSeek wrong URL", "status": "done", "detail": "Changed from platform.deepseek.com (403) to api-docs.deepseek.com/quick_start/pricing. Result: 0→2 models"},
+    {"id": 7, "name": "Fix Fireworks wrong URL", "status": "done", "detail": "Changed from fireworks.ai/pricing to docs.fireworks.ai/serverless/pricing. Result: 0→16 models"},
+    {"id": 8, "name": "Add waitForLoadState to base crawler", "status": "done", "detail": "Added networkidle + 3s timeout before page.content() for JS-rendered pages"},
+    {"id": 9, "name": "Add 0-model extraction warning", "status": "done", "detail": "Extract worker now logs warning when adapter returns 0 models"},
+    {"id": 10, "name": "Test all providers", "status": "done", "detail": "Tested 4 remaining providers. DeepSeek 2 models, Fireworks 2 models, Together 0 (HTML 600K), xAI 0 (HTML 350K)"}
+  ],
+  "remaining_tasks": [
+    {"id": 11, "name": "Fix Together HTML truncation", "status": "not_started", "detail": "HTML is 600K, exceeds 100K limit. Need smarter truncation or page-specific extraction"},
+    {"id": 12, "name": "Fix xAI client-side rendering", "status": "not_started", "detail": "HTML 350K, pricing data may be JS-rendered despite networkidle wait"},
+    {"id": 13, "name": "Add Amazon adapter", "status": "not_started", "detail": "amazon source exists in DB but has no adapter (separate from bedrock)"},
+    {"id": 14, "name": "Commit and push all fixes", "status": "not_started", "detail": "All code changes need to be committed to phase branch"}
+  ],
+  "blockers": [],
+  "async_jobs": [],
+  "human_actions_pending": [],
+  "decisions": [
+    {"decision": "Use system Chromium instead of Playwright's bundled browser", "rationale": "Alpine Linux uses musl, Playwright's Chrome needs glibc. System Chromium works natively"},
+    {"decision": "Set AI_PROVIDER=mimo in docker-compose", "rationale": "Only MIMO_API_KEY is available, default AI_PROVIDER=anthropic would fail"},
+    {"decision": "Use docs.anthropic.com for pricing URL", "rationale": "claude.com/pricing is consumer subscription page with no API per-token pricing"}
+  ],
+  "uncommitted_files": [
+    "src/providers/anthropic/config.ts",
+    "src/providers/deepseek/config.ts",
+    "src/providers/fireworks/config.ts",
+    "src/providers/base.ts",
+    "src/pipeline/article-generator.ts",
+    "src/pipeline/workers/extract.ts",
+    "docker-compose.yml"
+  ],
+  "next_action": "Commit all fixes to phase branch, then tackle Together/xAI HTML truncation issue",
+  "context_notes": "Pipeline is now 10/13 providers working (135 models). Article generation works with content. The remaining 3 providers (together, xai, amazon) need HTML truncation improvements or page-specific adapters."
+}
