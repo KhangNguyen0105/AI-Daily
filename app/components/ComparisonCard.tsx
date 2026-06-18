@@ -32,9 +32,9 @@ export function ComparisonCard({
     <div className="border rounded-lg p-4 flex-shrink-0 w-full lg:w-80">
       {/* Header */}
       <div className="mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">{modelName}</h3>
+        <h3 className="text-lg font-semibold text-text-primary">{modelName}</h3>
         {sourceName && (
-          <p className="text-sm text-gray-500">{sourceName}</p>
+          <p className="text-sm text-text-secondary">{sourceName}</p>
         )}
         <span
           className={`inline-block mt-2 px-2 py-1 rounded text-xs font-medium ${getConfidenceColor(confidence)}`}
@@ -45,16 +45,16 @@ export function ComparisonCard({
 
       {/* Pricing */}
       <div className="mb-4">
-        <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+        <h4 className="text-xs font-medium text-text-secondary uppercase tracking-wide mb-2">
           Pricing
         </h4>
         <div className="space-y-1">
           <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Input</span>
+            <span className="text-text-secondary">Input</span>
             <span className="font-medium">{formatPrice(inputPricePer1m)}/1M</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Output</span>
+            <span className="text-text-secondary">Output</span>
             <span className="font-medium">{formatPrice(outputPricePer1m)}/1M</span>
           </div>
         </div>
@@ -62,7 +62,7 @@ export function ComparisonCard({
 
       {/* Context Window */}
       <div className="mb-4">
-        <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+        <h4 className="text-xs font-medium text-text-secondary uppercase tracking-wide mb-2">
           Context Window
         </h4>
         <p className="text-sm font-medium">{formatContextWindow(contextWindow)}</p>
@@ -71,13 +71,13 @@ export function ComparisonCard({
       {/* Practical Costs */}
       {practicalCosts.length > 0 && (
         <div className="mb-4">
-          <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+          <h4 className="text-xs font-medium text-text-secondary uppercase tracking-wide mb-2">
             Practical Costs
           </h4>
           <div className="space-y-2">
             {practicalCosts.map((cost) => (
               <div key={cost.modelId} className="flex justify-between text-sm">
-                <span className="text-gray-600">{cost.modelName}</span>
+                <span className="text-text-secondary">{cost.modelName}</span>
                 <span className="font-medium">{formatPrice(cost.totalCost)}</span>
               </div>
             ))}
@@ -87,7 +87,7 @@ export function ComparisonCard({
 
       {/* Free Tier Status */}
       <div>
-        <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+        <h4 className="text-xs font-medium text-text-secondary uppercase tracking-wide mb-2">
           Free Tier
         </h4>
         {promotions.length > 0 ? (
@@ -108,7 +108,7 @@ export function ComparisonCard({
             ))}
           </div>
         ) : (
-          <p className="text-sm text-gray-500">No free tier</p>
+          <p className="text-sm text-text-secondary">No free tier</p>
         )}
       </div>
     </div>
