@@ -188,7 +188,7 @@ export function TrendChart({ data, modelName }: { data: TrendPoint[]; modelName:
 
   if (chartData.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
+      <div className="text-center py-8 text-text-secondary">
         No pricing data available yet.
       </div>
     );
@@ -196,7 +196,7 @@ export function TrendChart({ data, modelName }: { data: TrendPoint[]; modelName:
 
   if (chartData.length === 1) {
     return (
-      <div className="text-center py-8 text-gray-500">
+      <div className="text-center py-8 text-text-secondary">
         Only 1 data point collected. Trend chart will appear after the next collection.
       </div>
     );
@@ -204,7 +204,7 @@ export function TrendChart({ data, modelName }: { data: TrendPoint[]; modelName:
 
   return (
     <div>
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">{modelName}</h3>
+      <h3 className="text-lg font-semibold text-text-primary mb-4">{modelName}</h3>
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" />
