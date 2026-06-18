@@ -87,19 +87,19 @@ export function AlertBanner() {
       {triggeredAlerts.map((alert, index) => (
         <div
           key={`${alert.modelName}-${index}`}
-          className="bg-green-50 border border-green-200 rounded-lg p-4 shadow-lg flex items-start justify-between gap-3"
+          className="bg-badge-green-bg border border-badge-green-border rounded-lg p-4 shadow-lg flex items-start justify-between gap-3"
         >
           <div>
-            <p className="text-sm font-medium text-green-900">
+            <p className="text-sm font-medium text-badge-green-text">
               🔔 {alert.modelName}
             </p>
-            <p className="text-xs text-green-700 mt-1">
+            <p className="text-xs text-badge-green-text/80 mt-1">
               Price is ${alert.currentPrice.toFixed(4)}/1M tokens (your threshold: ${alert.thresholdPrice.toFixed(4)}/1M)
             </p>
           </div>
           <button
             onClick={() => handleDismiss(index)}
-            className="text-green-600 hover:text-green-800 flex-shrink-0"
+            className="text-badge-green-text hover:opacity-80 flex-shrink-0"
           >
             ✕
           </button>
