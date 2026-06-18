@@ -23,13 +23,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setTheme(isDark ? 'dark' : 'light');
   }, []);
 
+  // Sync DOM class and localStorage when theme state changes
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
   const toggle = useCallback(() => {
-    setTheme((prev) => {
-      const next: Theme = prev === 'light' ? 'dark' : 'light';
-      document.documentElement.classList.toggle('dark', next === 'dark');
-      localStorage.setItem('theme', next);
-      return next;
-    });
+    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
   }, []);
 
   return (
