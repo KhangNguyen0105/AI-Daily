@@ -113,7 +113,7 @@ export function SourcesTable({ sources, onToggleTrust }: SourcesTableProps) {
                     <td className="px-4 py-3 text-text-secondary">{source.providerType}</td>
                     <td className="px-4 py-3">
                       {source.isActive === 1 ? (
-                        <span className="inline-block px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded">
+                        <span className="inline-block px-2 py-0.5 text-xs font-medium bg-badge-green-bg text-badge-green-text rounded">
                           Active
                         </span>
                       ) : (
@@ -139,7 +139,7 @@ export function SourcesTable({ sources, onToggleTrust }: SourcesTableProps) {
                         } ${loadingToggleId === source.id ? 'opacity-50' : ''}`}
                       >
                         <span
-                          className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
+                          className={`inline-block h-5 w-5 transform rounded-full bg-bg-primary shadow transition-transform ${
                             source.isActive === 1 ? 'translate-x-5' : 'translate-x-0'
                           }`}
                         />
