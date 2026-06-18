@@ -51,7 +51,7 @@ export function RegenerateTrigger({ onSuccess, onError }: RegenerateTriggerProps
         <button
           onClick={() => setIsConfirmOpen(true)}
           disabled={isLoading}
-          className="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2 bg-accent-blue text-white text-sm rounded-md hover:bg-accent-blue/90 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Regenerate Article
         </button>

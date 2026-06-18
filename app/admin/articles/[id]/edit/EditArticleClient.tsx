@@ -104,7 +104,7 @@ export function EditArticleClient({ article, initialVersions, initialExtractions
           onClick={() => setActiveTab('edit')}
           className={`pb-3 text-sm ${
             activeTab === 'edit'
-              ? 'text-blue-600 border-b-2 border-blue-600 font-semibold'
+              ? 'text-accent-blue border-b-2 border-accent-blue font-semibold'
               : 'text-text-secondary'
           }`}
         >
@@ -114,7 +114,7 @@ export function EditArticleClient({ article, initialVersions, initialExtractions
           onClick={() => setActiveTab('preview')}
           className={`pb-3 text-sm ${
             activeTab === 'preview'
-              ? 'text-blue-600 border-b-2 border-blue-600 font-semibold'
+              ? 'text-accent-blue border-b-2 border-accent-blue font-semibold'
               : 'text-text-secondary'
           }`}
         >
@@ -124,7 +124,7 @@ export function EditArticleClient({ article, initialVersions, initialExtractions
           onClick={() => setActiveTab('sources')}
           className={`pb-3 text-sm ${
             activeTab === 'sources'
-              ? 'text-blue-600 border-b-2 border-blue-600 font-semibold'
+              ? 'text-accent-blue border-b-2 border-accent-blue font-semibold'
               : 'text-text-secondary'
           }`}
         >
@@ -175,7 +175,7 @@ export function EditArticleClient({ article, initialVersions, initialExtractions
                       <td className="px-4 py-3 text-text-primary">{ext.modelName}</td>
                       <td className="px-4 py-3">
                         {ext.sourceUrl ? (
-                          <a href={ext.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 text-sm">
+                          <a href={ext.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-accent-blue hover:text-accent-blue/80 text-sm">
                             {ext.sourceName ?? 'Link'}
                           </a>
                         ) : (

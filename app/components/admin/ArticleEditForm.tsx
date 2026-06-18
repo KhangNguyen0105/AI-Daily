@@ -33,7 +33,7 @@ export function ArticleEditForm({ article, onSave, isSaving }: ArticleEditFormPr
         <button
           type="submit"
           disabled={isSaving || !title || !content}
-          className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2 bg-accent-blue text-white text-sm font-medium rounded-md hover:bg-accent-blue/90 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSaving ? 'Saving...' : 'Save Changes'}
         </button>
@@ -49,7 +49,7 @@ export function ArticleEditForm({ article, onSave, isSaving }: ArticleEditFormPr
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full px-3 py-2 border border-border-secondary rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+            className="w-full px-3 py-2 border border-border-secondary rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue focus:border-transparent"
             required
           />
         </div>
@@ -63,7 +63,7 @@ export function ArticleEditForm({ article, onSave, isSaving }: ArticleEditFormPr
             type="text"
             value={summary}
             onChange={(e) => setSummary(e.target.value)}
-            className="w-full px-3 py-2 border border-border-secondary rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+            className="w-full px-3 py-2 border border-border-secondary rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue focus:border-transparent"
           />
         </div>
 
@@ -76,7 +76,7 @@ export function ArticleEditForm({ article, onSave, isSaving }: ArticleEditFormPr
                 onClick={() => setActiveTab('edit')}
                 className={`text-sm pb-1 ${
                   activeTab === 'edit'
-                    ? 'text-blue-600 border-b-2 border-blue-600 font-semibold'
+                    ? 'text-accent-blue border-b-2 border-accent-blue font-semibold'
                     : 'text-text-secondary'
                 }`}
               >
@@ -87,7 +87,7 @@ export function ArticleEditForm({ article, onSave, isSaving }: ArticleEditFormPr
                 onClick={() => setActiveTab('preview')}
                 className={`text-sm pb-1 ${
                   activeTab === 'preview'
-                    ? 'text-blue-600 border-b-2 border-blue-600 font-semibold'
+                    ? 'text-accent-blue border-b-2 border-accent-blue font-semibold'
                     : 'text-text-secondary'
                 }`}
               >
@@ -100,7 +100,7 @@ export function ArticleEditForm({ article, onSave, isSaving }: ArticleEditFormPr
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              className="w-full min-h-[400px] font-mono text-sm border border-border-secondary rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+              className="w-full min-h-[400px] font-mono text-sm border border-border-secondary rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-accent-blue focus:border-transparent"
               required
             />
           ) : (

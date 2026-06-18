@@ -81,7 +81,7 @@ export function PromotionCard({ promo }: { promo: PromotionData }) {
           href={promo.sourceUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-xs text-blue-600 hover:text-blue-800 underline"
+          className="text-xs text-accent-blue hover:text-accent-blue/80 underline"
         >
           View details
         </a>

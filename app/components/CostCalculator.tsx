@@ -58,7 +58,7 @@ export function CostCalculator({
             onClick={() => setSelectedScenario(s.id)}
             className={`rounded-lg px-4 py-2 text-sm transition-colors ${
               selectedScenario === s.id
-                ? 'bg-blue-600 text-white'
+                ? 'bg-accent-blue text-white'
                 : 'bg-bg-tertiary text-text-primary hover:bg-border-primary'
             }`}
           >

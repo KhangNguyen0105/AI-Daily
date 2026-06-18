@@ -78,7 +78,7 @@ export default async function AdminArticlesPage() {
                   <td className="px-4 py-3 text-right">
                     <Link
                       href={`/admin/articles/${article.id}/edit`}
-                      className="text-sm text-blue-600 hover:text-blue-800"
+                      className="text-sm text-accent-blue hover:text-accent-blue/80"
                     >
                       Edit Article
                     </Link>

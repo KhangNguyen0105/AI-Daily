@@ -103,7 +103,7 @@ export function ComparePageClient({
         {selectedModels.length < 5 && (
           <button
             onClick={handleAdd}
-            className="px-4 py-2 text-sm text-blue-600 hover:text-blue-800 border border-blue-300 rounded-lg"
+            className="px-4 py-2 text-sm text-accent-blue hover:text-accent-blue/80 border border-accent-blue/50 rounded-lg"
           >
             + Add model
           </button>

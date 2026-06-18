@@ -135,7 +135,7 @@ export function SourcesTable({ sources, onToggleTrust }: SourcesTableProps) {
                         }}
                         disabled={loadingToggleId === source.id}
                         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                          source.isActive === 1 ? 'bg-blue-600' : 'bg-bg-tertiary'
+                          source.isActive === 1 ? 'bg-accent-blue' : 'bg-bg-tertiary'
                         } ${loadingToggleId === source.id ? 'opacity-50' : ''}`}
                       >
                         <span
@@ -159,7 +159,7 @@ export function SourcesTable({ sources, onToggleTrust }: SourcesTableProps) {
                                 href={source.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-blue-600 hover:text-blue-800 hover:underline"
+                                className="text-accent-blue hover:text-accent-blue/80 hover:underline"
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 {source.url}

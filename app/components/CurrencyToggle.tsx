@@ -20,7 +20,7 @@ export function CurrencyToggle({
         onClick={() => onCurrencyChange('usd')}
         className={`px-3 py-1 text-sm rounded-l border transition-colors ${
           currency === 'usd'
-            ? 'bg-blue-600 text-white border-blue-600'
+            ? 'bg-accent-blue text-white border-accent-blue'
             : 'bg-bg-primary text-text-primary border-border-secondary hover:bg-bg-secondary'
         }`}
       >
@@ -31,7 +31,7 @@ export function CurrencyToggle({
         onClick={() => onCurrencyChange('vnd')}
         className={`px-3 py-1 text-sm rounded-r border-t border-b border-r transition-colors ${
           currency === 'vnd'
-            ? 'bg-blue-600 text-white border-blue-600'
+            ? 'bg-accent-blue text-white border-accent-blue'
             : 'bg-bg-primary text-text-primary border-border-secondary hover:bg-bg-secondary'
         }`}
       >

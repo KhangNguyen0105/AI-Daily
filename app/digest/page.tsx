@@ -93,7 +93,7 @@ export default async function DigestArchivePage({
                   </time>
                   <Link
                     href={`/digest/${article.date}`}
-                    className="text-lg font-bold text-text-primary hover:text-blue-600 mt-1 block"
+                    className="text-lg font-bold text-text-primary hover:text-accent-blue mt-1 block"
                   >
                     {article.title}
                   </Link>
@@ -109,7 +109,7 @@ export default async function DigestArchivePage({
             {hasMore && (
               <Link
                 href={`/digest?offset=${offset + limit}`}
-                className="text-blue-600 hover:text-blue-800 text-sm mt-8 inline-block"
+                className="text-accent-blue hover:text-accent-blue/80 text-sm mt-8 inline-block"
               >
                 Load more
               </Link>

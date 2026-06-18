@@ -57,13 +57,13 @@ export default async function AdminOverviewPage() {
       <div>
         <h2 className="text-lg font-semibold text-text-primary mb-3">Quick Actions</h2>
         <div className="flex flex-col gap-2">
-          <Link href="/admin/articles" className="text-blue-600 hover:text-blue-800 text-sm underline">
+          <Link href="/admin/articles" className="text-accent-blue hover:text-accent-blue/80 text-sm underline">
             View Articles
           </Link>
-          <Link href="/admin/pipeline" className="text-blue-600 hover:text-blue-800 text-sm underline">
+          <Link href="/admin/pipeline" className="text-accent-blue hover:text-accent-blue/80 text-sm underline">
             View Pipeline
           </Link>
-          <Link href="/admin/sources" className="text-blue-600 hover:text-blue-800 text-sm underline">
+          <Link href="/admin/sources" className="text-accent-blue hover:text-accent-blue/80 text-sm underline">
             View Sources
           </Link>
         </div>

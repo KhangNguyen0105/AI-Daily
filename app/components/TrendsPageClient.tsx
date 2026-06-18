@@ -33,7 +33,7 @@ export function TrendsPageClient({ models }: { models: TrendModelData[] }) {
       {selectedModel && (
         <button
           onClick={() => setSelectedModelIndex(null)}
-          className="text-sm text-blue-600 hover:text-blue-800 mb-6"
+          className="text-sm text-accent-blue hover:text-accent-blue/80 mb-6"
         >
           ← Back to all models
         </button>
@@ -54,7 +54,7 @@ export function TrendsPageClient({ models }: { models: TrendModelData[] }) {
               <button
                 key={`${model.modelName}-${model.sourceId}`}
                 onClick={() => setSelectedModelIndex(index)}
-                className="bg-bg-primary border border-border-primary rounded-lg p-4 text-left hover:border-blue-300 hover:shadow-sm transition-all"
+                className="bg-bg-primary border border-border-primary rounded-lg p-4 text-left hover:border-accent-blue hover:shadow-sm transition-all"
               >
                 <p className="text-sm font-medium text-text-primary">
                   {sanitizeDisplayName(model.modelName)}

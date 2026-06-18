@@ -33,7 +33,7 @@ export function DigestArticle({
     <div className="max-w-4xl mx-auto px-4 py-8">
       <Link
         href="/digest"
-        className="text-blue-600 hover:text-blue-800 text-sm mb-4 inline-flex items-center gap-1"
+        className="text-accent-blue hover:text-accent-blue/80 text-sm mb-4 inline-flex items-center gap-1"
       >
         &larr; Back to digest
       </Link>
@@ -85,7 +85,7 @@ export function DigestArticle({
             a: ({ href, children }) => (
               <a
                 href={href}
-                className="text-blue-600 hover:text-blue-800 underline"
+                className="text-accent-blue hover:text-accent-blue/80 underline"
               >
                 {children}
               </a>
