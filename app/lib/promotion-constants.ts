@@ -5,9 +5,9 @@
  */
 
 export const PROMOTION_BADGE_STYLES: Record<string, string> = {
-  free_tier: 'bg-green-100 text-green-800',
-  promotion: 'bg-blue-100 text-blue-800',
-  beta: 'bg-purple-100 text-purple-800',
+  free_tier: 'bg-badge-green-bg text-badge-green-text',
+  promotion: 'bg-badge-blue-bg text-badge-blue-text',
+  beta: 'bg-badge-purple-bg text-badge-purple-text',
 };
 
 export const PROMOTION_TYPE_LABELS: Record<string, string> = {
