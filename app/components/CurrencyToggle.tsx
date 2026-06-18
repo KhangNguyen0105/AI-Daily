@@ -21,7 +21,7 @@ export function CurrencyToggle({
         className={`px-3 py-1 text-sm rounded-l border transition-colors ${
           currency === 'usd'
             ? 'bg-blue-600 text-white border-blue-600'
-            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+            : 'bg-bg-primary text-text-primary border-border-secondary hover:bg-bg-secondary'
         }`}
       >
         USD
@@ -32,7 +32,7 @@ export function CurrencyToggle({
         className={`px-3 py-1 text-sm rounded-r border-t border-b border-r transition-colors ${
           currency === 'vnd'
             ? 'bg-blue-600 text-white border-blue-600'
-            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+            : 'bg-bg-primary text-text-primary border-border-secondary hover:bg-bg-secondary'
         }`}
       >
         VND
