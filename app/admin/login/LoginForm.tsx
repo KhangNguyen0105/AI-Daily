@@ -48,7 +48,7 @@ export function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Enter admin password"
-            className="w-full px-3 py-2 pr-10 border border-border-secondary rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+            className="w-full px-3 py-2 pr-10 border border-border-secondary rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue focus:border-transparent"
             required
             autoComplete="current-password"
           />
@@ -74,7 +74,7 @@ export function LoginForm() {
       </div>
 
       {error && (
-        <p className="text-sm text-red-600" role="alert">
+        <p className="text-sm text-badge-red-text" role="alert">
           {error}
         </p>
       )}
