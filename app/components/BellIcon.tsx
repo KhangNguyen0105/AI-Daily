@@ -71,7 +71,7 @@ export function BellIcon({
         className={`p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg transition-colors ${
           hasAlert
             ? 'text-blue-600 hover:text-blue-800'
-            : 'text-gray-400 hover:text-gray-600'
+            : 'text-text-tertiary hover:text-text-secondary'
         }`}
         title={hasAlert ? 'Manage price alert' : 'Set price alert'}
       >
@@ -89,9 +89,9 @@ export function BellIcon({
       </button>
 
       {showForm && (
-        <div role="dialog" aria-label="Price alert settings" className="absolute mt-2 p-3 bg-gray-50 rounded-lg border border-gray-200 shadow-lg z-10 w-64">
+        <div role="dialog" aria-label="Price alert settings" className="absolute mt-2 p-3 bg-bg-secondary rounded-lg border border-border-primary shadow-lg z-10 w-64">
           {currentPrice !== null && (
-            <p className="text-xs text-gray-600 mb-2">
+            <p className="text-xs text-text-secondary mb-2">
               Current price: ${currentPrice.toFixed(4)}/1M tokens
             </p>
           )}
@@ -103,7 +103,7 @@ export function BellIcon({
                 value={thresholdInput}
                 onChange={(e) => setThresholdInput(e.target.value)}
                 placeholder="Threshold price (USD/1M)"
-                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded mb-2"
+                className="w-full px-2 py-1.5 text-sm border border-border-secondary rounded mb-2"
                 min="0"
                 step="0.0001"
               />
@@ -116,7 +116,7 @@ export function BellIcon({
             </>
           ) : (
             <>
-              <p className="text-xs text-gray-600 mb-2">
+              <p className="text-xs text-text-secondary mb-2">
                 Alert is active for this model.
               </p>
               <button
