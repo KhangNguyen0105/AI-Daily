@@ -1,5 +1,4 @@
 import type { ConsumerAdapter } from './base';
-import type { ProviderAdapter } from '../base';
 
 // Tier 1 consumer adapters
 import { ChatGPTConsumerAdapter } from './chatgpt/adapter';
@@ -127,7 +126,7 @@ export function isConsumerTier2Provider(name: string): boolean {
 export async function mirrorToMainRegistry(): Promise<void> {
   const { registerAdapter } = await import('../registry');
   for (const adapter of getAllConsumerAdapters()) {
-    registerAdapter(adapter as unknown as ProviderAdapter);
+    registerAdapter(adapter);
   }
 }
 
