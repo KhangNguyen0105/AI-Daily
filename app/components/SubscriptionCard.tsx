@@ -2,7 +2,7 @@
 
 import { format } from 'date-fns';
 import { isSafeUrl } from '@/app/lib/url-utils';
-import { SubscriptionPlanData } from '@/app/subscriptions/page';
+import type { SubscriptionPlanData } from '@/app/lib/types';
 
 /**
  * Individual subscription plan card component.

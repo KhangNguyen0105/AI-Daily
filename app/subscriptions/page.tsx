@@ -1,31 +1,9 @@
 import { db } from '@/src/db';
 import { subscriptionPlans } from '@/src/db/schema';
 import { SubscriptionsPageClient } from '@/app/components/SubscriptionsPageClient';
+import type { SubscriptionPlanData } from '@/app/lib/types';
 
 export const revalidate = 60;
-
-/**
- * Subscription plan data shape passed to the client component.
- * Includes all fields needed for display, filtering, and sorting.
- */
-export interface SubscriptionPlanData {
-  id: number;
-  providerName: string;
-  planName: string;
-  monthlyPrice: number | null;
-  annualPrice: number | null;
-  annualMonthlyPrice: number | null;
-  rawPriceText: string | null;
-  billingPeriod: string;
-  freeTrialDays: number | null;
-  freeTrialConditions: string | null;
-  keyFeatures: string[];
-  currency: string;
-  sourceUrl: string | null;
-  confidence: string;
-  extractionNotes: string | null;
-  crawledAt: Date | null;
-}
 
 /**
  * Subscriptions page — displays consumer AI subscription plans.

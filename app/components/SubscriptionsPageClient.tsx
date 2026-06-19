@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { SubscriptionPlanData } from '@/app/subscriptions/page';
+import type { SubscriptionPlanData } from '@/app/lib/types';
 import { SubscriptionCard } from '@/app/components/SubscriptionCard';
 
 type FilterType = 'all' | 'free_trial' | 'monthly' | 'annual';
