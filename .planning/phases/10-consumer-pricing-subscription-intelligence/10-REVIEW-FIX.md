@@ -1,99 +1,82 @@
 ---
 phase: 10-consumer-pricing-subscription-intelligence
-fixed_at: 2026-06-19T12:00:00Z
+fixed_at: 2026-06-19T15:30:00Z
 review_path: .planning/phases/10-consumer-pricing-subscription-intelligence/10-REVIEW.md
-iteration: 1
-findings_in_scope: 12
-fixed: 10
-skipped: 2
-status: partial
+iteration: 3
+findings_in_scope: 7
+fixed: 7
+skipped: 0
+status: all_fixed
 ---
 
-# Phase 10: Code Review Fix Report
+# Phase 10: Code Review Fix Report (Iteration 3)
 
-**Fixed at:** 2026-06-19T12:00:00Z
+**Fixed at:** 2026-06-19T15:30:00Z
 **Source review:** `.planning/phases/10-consumer-pricing-subscription-intelligence/10-REVIEW.md`
-**Iteration:** 1
+**Iteration:** 3
 
 **Summary:**
-- Findings in scope: 12 (1 critical, 7 warnings, 4 info)
-- Fixed: 10
-- Skipped: 2
+- Findings in scope: 7
+- Fixed: 7
+- Skipped: 0
 
-## Fixed Issues
+## Fixes Applied
 
-### CR-01: Subscription plan upsert missing planName normalization
+### CR-01: Consumer adapters double-enqueued in pipeline orchestrator
+
 **Status:** fixed
-**Files modified:** `src/pipeline/workers/extract.ts`
-**Commit:** `6154596`
-**Applied fix:** Added `normalizePlanName()` utility function that lowercases, trims, and collapses whitespace. Applied normalization to `planName` in the insert values before the upsert. This prevents duplicate stale rows when the LLM returns different casing/whitespace across crawls.
+**File(s):** `src/pipeline/orchestrator.ts`
+**Commit:** `b0884c1`
+**Applied fix:** Added `isConsumerTier1Provider`/`isConsumerTier2Provider` guard at the top of the general adapter loop (line 100) to skip consumer adapters. After `mirrorToMainRegistry()` registers consumer adapters in the main `adapters` Map, `getAllAdapters()` returns them. Without this guard, the general loop enqueues them with incorrect priority (10/lowest) and no tier classification, then the dedicated consumer loop enqueues them again with correct priority (5 or 6). This caused double Playwright sessions, double LLM API calls, and double rawData rows per pipeline run.
 
-### WR-01: Orchestrator consumerMirrored guard is dead code
+### WR-01: Dead code -- `VIRTUAL_TRIAL_ID_OFFSET` constant never used
+
 **Status:** fixed
-**Files modified:** `src/pipeline/orchestrator.ts`
-**Commit:** `c8d4298`
-**Applied fix:** Moved `let consumerMirrored = false` from function-local scope (inside `orchestrateDailyRun()`) to module scope. The guard now correctly caches the mirroring state across invocations, avoiding redundant `mirrorToMainRegistry()` calls on every pipeline run.
+**File(s):** `app/promotions/page.tsx`
+**Commit:** `130da84`
+**Applied fix:** Removed the unused `VIRTUAL_TRIAL_ID_OFFSET = 100_000` constant and its 7-line comment block (lines 9-16). The constant was left behind after review #4 replaced offset-based ID generation with negative IDs (`-(row.id + 1)`).
 
-### WR-02: Promise.race timeout not cleared -- leaked timers
+### WR-02: `planSlug` column defined in schema but never populated
+
 **Status:** fixed
-**Files modified:** All 10 consumer adapter files (`src/providers/consumer/*/adapter.ts`)
-**Commit:** `c317267`
-**Applied fix:** In all 10 consumer adapters: (1) declared `timeoutId` variable before the try block, (2) captured the `setTimeout` return value in `timeoutId`, (3) added a `finally` block that calls `clearTimeout(timeoutId)` to prevent leaked timers on successful extraction.
+**File(s):** `src/pipeline/workers/extract.ts`
+**Commit:** `6dc92ba`
+**Applied fix:** Added `planSlug: normalizePlanName(plan.planName).replace(/\s+/g, '-')` to both the insert values and the `onConflictDoUpdate` set block in the subscription plan upsert. This generates a stable, lowercase, hyphenated slug from the normalized plan name for cross-crawl consistency.
 
-### WR-03: Consumer adapter subscription plan upsert missing providerName in conflict SET
+### IN-01: Consumer config files use inline intersection type instead of `ConsumerProviderConfig`
+
 **Status:** fixed
-**Files modified:** `src/pipeline/workers/extract.ts`
-**Commit:** `6154596`
-**Applied fix:** Added `providerName` to the `onConflictDoUpdate` set block, so that if a plan's provider name is corrected between crawls, the updated value persists in the database.
+**File(s):** `src/providers/consumer/chatgpt/config.ts`, `src/providers/consumer/claude/config.ts`, `src/providers/consumer/gemini/config.ts`, `src/providers/consumer/copilot/config.ts`, `src/providers/consumer/perplexity/config.ts`, `src/providers/consumer/poe/config.ts`, `src/providers/consumer/grok/config.ts`, `src/providers/consumer/you/config.ts`, `src/providers/consumer/phind/config.ts`, `src/providers/consumer/cursor/config.ts`
+**Commit:** `1109353`
+**Applied fix:** Updated all 10 consumer config files to import `ConsumerProviderConfig` from `../base` instead of `ProviderConfig` from `../../base`, and replaced the inline intersection type annotation (`ProviderConfig & { expectedPlanNames: string[]; adapterTimeoutMs: number }`) with the named `ConsumerProviderConfig` interface. This improves maintainability and consistency with the base class's `consumerConfig` getter.
 
-### WR-04: SubscriptionPlanData interface defined in server component, imported by client component
+### IN-02: Some adapter `buildExtractionPrompt` overrides are near-identical to base class default
+
 **Status:** fixed
-**Files modified:** `app/lib/types.ts`, `app/subscriptions/page.tsx`, `app/components/SubscriptionCard.tsx`, `app/components/SubscriptionsPageClient.tsx`
-**Commit:** `97c4fb3`
-**Applied fix:** Extracted `SubscriptionPlanData` interface from `app/subscriptions/page.tsx` (server component) into the existing shared types file `app/lib/types.ts`. Updated all imports in `SubscriptionCard.tsx` and `SubscriptionsPageClient.tsx` to reference `@/app/lib/types` instead of `@/app/subscriptions/page`. The server page now imports from the shared file as well.
+**File(s):** `src/providers/consumer/gemini/adapter.ts`
+**Commit:** `7c381ef`
+**Applied fix:** Removed the `buildExtractionPrompt()` override from `GeminiConsumerAdapter`. The override differed from the base class default only in the page description ("Gemini/Google One" vs interpolated `config.name`) and price example ("$19.99/mo" vs "$20/mo"). The base class already handles the common case with `config.name` interpolation.
 
-### WR-05: Virtual promotion ID offset uses magic number 100000
+### IN-03: `subscriptionPlans` upsert does not update `currency` on conflict
+
 **Status:** fixed
-**Files modified:** `app/promotions/page.tsx`
-**Commit:** `f434893`
-**Applied fix:** Replaced the inline magic number `100000` with a named constant `VIRTUAL_TRIAL_ID_OFFSET = 100_000` declared at the top of the file with documentation explaining its purpose and safety margin.
+**File(s):** `src/pipeline/workers/extract.ts`
+**Commit:** `6dc92ba` (combined with WR-02)
+**Applied fix:** Added `currency: plan.currency || 'USD'` to the `onConflictDoUpdate` set block for subscription plans. Previously, currency was only set on insert, so a provider currency change between crawls would not be reflected.
 
-### WR-06: PromotionData.type field type assertion may be needed
+### IN-04: Test mocks hide real integration behavior
+
 **Status:** fixed
-**Files modified:** `app/promotions/page.tsx`, `app/model/[slug]/page.tsx`
-**Commit:** `1646885`
-**Applied fix:** Added explicit type assertion `as PromotionData['type']` in `promotions/page.tsx` and `as 'free_tier' | 'promotion' | 'beta' | 'free_trial'` in `model/[slug]/page.tsx` for the `row.type` mapping. This prevents potential TypeScript compile errors if Drizzle infers the column type as `string` instead of the literal union.
+**File(s):** `tests/pipeline/subscription-pipeline.test.ts`
+**Commit:** `ce1d256`
+**Applied fix:** Updated `getAllAdapters` mock to return a realistic list including both API providers (e.g., `openai`) and consumer adapters (simulating post-`mirrorToMainRegistry` state). Added explicit test `'should not double-enqueue consumer adapters (CR-01)'` that tracks all `collectQueue.add` calls and asserts each consumer adapter appears exactly once. This test would have caught the CR-01 double-enqueue bug.
 
-### IN-01: Dead code -- consumer schemas barrel file is never imported
-**Status:** fixed
-**Files modified:** `src/providers/consumer/schemas.ts` (deleted)
-**Commit:** `786aee3`
-**Applied fix:** Deleted the unused barrel file `src/providers/consumer/schemas.ts` which re-exported `consumerSubscriptionSchema` from `../schemas`. All 10 consumer adapters import directly from `../../schemas`, making this file dead code.
+## Remaining Issues
 
-### IN-03: All consumer adapters hardcode currency: 'USD'
-**Status:** fixed
-**Files modified:** All 10 consumer adapter files (`src/providers/consumer/*/adapter.ts`)
-**Commit:** `c317267`
-**Applied fix:** Changed `currency: 'USD'` to `currency: this.config.currency ?? 'USD'` in all 10 consumer adapters. This uses the adapter config's currency field (which all configs already define as 'USD') with a fallback, enabling future non-USD providers without code changes.
-
-### IN-04: Double-cast in mirrorToMainRegistry
-**Status:** fixed
-**Files modified:** `src/providers/consumer/registry.ts`
-**Commit:** `bfd2ece`
-**Applied fix:** Changed `registerAdapter(adapter as unknown as ProviderAdapter)` to `registerAdapter(adapter)` since `ConsumerAdapter` extends `ProviderAdapter` and the inheritance relationship satisfies the type. Also removed the now-unused `import type { ProviderAdapter } from '../base'`.
-
-## Skipped Issues
-
-### WR-07: PromotionsPageClient imports PromotionCard from external file not in Phase 10 scope
-**File:** `app/components/PromotionsPageClient.tsx:5`
-**Reason:** This is an informational observation, not a bug. The `PromotionCard` import resolves correctly to an existing file that exports the expected component. No code change is needed. Cross-phase imports are architecturally sound.
-
-### IN-02: Massive code duplication across 10 consumer adapters
-**Files:** All 10 `src/providers/consumer/*/adapter.ts` files
-**Reason:** This is a major structural refactor requiring: (1) adding a template method `buildExtractionPrompt()` to the `ConsumerAdapter` base class, (2) moving the shared `extract()` logic to the base class, (3) updating all 10 adapters to only override the prompt method. The risk of introducing regressions in the extraction pipeline is too high for an automated fix. This refactor should be planned as a dedicated phase with thorough testing.
+None -- all 7 findings were successfully fixed.
 
 ---
 
-_Fixed: 2026-06-19T12:00:00Z_
+_Fixed: 2026-06-19T15:30:00Z_
 _Fixer: Claude (gsd-code-fixer)_
-_Iteration: 1_
+_Iteration: 3_
