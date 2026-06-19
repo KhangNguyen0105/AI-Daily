@@ -43,7 +43,7 @@ export function PromotionsPageClient({
   ];
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="h-[calc(100vh-56px)] overflow-y-auto max-w-6xl mx-auto px-4 py-8">
       {/* Page heading */}
       <h1 className="text-2xl font-semibold text-text-primary mb-2">
         Promotions & Free Tiers

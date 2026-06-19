@@ -6,7 +6,7 @@ export const metadata = {
 
 export default function AdminLoginPage() {
   return (
-    <div className="min-h-screen bg-bg-secondary flex flex-col items-center justify-center px-4">
+    <div className="h-[calc(100vh-56px)] overflow-y-auto bg-bg-secondary flex flex-col items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-text-primary">AI Daily</h1>

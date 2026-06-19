@@ -142,7 +142,7 @@ export function EditArticleClient({ article, initialVersions, initialExtractions
         <div>
           <h1 className="text-2xl font-bold text-text-primary mb-2">{article.title}</h1>
           {article.summary && <p className="text-sm text-text-secondary mb-6">{article.summary}</p>}
-          <div className="prose prose-sm max-w-none">
+          <div className="prose prose-sm dark:prose-invert max-w-none">
             {/* Preview is handled by ArticleEditForm, but we show it standalone here too */}
             <p className="text-sm text-text-secondary">Switch to Edit tab and use the Preview button within the form.</p>
           </div>

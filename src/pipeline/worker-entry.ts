@@ -8,6 +8,7 @@ import {
   setupTier1Scheduler,
   setupTier2Scheduler,
   setupFeedMonitorScheduler,
+  checkAndRunMissedDailyPipeline,
   createDailyPipelineWorker,
   createTier1RefreshWorker,
   createTier2RefreshWorker,
@@ -45,6 +46,10 @@ await setupTier2Scheduler();
 
 // CR-04: Set up feed monitor scheduler (daily at 2 AM UTC)
 await setupFeedMonitorScheduler();
+
+// Check if today's 6 AM daily pipeline was missed (worker was down).
+// If so, trigger a catch-up run immediately.
+await checkAndRunMissedDailyPipeline();
 
 // Create all workers (8 total — added tier1-refresh, tier2-refresh, feed-monitor workers)
 const collectWorker = createCollectWorker();

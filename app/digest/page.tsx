@@ -56,7 +56,7 @@ export default async function DigestArchivePage({
   }
 
   return (
-    <main className="min-h-screen bg-bg-primary text-text-primary">
+    <main className="h-[calc(100vh-56px)] overflow-y-auto bg-bg-primary text-text-primary">
       <div className="max-w-4xl mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold tracking-tight mb-8">
           Daily Digest Archive

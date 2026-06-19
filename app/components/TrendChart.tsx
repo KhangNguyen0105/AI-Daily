@@ -97,7 +97,7 @@ function OutputDot(props: RechartsDotProps) {
 function ActiveDot(props: RechartsDotProps) {
   const { cx, cy } = props;
   if (cx === undefined || cy === undefined) return null;
-  return <circle cx={cx} cy={cy} r={6} fill="var(--chart-1)" stroke="#fff" strokeWidth={2} />;
+  return <circle cx={cx} cy={cy} r={6} fill="var(--chart-1)" stroke="var(--bg-primary)" strokeWidth={2} />;
 }
 
 /**

@@ -29,7 +29,7 @@ export function ComparisonCard({
   promotions: PromotionData[];
 }) {
   return (
-    <div className="border rounded-lg p-4 flex-shrink-0 w-full lg:w-80">
+    <div className="border border-border-primary rounded-lg p-4 flex-shrink-0 w-full lg:w-80">
       {/* Header */}
       <div className="mb-4">
         <h3 className="text-lg font-semibold text-text-primary">{modelName}</h3>

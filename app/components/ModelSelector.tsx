@@ -74,7 +74,7 @@ export function ModelSelector({
         }}
         onFocus={() => setOpen(true)}
         placeholder={placeholder}
-        className="w-full px-3 py-2 border border-border-secondary rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue focus:border-transparent"
+        className="w-full px-3 py-2 bg-bg-primary border border-border-secondary rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue focus:border-transparent"
       />
 
       {open && filtered.length > 0 && (

@@ -46,7 +46,7 @@ export function RegenerateTrigger({ onSuccess, onError }: RegenerateTriggerProps
           type="date"
           value={selectedDate}
           onChange={(e) => setSelectedDate(e.target.value)}
-          className="px-3 py-2 border border-border-secondary rounded-md text-sm"
+          className="px-3 py-2 bg-bg-primary border border-border-secondary rounded-md text-sm"
         />
         <button
           onClick={() => setIsConfirmOpen(true)}

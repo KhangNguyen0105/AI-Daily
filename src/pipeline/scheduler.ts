@@ -4,6 +4,7 @@ import { orchestrateDailyRun } from './orchestrator';
 import { getAllTier1Adapters, getAllTier2Adapters, getAllTier3Adapters } from '../providers/registry';
 import { collectQueue } from './queues';
 import { monitorProviderFeeds, createFeedMonitorWorker } from './feed-monitor-worker';
+import { desc } from 'drizzle-orm';
 import { db } from '../db/index';
 import { pipelineRuns } from '../db/schema';
 
@@ -398,6 +399,65 @@ export function createTier2RefreshWorker(): Worker {
   });
 
   return worker;
+}
+
+/**
+ * Check if today's daily pipeline has already run. If not, and it's past
+ * 6:00 AM UTC, trigger it immediately. This covers the case where the
+ * worker was down at 6 AM and missed the scheduled run.
+ *
+ * Logic:
+ * 1. Query pipelineRuns for a completed run started today (UTC date).
+ * 2. If none found and current time >= 06:05 UTC (5-min grace period),
+ *    enqueue a one-off daily-pipeline job.
+ *
+ * The 5-minute grace period prevents a race condition where the worker
+ * starts up at exactly 6:00 AM and both the cron job and this check
+ * fire simultaneously.
+ */
+export async function checkAndRunMissedDailyPipeline(): Promise<void> {
+  const now = new Date();
+  const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const sixAmPlusGrace = new Date(todayUTC.getTime() + 6 * 60 * 60 * 1000 + 5 * 60 * 1000);
+
+  // Only check if it's past 6:05 AM UTC
+  if (now < sixAmPlusGrace) {
+    console.log('Before 6:05 AM UTC — skipping missed-run check');
+    return;
+  }
+
+  // Check if there's already a completed (or running) daily pipeline for today
+  // Look at recent runs and filter by UTC date in JS for reliability
+  const recentRuns = await db
+    .select({ id: pipelineRuns.id, status: pipelineRuns.status, startedAt: pipelineRuns.startedAt })
+    .from(pipelineRuns)
+    .limit(5)
+    .orderBy(desc(pipelineRuns.startedAt));
+
+  const todayRun = recentRuns.find((run) => {
+    if (!run.startedAt) return false;
+    const runDate = new Date(run.startedAt);
+    return (
+      runDate.getUTCFullYear() === todayUTC.getUTCFullYear() &&
+      runDate.getUTCMonth() === todayUTC.getUTCMonth() &&
+      runDate.getUTCDate() === todayUTC.getUTCDate()
+    );
+  });
+
+  if (todayRun) {
+    console.log(`Daily pipeline already ran today (run ${todayRun.id}, status: ${todayRun.status}) — skipping catch-up`);
+    return;
+  }
+
+  // No run today — trigger catch-up
+  console.log('No daily pipeline run found for today — triggering catch-up run');
+  const queue = new Queue('daily-pipeline', { connection: redisConnection });
+  await queue.add('daily-catchup', {}, {
+    removeOnComplete: { count: 5 },
+    removeOnFail: { count: 10 },
+  });
+  await queue.close();
+  console.log('Catch-up daily pipeline job enqueued');
 }
 
 /**

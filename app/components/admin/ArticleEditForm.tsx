@@ -49,7 +49,7 @@ export function ArticleEditForm({ article, onSave, isSaving }: ArticleEditFormPr
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full px-3 py-2 border border-border-secondary rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue focus:border-transparent"
+            className="w-full px-3 py-2 bg-bg-primary border border-border-secondary rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue focus:border-transparent"
             required
           />
         </div>
@@ -63,7 +63,7 @@ export function ArticleEditForm({ article, onSave, isSaving }: ArticleEditFormPr
             type="text"
             value={summary}
             onChange={(e) => setSummary(e.target.value)}
-            className="w-full px-3 py-2 border border-border-secondary rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue focus:border-transparent"
+            className="w-full px-3 py-2 bg-bg-primary border border-border-secondary rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue focus:border-transparent"
           />
         </div>
 
@@ -100,11 +100,11 @@ export function ArticleEditForm({ article, onSave, isSaving }: ArticleEditFormPr
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              className="w-full min-h-[400px] font-mono text-sm border border-border-secondary rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-accent-blue focus:border-transparent"
+              className="w-full min-h-[400px] font-mono text-sm bg-bg-primary border border-border-secondary rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-accent-blue focus:border-transparent"
               required
             />
           ) : (
-            <div className="min-h-[400px] border border-border-secondary rounded-md p-3 prose prose-sm max-w-none">
+            <div className="min-h-[400px] border border-border-secondary rounded-md p-3 prose prose-sm dark:prose-invert max-w-none">
               <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
             </div>
           )}

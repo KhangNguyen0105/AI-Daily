@@ -103,7 +103,7 @@ export function BellIcon({
                 value={thresholdInput}
                 onChange={(e) => setThresholdInput(e.target.value)}
                 placeholder="Threshold price (USD/1M)"
-                className="w-full px-2 py-1.5 text-sm border border-border-secondary rounded mb-2"
+                className="w-full px-2 py-1.5 text-sm bg-bg-primary border border-border-secondary rounded mb-2"
                 min="0"
                 step="0.0001"
               />

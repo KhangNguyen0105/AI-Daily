@@ -49,7 +49,7 @@ export function ModelDetailClient({
     : null;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="h-[calc(100vh-56px)] overflow-y-auto max-w-4xl mx-auto px-4 py-8">
       {/* Hero Section */}
       <div className="mb-8">
         <Link

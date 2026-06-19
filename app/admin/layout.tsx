@@ -12,7 +12,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <SessionProviderWrapper>
       <AdminHeader onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
       <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <main className="ml-0 md:ml-60 pt-12 min-h-screen bg-bg-secondary">
+      <main className="ml-0 md:ml-60 pt-12 h-[calc(100vh-56px)] overflow-y-auto bg-bg-secondary">
         <div className="p-6">
           {children}
         </div>

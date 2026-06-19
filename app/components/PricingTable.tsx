@@ -65,16 +65,9 @@ function getColumnResponsiveClass(columnId: string): string {
 /**
  * Minimum column widths to prevent excessive collapse on small screens.
  */
-function getColumnMinWidth(columnId: string): string {
-  switch (columnId) {
-    case 'modelName':
-      return 'min-w-[120px]';
-    case 'inputPricePer1m':
-    case 'outputPricePer1m':
-      return 'min-w-[80px]';
-    default:
-      return '';
-  }
+function getColumnMinWidth(_columnId: string): string {
+  // Removed min-w constraints to prevent horizontal overflow
+  return '';
 }
 
 /**
@@ -412,7 +405,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
     contextWindowMax !== '';
 
   return (
-    <div>
+    <div className="h-full flex flex-col">
       {data.length === 0 ? (
         <div className="text-center py-12 bg-bg-secondary rounded-lg">
           <p className="text-text-secondary text-lg">
@@ -422,7 +415,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
       ) : (
         <>
           {/* Filter bar */}
-          <div className="mb-4 space-y-3">
+          <div className="shrink-0 mb-4 space-y-3">
             {/* Top row: search + provider + free tier + clear */}
             <div className="flex flex-col md:flex-row gap-3 items-start md:items-center">
               <div className="flex-1 w-full">
@@ -431,7 +424,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                   placeholder="Search models or providers..."
                   value={globalFilter}
                   onChange={(e) => setGlobalFilter(e.target.value)}
-                  className="w-full px-3 py-2 border border-border-secondary rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue focus:border-accent-blue"
+                  className="w-full px-3 py-2 bg-bg-primary border border-border-secondary rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue focus:border-accent-blue"
                   aria-label="Search models or providers"
                 />
               </div>
@@ -442,7 +435,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
               <select
                 value={providerFilter}
                 onChange={(e) => setProviderFilter(e.target.value)}
-                className="px-3 py-2 border border-border-secondary rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue focus:border-accent-blue min-w-[160px]"
+                className="px-3 py-2 bg-bg-primary border border-border-secondary rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue focus:border-accent-blue min-w-[160px]"
                 aria-label="Filter by provider"
               >
                 <option value="">All Providers</option>
@@ -496,7 +489,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                       placeholder="Min"
                       value={inputPriceMin}
                       onChange={(e) => setInputPriceMin(e.target.value)}
-                      className="w-24 px-2 py-1.5 border border-border-secondary rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue"
+                      className="w-24 px-2 py-1.5 bg-bg-primary border border-border-secondary rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue"
                       min="0"
                       step="0.01"
                       aria-label="Input price minimum"
@@ -506,7 +499,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                       placeholder="Max"
                       value={inputPriceMax}
                       onChange={(e) => setInputPriceMax(e.target.value)}
-                      className="w-24 px-2 py-1.5 border border-border-secondary rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue"
+                      className="w-24 px-2 py-1.5 bg-bg-primary border border-border-secondary rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue"
                       min="0"
                       step="0.01"
                       aria-label="Input price maximum"
@@ -522,7 +515,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                       placeholder="Min"
                       value={outputPriceMin}
                       onChange={(e) => setOutputPriceMin(e.target.value)}
-                      className="w-24 px-2 py-1.5 border border-border-secondary rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue"
+                      className="w-24 px-2 py-1.5 bg-bg-primary border border-border-secondary rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue"
                       min="0"
                       step="0.01"
                       aria-label="Output price minimum"
@@ -532,7 +525,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                       placeholder="Max"
                       value={outputPriceMax}
                       onChange={(e) => setOutputPriceMax(e.target.value)}
-                      className="w-24 px-2 py-1.5 border border-border-secondary rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue"
+                      className="w-24 px-2 py-1.5 bg-bg-primary border border-border-secondary rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue"
                       min="0"
                       step="0.01"
                       aria-label="Output price maximum"
@@ -548,7 +541,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                       placeholder="Min"
                       value={contextWindowMin}
                       onChange={(e) => setContextWindowMin(e.target.value)}
-                      className="w-28 px-2 py-1.5 border border-border-secondary rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue"
+                      className="w-28 px-2 py-1.5 bg-bg-primary border border-border-secondary rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue"
                       min="0"
                       step="1000"
                       aria-label="Context window minimum"
@@ -558,7 +551,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                       placeholder="Max"
                       value={contextWindowMax}
                       onChange={(e) => setContextWindowMax(e.target.value)}
-                      className="w-28 px-2 py-1.5 border border-border-secondary rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue"
+                      className="w-28 px-2 py-1.5 bg-bg-primary border border-border-secondary rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue"
                       min="0"
                       step="1000"
                       aria-label="Context window maximum"
@@ -570,12 +563,12 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
           </div>
 
           {/* Row count indicator */}
-          <p className="text-sm text-text-secondary mb-3">
+          <p className="shrink-0 text-sm text-text-secondary mb-3">
             Showing {filteredRowCount} of {totalRowCount} models
           </p>
 
           {/* Table */}
-          <div className="overflow-x-auto" style={{ maxHeight: 'calc(100vh - 220px)' }}>
+          <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
             <table className="w-full border-collapse">
               <thead>
                 {table.getHeaderGroups().map((headerGroup) => (
@@ -626,7 +619,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
           </div>
 
           {/* Pagination controls */}
-          <div className="flex items-center justify-between mt-4 pt-3 border-t border-border-primary">
+          <div className="shrink-0 flex items-center justify-between mt-4 pt-3 border-t border-border-primary">
             <p className="text-sm text-text-secondary">
               Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount() || 1}
             </p>
