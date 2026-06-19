@@ -222,6 +222,7 @@ export function createExtractWorker(): Worker<ExtractJobData, ExtractJobResult> 
                 sourceId,
                 providerName,
                 planName: normalizePlanName(plan.planName),
+                planSlug: normalizePlanName(plan.planName).replace(/\s+/g, '-'),
                 monthlyPrice: plan.monthlyPrice,
                 annualPrice: plan.annualPrice,
                 annualMonthlyPrice: plan.annualMonthlyPrice,
@@ -241,6 +242,7 @@ export function createExtractWorker(): Worker<ExtractJobData, ExtractJobResult> 
                 target: [subscriptionPlans.sourceId, subscriptionPlans.planName],
                 set: {
                   providerName,
+                  planSlug: normalizePlanName(plan.planName).replace(/\s+/g, '-'),
                   monthlyPrice: plan.monthlyPrice,
                   annualPrice: plan.annualPrice,
                   annualMonthlyPrice: plan.annualMonthlyPrice,
@@ -249,6 +251,7 @@ export function createExtractWorker(): Worker<ExtractJobData, ExtractJobResult> 
                   freeTrialDays: plan.freeTrialDays,
                   freeTrialConditions: plan.freeTrialConditions,
                   keyFeatures: plan.keyFeatures,
+                  currency: plan.currency || 'USD',
                   confidence: plan.confidence || 'likely',
                   extractionNotes: plan.extractionNotes,
                   sourceUrl: plan.sourceUrl,
