@@ -1,4 +1,19 @@
 import type { ConsumerAdapter } from './base';
+import type { ProviderAdapter } from '../base';
+
+// Tier 1 consumer adapters
+import { ChatGPTConsumerAdapter } from './chatgpt/adapter';
+import { GeminiConsumerAdapter } from './gemini/adapter';
+import { ClaudeConsumerAdapter } from './claude/adapter';
+import { PerplexityConsumerAdapter } from './perplexity/adapter';
+import { CopilotConsumerAdapter } from './copilot/adapter';
+
+// Tier 2 consumer adapters
+import { PoeConsumerAdapter } from './poe/adapter';
+import { GrokConsumerAdapter } from './grok/adapter';
+import { YouConsumerAdapter } from './you/adapter';
+import { PhindConsumerAdapter } from './phind/adapter';
+import { CursorConsumerAdapter } from './cursor/adapter';
 
 /**
  * Explicit consumer adapter registry.
@@ -103,3 +118,33 @@ export function isConsumerTier1Provider(name: string): boolean {
 export function isConsumerTier2Provider(name: string): boolean {
   return (CONSUMER_TIER2_PROVIDERS as readonly string[]).includes(name);
 }
+
+/**
+ * Mirror all registered consumer adapters into the main adapter registry.
+ * Uses lazy import to avoid circular dependency with src/providers/registry.ts.
+ * Called once at pipeline startup before adapter loops.
+ */
+export async function mirrorToMainRegistry(): Promise<void> {
+  const { registerAdapter } = await import('../registry');
+  for (const adapter of getAllConsumerAdapters()) {
+    registerAdapter(adapter as unknown as ProviderAdapter);
+  }
+}
+
+// ============================================================
+// Register all consumer adapters
+// ============================================================
+
+// Tier 1 consumer providers
+registerConsumerAdapter(new ChatGPTConsumerAdapter());
+registerConsumerAdapter(new GeminiConsumerAdapter());
+registerConsumerAdapter(new ClaudeConsumerAdapter());
+registerConsumerAdapter(new PerplexityConsumerAdapter());
+registerConsumerAdapter(new CopilotConsumerAdapter());
+
+// Tier 2 consumer providers
+registerConsumerAdapter(new PoeConsumerAdapter());
+registerConsumerAdapter(new GrokConsumerAdapter());
+registerConsumerAdapter(new YouConsumerAdapter());
+registerConsumerAdapter(new PhindConsumerAdapter());
+registerConsumerAdapter(new CursorConsumerAdapter());
