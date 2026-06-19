@@ -7,15 +7,6 @@ import { PromotionData } from '@/app/components/PromotionsList';
 export const revalidate = 60;
 
 /**
- * Offset for virtual free-trial IDs projected from subscription_plans.
- * IN-05: Uses negative IDs (-(row.id + 1)) for collision-free semantics
- * since real promotion serial IDs are always positive.
- * Legacy constant kept for reference but no longer used for ID generation.
- * (WR-05: replaced magic number 100000 with named constant)
- */
-const VIRTUAL_TRIAL_ID_OFFSET = 100_000;
-
-/**
  * Promotions & free tiers page.
  * Server component fetching promotions from database.
  * Per D-06: dedicated /promotions route.
