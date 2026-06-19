@@ -45,14 +45,14 @@ export function ToastContainer({
       {visible.map((toast) => (
         <div
           key={toast.id}
-          className={`flex items-center gap-3 px-4 py-3 bg-white rounded-lg shadow-lg border-l-4 transition-all duration-200 ${
-            toast.type === 'success' ? 'border-green-500' : 'border-red-500'
+          className={`flex items-center gap-3 px-4 py-3 bg-bg-primary rounded-lg shadow-lg border-l-4 transition-all duration-200 ${
+            toast.type === 'success' ? 'border-accent-green' : 'border-accent-red'
           }`}
         >
-          <span className="text-sm text-gray-700 flex-1">{toast.message}</span>
+          <span className="text-sm text-text-secondary flex-1">{toast.message}</span>
           <button
             onClick={() => onDismiss(toast.id)}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-text-tertiary hover:text-text-secondary"
             aria-label="Dismiss"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">

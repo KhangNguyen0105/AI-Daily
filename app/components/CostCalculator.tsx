@@ -58,8 +58,8 @@ export function CostCalculator({
             onClick={() => setSelectedScenario(s.id)}
             className={`rounded-lg px-4 py-2 text-sm transition-colors ${
               selectedScenario === s.id
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-accent-blue text-bg-primary'
+                : 'bg-bg-tertiary text-text-secondary hover:bg-bg-tertiary'
             }`}
           >
             {s.name}
@@ -68,18 +68,18 @@ export function CostCalculator({
       </div>
 
       {/* Scenario description */}
-      <p className="text-sm text-gray-500 mb-1">{scenario.description}</p>
+      <p className="text-sm text-text-tertiary mb-1">{scenario.description}</p>
 
       {/* Token count */}
-      <p className="text-xs text-gray-400 mb-4">
+      <p className="text-xs text-text-tertiary mb-4">
         Input: {scenario.inputTokens.toLocaleString()} tokens | Output:{' '}
         {scenario.outputTokens.toLocaleString()} tokens
       </p>
 
       {/* Ranked model list */}
       {costs.length === 0 ? (
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
-          <p className="text-gray-500">
+        <div className="text-center py-12 bg-bg-secondary rounded-lg">
+          <p className="text-text-tertiary">
             No models with complete pricing data available for this scenario.
           </p>
         </div>
@@ -90,35 +90,35 @@ export function CostCalculator({
               key={item.modelId}
               className={`flex items-center justify-between p-4 rounded-lg border ${
                 index === 0
-                  ? 'border-l-4 border-green-500 bg-green-50'
-                  : 'bg-white border-gray-200'
+                  ? 'border-l-4 border-accent-green bg-badge-green-bg'
+                  : 'bg-bg-primary border-border-primary'
               }`}
             >
               {/* Left side: rank, model info */}
               <div className="flex items-center gap-3 min-w-0">
                 <span
                   className={`text-lg font-semibold shrink-0 ${
-                    index === 0 ? 'text-green-700' : 'text-gray-400'
+                    index === 0 ? 'text-badge-green-text' : 'text-text-tertiary'
                   }`}
                 >
                   #{index + 1}
                 </span>
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 truncate">
+                  <p className="text-sm font-semibold text-text-primary truncate">
                     {sanitizeDisplayName(item.modelName)}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-text-tertiary">
                     {sanitizeDisplayName(item.sourceName ?? 'Unknown')}
                   </p>
                   <span
                     className={`inline-block w-3 h-3 rounded-full mt-1 ${
                       item.confidence === 'verified'
-                        ? 'bg-green-500'
+                        ? 'bg-accent-green'
                         : item.confidence === 'likely'
-                        ? 'bg-yellow-500'
+                        ? 'bg-accent-yellow'
                         : item.confidence === 'low_confidence'
-                        ? 'bg-red-500'
-                        : 'bg-gray-500'
+                        ? 'bg-accent-red'
+                        : 'bg-text-tertiary'
                     }`}
                     title={item.confidence}
                     aria-label={item.confidence}
@@ -128,10 +128,10 @@ export function CostCalculator({
 
               {/* Right side: total cost + breakdown */}
               <div className="text-right shrink-0 ml-4">
-                <p className="text-xl font-semibold text-gray-900">
+                <p className="text-xl font-semibold text-text-primary">
                   {formatCurrencyPrice(item.totalCost, currency, exchangeRate)}
                 </p>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-text-tertiary">
                   In: {formatCurrencyPrice(item.inputCost, currency, exchangeRate)} | Out:{' '}
                   {formatCurrencyPrice(item.outputCost, currency, exchangeRate)}
                 </p>

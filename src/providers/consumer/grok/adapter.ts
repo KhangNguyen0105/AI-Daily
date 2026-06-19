@@ -1,3 +1,4 @@
+import type { Page } from 'playwright';
 import { ConsumerAdapter } from '../base';
 import { grokConsumerConfig } from './config';
 
@@ -5,11 +6,61 @@ import { grokConsumerConfig } from './config';
  * Grok (X/Twitter) consumer subscription adapter.
  * Extracts subscription plan data from x.com/i/premium.
  *
- * WR-01: Shared extraction logic moved to ConsumerAdapter base class.
- * Overrides buildExtractionPrompt() for X/Twitter specific context.
+ * Supports login-based crawling: if X_EMAIL and X_PASSWORD env vars
+ * are set, the worker logs in at x.com before crawling the pricing page.
  */
 export class GrokConsumerAdapter extends ConsumerAdapter {
   config = grokConsumerConfig;
+
+  protected getLoginUrl(): string | null {
+    if (process.env.X_EMAIL && process.env.X_PASSWORD) {
+      return 'https://x.com/login';
+    }
+    return null;
+  }
+
+  protected async performLogin(page: Page): Promise<boolean> {
+    const email = process.env.X_EMAIL;
+    const password = process.env.X_PASSWORD;
+    if (!email || !password) return false;
+
+    await page.goto('https://x.com/login', { waitUntil: 'domcontentloaded', timeout: 30_000 });
+    await page.waitForTimeout(3000);
+
+    // X login: username/email field
+    const emailInput = page.locator('input[name="text"], input[autocomplete="username"]').first();
+    await emailInput.waitFor({ timeout: 10_000 });
+    await emailInput.fill(email);
+
+    // Click Next
+    const nextBtn = page.locator('button:has-text("Next"), [role="button"]:has-text("Next")').first();
+    await nextBtn.click();
+    await page.waitForTimeout(2000);
+
+    // X may show an extra "enter your phone/username" verification step
+    const verifyInput = page.locator('input[name="text"]').first();
+    if (await verifyInput.count() > 0) {
+      // Re-enter email/username for verification
+      await verifyInput.fill(email);
+      const nextBtn2 = page.locator('button:has-text("Next"), [role="button"]:has-text("Next")').first();
+      await nextBtn2.click();
+      await page.waitForTimeout(2000);
+    }
+
+    // Password field
+    const pwInput = page.locator('input[name="password"], input[type="password"]').first();
+    await pwInput.waitFor({ timeout: 10_000 });
+    await pwInput.fill(password);
+
+    // Click Log in
+    const loginBtn = page.locator('button[data-testid="LoginForm_Login_Button"], button:has-text("Log in"), [role="button"]:has-text("Log in")').first();
+    await loginBtn.click();
+
+    // Wait for redirect to home timeline
+    await page.waitForURL('https://x.com/**', { timeout: 15_000 });
+    await page.waitForTimeout(2000);
+    return true;
+  }
 
   protected buildExtractionPrompt(html: string): string {
     const expectedNames = this.consumerConfig.expectedPlanNames;

@@ -31,7 +31,7 @@ export function PriceHistoryChart({ data }: { data: HistoryPoint[] }) {
 
   if (chartData.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
+      <div className="text-center py-8 text-text-tertiary">
         No pricing data available yet.
       </div>
     );
@@ -39,7 +39,7 @@ export function PriceHistoryChart({ data }: { data: HistoryPoint[] }) {
 
   if (chartData.length === 1) {
     return (
-      <div className="text-center py-8 text-gray-500">
+      <div className="text-center py-8 text-text-tertiary">
         Only 1 data point collected. Price history chart will appear after the next collection.
       </div>
     );

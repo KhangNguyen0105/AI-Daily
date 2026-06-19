@@ -62,8 +62,8 @@ export function PromotionsPageClient({
             onClick={() => setActiveFilter(filter.value)}
             className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
               activeFilter === filter.value
-                ? 'bg-blue-600 text-bg-primary'
-                : 'bg-bg-tertiary text-text-primary hover:bg-gray-200'
+                ? 'bg-accent-blue text-bg-primary'
+                : 'bg-bg-tertiary text-text-primary hover:bg-bg-tertiary'
             }`}
           >
             {filter.label}

@@ -19,7 +19,7 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
           console.error("ADMIN_PASSWORD environment variable is not set");
           return null;
         }
-        const password = credentials.password ?? '';
+        const password = (credentials.password as string) ?? '';
         // WR-04 fix: Use timing-safe comparison to prevent timing attacks
         if (
           password.length === adminPassword.length &&

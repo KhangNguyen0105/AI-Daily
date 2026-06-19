@@ -36,16 +36,16 @@ export function AutoPublishToggle({ initialValue, onChange }: AutoPublishToggleP
         onClick={handleToggle}
         disabled={isLoading}
         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-          enabled ? 'bg-blue-600' : 'bg-gray-300'
+          enabled ? 'bg-accent-blue' : 'bg-bg-tertiary'
         } ${isLoading ? 'opacity-50' : ''}`}
       >
         <span
-          className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
+          className={`inline-block h-5 w-5 transform rounded-full bg-bg-primary shadow transition-transform ${
             enabled ? 'translate-x-5' : 'translate-x-0'
           }`}
         />
       </button>
-      <span className="text-sm text-gray-700">Auto-publish</span>
+      <span className="text-sm text-text-secondary">Auto-publish</span>
     </div>
   );
 }

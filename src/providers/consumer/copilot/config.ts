@@ -22,6 +22,6 @@ export const copilotConsumerConfig: ConsumerProviderConfig = {
       sourceType: 'pricing_page',
     },
   ],
-  expectedPlanNames: ['Microsoft Copilot Free', 'Copilot Pro', 'Copilot for Microsoft 365'],
+  expectedPlanNames: ['Copilot Free', 'Copilot Pro', 'Copilot for Microsoft 365'],
   adapterTimeoutMs: 30_000,
 };

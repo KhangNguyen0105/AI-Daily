@@ -22,6 +22,6 @@ export const geminiConsumerConfig: ConsumerProviderConfig = {
       sourceType: 'pricing_page',
     },
   ],
-  expectedPlanNames: ['Google One AI Premium', 'Gemini Advanced'],
+  expectedPlanNames: ['Google One AI Premium', 'Google One AI Premium (Family)'],
   adapterTimeoutMs: 30_000,
 };

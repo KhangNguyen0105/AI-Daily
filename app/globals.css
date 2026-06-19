@@ -25,6 +25,12 @@
   --accent-red: #ef4444;
   --accent-purple: #8b5cf6;
 
+  /* Accent hover (slightly darker for hover states) */
+  --accent-blue-hover: #1d4ed8;
+  --accent-green-hover: #16a34a;
+  --accent-red-hover: #dc2626;
+  --accent-purple-hover: #7c3aed;
+
   /* Semantic: Green (success, active, published, free tier) */
   --badge-green-bg: #dcfce7;
   --badge-green-text: #16653d;
@@ -84,8 +90,16 @@
 
   /* Accent dark overrides */
   --accent-blue: #3b82f6;
+  --accent-green: #34d399;
+  --accent-yellow: #facc15;
   --accent-red: #f87171;
   --accent-purple: #a78bfa;
+
+  /* Accent hover (slightly brighter in dark mode) */
+  --accent-blue-hover: #60a5fa;
+  --accent-green-hover: #6ee7b7;
+  --accent-red-hover: #fca5a5;
+  --accent-purple-hover: #c4b5fd;
 
   /* Semantic: Green (success, active, published, free tier) */
   --badge-green-bg: #064e3b;
@@ -135,6 +149,11 @@
   --color-accent-yellow: var(--accent-yellow);
   --color-accent-red: var(--accent-red);
   --color-accent-purple: var(--accent-purple);
+
+  --color-accent-blue-hover: var(--accent-blue-hover);
+  --color-accent-green-hover: var(--accent-green-hover);
+  --color-accent-red-hover: var(--accent-red-hover);
+  --color-accent-purple-hover: var(--accent-purple-hover);
 
   --color-badge-green-bg: var(--badge-green-bg);
   --color-badge-green-text: var(--badge-green-text);

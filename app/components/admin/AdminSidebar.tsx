@@ -36,7 +36,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
       {/* Sidebar */}
       <nav
         aria-label="Admin navigation"
-        className={`fixed top-12 left-0 bottom-0 w-60 bg-white border-r border-gray-200 z-50 transform transition-transform duration-200 ${
+        className={`fixed top-12 left-0 bottom-0 w-60 bg-bg-primary border-r border-border-primary z-50 transform transition-transform duration-200 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         } md:translate-x-0`}
       >
@@ -48,8 +48,8 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
               onClick={onClose}
               className={`flex items-center px-4 py-2 text-sm rounded-md mb-1 ${
                 isActive(item.href)
-                  ? 'bg-blue-50 text-blue-600 font-semibold'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 font-normal'
+                  ? 'bg-badge-blue-bg text-accent-blue font-semibold'
+                  : 'text-text-secondary hover:bg-bg-secondary hover:text-text-primary font-normal'
               }`}
             >
               {item.label}

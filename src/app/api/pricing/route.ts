@@ -39,10 +39,10 @@ export interface ConfidenceBreakdown {
 }
 
 export interface FreshnessInfo {
-  last_verified_at: string; // ISO timestamp
+  last_verified_at: string | null; // ISO timestamp
   status: string;           // 'fresh' / 'recent' / 'aging' / 'stale'
   badge_color: string;      // 'green' / 'blue' / 'amber' / 'red'
-  data_age_hours: number;
+  data_age_hours: number | null;
 }
 
 export interface PricingRowResponse {

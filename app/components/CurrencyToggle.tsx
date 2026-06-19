@@ -20,8 +20,8 @@ export function CurrencyToggle({
         onClick={() => onCurrencyChange('usd')}
         className={`px-3 py-1 text-sm rounded-l border transition-colors ${
           currency === 'usd'
-            ? 'bg-blue-600 text-white border-blue-600'
-            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+            ? 'bg-accent-blue text-bg-primary border-accent-blue'
+            : 'bg-bg-primary text-text-secondary border-border-secondary hover:bg-bg-secondary'
         }`}
       >
         USD
@@ -31,8 +31,8 @@ export function CurrencyToggle({
         onClick={() => onCurrencyChange('vnd')}
         className={`px-3 py-1 text-sm rounded-r border-t border-b border-r transition-colors ${
           currency === 'vnd'
-            ? 'bg-blue-600 text-white border-blue-600'
-            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+            ? 'bg-accent-blue text-bg-primary border-accent-blue'
+            : 'bg-bg-primary text-text-secondary border-border-secondary hover:bg-bg-secondary'
         }`}
       >
         VND

@@ -23,7 +23,7 @@ export function ProviderLinks({ providerName, sourceUrl }: ProviderLinksProps) {
             href={links.docs}
             target="_blank"
             rel="noopener noreferrer"
-            className="block text-blue-600 hover:text-blue-800 underline"
+            className="block text-accent-blue hover:text-accent-blue-hover underline"
           >
             Docs
           </a>
@@ -31,7 +31,7 @@ export function ProviderLinks({ providerName, sourceUrl }: ProviderLinksProps) {
             href={links.api}
             target="_blank"
             rel="noopener noreferrer"
-            className="block text-blue-600 hover:text-blue-800 underline"
+            className="block text-accent-blue hover:text-accent-blue-hover underline"
           >
             API Reference
           </a>
@@ -40,7 +40,7 @@ export function ProviderLinks({ providerName, sourceUrl }: ProviderLinksProps) {
               href={links.playground}
               target="_blank"
               rel="noopener noreferrer"
-              className="block text-blue-600 hover:text-blue-800 underline"
+              className="block text-accent-blue hover:text-accent-blue-hover underline"
             >
               Playground
             </a>
@@ -52,7 +52,7 @@ export function ProviderLinks({ providerName, sourceUrl }: ProviderLinksProps) {
           href={sourceUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="block text-blue-600 hover:text-blue-800 underline"
+          className="block text-accent-blue hover:text-accent-blue-hover underline"
         >
           Pricing Page
         </a>
