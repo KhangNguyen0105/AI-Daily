@@ -207,7 +207,15 @@ export async function updatePipelineStats(
   }
 
   // Process non-numeric fields with simple merge
-  const nonNumericEntries = Object.entries(updates).filter(([, v]) => typeof v !== 'number');
+  // IN-02: Validate non-numeric keys against the same allowlist as numeric fields
+  const nonNumericEntries = Object.entries(updates).filter(([k, v]) => {
+    if (typeof v === 'number') return false;
+    if (!VALID_STATS_KEYS.has(k)) {
+      console.warn(`updatePipelineStats: ignoring unknown non-numeric key "${k}"`);
+      return false;
+    }
+    return true;
+  });
   if (nonNumericEntries.length > 0) {
     const mergeObj = Object.fromEntries(nonNumericEntries);
     await db
