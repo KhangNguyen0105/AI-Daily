@@ -5,6 +5,9 @@ import { db } from '../db/index';
 import { pipelineRuns } from '../db/schema';
 import { eq, sql } from 'drizzle-orm';
 
+// Module-level singleton flag for consumer adapter mirroring (WR-01: was function-local, always false)
+let consumerMirrored = false;
+
 /**
  * Pipeline run statistics tracked across all stages.
  * Stored as JSONB in pipelineRuns.stats.
@@ -45,7 +48,6 @@ export interface PipelineStats {
  */
 export async function orchestrateDailyRun(): Promise<number> {
   // Mirror consumer adapters into main registry (lazy init to avoid circular deps)
-  let consumerMirrored = false;
   if (!consumerMirrored) {
     await mirrorToMainRegistry();
     consumerMirrored = true;
