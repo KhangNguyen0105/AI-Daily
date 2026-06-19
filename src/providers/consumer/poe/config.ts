@@ -1,4 +1,4 @@
-import type { ProviderConfig } from '../../base';
+import type { ConsumerProviderConfig } from '../base';
 
 /**
  * Poe consumer adapter configuration.
@@ -6,10 +6,7 @@ import type { ProviderConfig } from '../../base';
  * Review #1: expectedPlanNames for extraction cross-checking.
  * Review #6: adapterTimeoutMs for per-adapter timeout control.
  */
-export const poeConsumerConfig: ProviderConfig & {
-  expectedPlanNames: string[];
-  adapterTimeoutMs: number;
-} = {
+export const poeConsumerConfig: ConsumerProviderConfig = {
   name: 'poe-consumer',
   baseUrl: 'https://poe.com',
   pricingUrl: 'https://poe.com/subscribe',

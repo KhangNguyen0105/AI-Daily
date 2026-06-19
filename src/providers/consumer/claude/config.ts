@@ -1,4 +1,4 @@
-import type { ProviderConfig } from '../../base';
+import type { ConsumerProviderConfig } from '../base';
 
 /**
  * Claude consumer adapter configuration.
@@ -6,10 +6,7 @@ import type { ProviderConfig } from '../../base';
  * Review #1: expectedPlanNames for extraction cross-checking.
  * Review #6: adapterTimeoutMs for per-adapter timeout control.
  */
-export const claudeConsumerConfig: ProviderConfig & {
-  expectedPlanNames: string[];
-  adapterTimeoutMs: number;
-} = {
+export const claudeConsumerConfig: ConsumerProviderConfig = {
   name: 'claude-consumer',
   baseUrl: 'https://www.anthropic.com',
   pricingUrl: 'https://www.anthropic.com/claude',

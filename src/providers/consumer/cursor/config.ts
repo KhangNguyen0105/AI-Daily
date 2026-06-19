@@ -1,4 +1,4 @@
-import type { ProviderConfig } from '../../base';
+import type { ConsumerProviderConfig } from '../base';
 
 /**
  * Cursor consumer adapter configuration.
@@ -6,10 +6,7 @@ import type { ProviderConfig } from '../../base';
  * Review #1: expectedPlanNames for extraction cross-checking.
  * Review #6: adapterTimeoutMs for per-adapter timeout control.
  */
-export const cursorConsumerConfig: ProviderConfig & {
-  expectedPlanNames: string[];
-  adapterTimeoutMs: number;
-} = {
+export const cursorConsumerConfig: ConsumerProviderConfig = {
   name: 'cursor-consumer',
   baseUrl: 'https://www.cursor.com',
   pricingUrl: 'https://www.cursor.com/pricing',

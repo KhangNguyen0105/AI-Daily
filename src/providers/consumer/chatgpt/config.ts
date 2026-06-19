@@ -1,4 +1,4 @@
-import type { ProviderConfig } from '../../base';
+import type { ConsumerProviderConfig } from '../base';
 
 /**
  * ChatGPT consumer adapter configuration.
@@ -6,10 +6,7 @@ import type { ProviderConfig } from '../../base';
  * Review #1: expectedPlanNames for extraction cross-checking.
  * Review #6: adapterTimeoutMs for per-adapter timeout control.
  */
-export const chatgptConsumerConfig: ProviderConfig & {
-  expectedPlanNames: string[];
-  adapterTimeoutMs: number;
-} = {
+export const chatgptConsumerConfig: ConsumerProviderConfig = {
   name: 'chatgpt-consumer',
   baseUrl: 'https://chatgpt.com',
   pricingUrl: 'https://chatgpt.com/pricing',

@@ -1,4 +1,4 @@
-import type { ProviderConfig } from '../../base';
+import type { ConsumerProviderConfig } from '../base';
 
 /**
  * Phind consumer adapter configuration.
@@ -6,10 +6,7 @@ import type { ProviderConfig } from '../../base';
  * Review #1: expectedPlanNames for extraction cross-checking.
  * Review #6: adapterTimeoutMs for per-adapter timeout control.
  */
-export const phindConsumerConfig: ProviderConfig & {
-  expectedPlanNames: string[];
-  adapterTimeoutMs: number;
-} = {
+export const phindConsumerConfig: ConsumerProviderConfig = {
   name: 'phind-consumer',
   baseUrl: 'https://www.phind.com',
   pricingUrl: 'https://www.phind.com/pro',
