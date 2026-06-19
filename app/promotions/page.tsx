@@ -7,6 +7,14 @@ import { PromotionData } from '@/app/components/PromotionsList';
 export const revalidate = 60;
 
 /**
+ * Offset for virtual free-trial IDs projected from subscription_plans.
+ * Ensures no collision with real promotion table IDs (which start from 1).
+ * With ~30 plans per crawl and daily runs, safe for ~9 years.
+ * (WR-05: replaced magic number 100000 with named constant)
+ */
+const VIRTUAL_TRIAL_ID_OFFSET = 100_000;
+
+/**
  * Promotions & free tiers page.
  * Server component fetching promotions from database.
  * Per D-06: dedicated /promotions route.
@@ -59,7 +67,7 @@ export default async function PromotionsPage() {
 
     // Map trial rows to PromotionData format
     const trialPromos: PromotionData[] = trialRows.map((row) => ({
-      id: row.id + 100000, // Offset to avoid ID collision with promotions table IDs
+      id: row.id + VIRTUAL_TRIAL_ID_OFFSET,
       modelPattern: `${row.providerName} ${row.planName}`,
       type: 'free_trial' as const,
       description: row.freeTrialConditions
