@@ -12,6 +12,16 @@ import type { EdgeCaseFlags } from '../edge-case-classifier';
 import type { EvidenceQuotes } from '../../lib/evidence-anchor';
 
 /**
+ * Normalize plan name for consistent upsert matching.
+ * Lowercases, trims, and collapses whitespace to prevent duplicate rows
+ * from LLM returning different casing/whitespace across crawls.
+ * (CR-01: subscription plan upsert missing planName normalization)
+ */
+function normalizePlanName(name: string): string {
+  return name.toLowerCase().trim().replace(/\s+/g, ' ');
+}
+
+/**
  * Job data for the extract queue.
  */
 export interface ExtractJobData {
@@ -211,7 +221,7 @@ export function createExtractWorker(): Worker<ExtractJobData, ExtractJobResult> 
               .values({
                 sourceId,
                 providerName,
-                planName: plan.planName,
+                planName: normalizePlanName(plan.planName),
                 monthlyPrice: plan.monthlyPrice,
                 annualPrice: plan.annualPrice,
                 annualMonthlyPrice: plan.annualMonthlyPrice,
@@ -230,6 +240,7 @@ export function createExtractWorker(): Worker<ExtractJobData, ExtractJobResult> 
               .onConflictDoUpdate({
                 target: [subscriptionPlans.sourceId, subscriptionPlans.planName],
                 set: {
+                  providerName,
                   monthlyPrice: plan.monthlyPrice,
                   annualPrice: plan.annualPrice,
                   annualMonthlyPrice: plan.annualMonthlyPrice,
