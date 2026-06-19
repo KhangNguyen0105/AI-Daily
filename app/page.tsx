@@ -70,7 +70,7 @@ export default async function HomePage() {
   }
 
   return (
-    <main className="min-h-screen bg-white text-gray-900">
+    <main className="bg-white text-gray-900">
       {/* AI Daily Branding */}
       <div className="flex flex-col items-center justify-center py-5 px-4">
         <h1 className="text-2xl font-semibold tracking-tight">AI Daily</h1>

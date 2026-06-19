@@ -574,8 +574,9 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
             Showing {filteredRowCount} of {totalRowCount} models
           </p>
 
-          {/* Table */}
-          <div className="overflow-x-auto" style={{ maxHeight: 'calc(100vh - 220px)' }}>
+          {/* Table — overflow-x-clip prevents horizontal scrollbar from leaking to body.
+              Per scrollbar-fix: no maxHeight; page scrolls naturally. */}
+          <div className="overflow-x-clip">
             <table className="w-full border-collapse">
               <thead>
                 {table.getHeaderGroups().map((headerGroup) => (
