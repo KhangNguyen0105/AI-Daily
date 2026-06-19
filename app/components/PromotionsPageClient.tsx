@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { PromotionData } from '@/app/components/PromotionsList';
 import { PromotionCard } from '@/app/components/PromotionCard';
 
-type FilterType = 'all' | 'free_tier' | 'promotion' | 'beta';
+type FilterType = 'all' | 'free_tier' | 'promotion' | 'beta' | 'free_trial';
 
 /**
  * Client component for the /promotions page.
@@ -12,6 +12,7 @@ type FilterType = 'all' | 'free_tier' | 'promotion' | 'beta';
  * Per D-06: dedicated /promotions route.
  * Per D-07: card grid layout with type filter.
  * Per D-08: show all promos, gray out expired ones.
+ * Per D-04 (review #4): free_trial filter for subscription trial projections.
  */
 export function PromotionsPageClient({
   promotions,
@@ -40,6 +41,7 @@ export function PromotionsPageClient({
     { label: 'Free Tier', value: 'free_tier' },
     { label: 'Promotion', value: 'promotion' },
     { label: 'Beta', value: 'beta' },
+    { label: 'Free Trial', value: 'free_trial' },
   ];
 
   return (

@@ -1,5 +1,6 @@
 import { db } from '@/src/db';
-import { promotions } from '@/src/db/schema';
+import { promotions, subscriptionPlans } from '@/src/db/schema';
+import { gt } from 'drizzle-orm';
 import { PromotionsPageClient } from '@/app/components/PromotionsPageClient';
 import { PromotionData } from '@/app/components/PromotionsList';
 
@@ -10,11 +11,14 @@ export const revalidate = 60;
  * Server component fetching promotions from database.
  * Per D-06: dedicated /promotions route.
  * Per D-09: data from existing promotions table.
+ * Per D-04 (review #4): virtual projection of subscription free trials
+ * at query time — NOT materialized rows in promotions table.
  */
 export default async function PromotionsPage() {
   let promos: PromotionData[] = [];
 
   try {
+    // Fetch promotions from promotions table
     const rows = await db
       .select({
         id: promotions.id,
@@ -38,6 +42,36 @@ export default async function PromotionsPage() {
       endDate: row.endDate ? new Date(row.endDate) : null,
       sourceUrl: row.sourceUrl,
     }));
+
+    // Virtual projection (review #4): query subscription_plans for free trials
+    // at query time. Does NOT write synthetic rows to promotions table.
+    const trialRows = await db
+      .select({
+        id: subscriptionPlans.id,
+        providerName: subscriptionPlans.providerName,
+        planName: subscriptionPlans.planName,
+        freeTrialDays: subscriptionPlans.freeTrialDays,
+        freeTrialConditions: subscriptionPlans.freeTrialConditions,
+        sourceUrl: subscriptionPlans.sourceUrl,
+      })
+      .from(subscriptionPlans)
+      .where(gt(subscriptionPlans.freeTrialDays, 0));
+
+    // Map trial rows to PromotionData format
+    const trialPromos: PromotionData[] = trialRows.map((row) => ({
+      id: row.id + 100000, // Offset to avoid ID collision with promotions table IDs
+      modelPattern: `${row.providerName} ${row.planName}`,
+      type: 'free_trial' as const,
+      description: row.freeTrialConditions
+        ? `Free trial: ${row.freeTrialDays} days — ${row.freeTrialConditions}`
+        : `Free trial: ${row.freeTrialDays} days`,
+      credits: null,
+      startDate: null, // Standard plans, not promotional campaigns (review #8)
+      endDate: null,   // Standard plans, not promotional campaigns (review #8)
+      sourceUrl: row.sourceUrl,
+    }));
+
+    promos = [...promos, ...trialPromos];
   } catch (error) {
     console.error('Failed to fetch promotions:', error);
   }
