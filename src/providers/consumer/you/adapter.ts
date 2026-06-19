@@ -11,11 +11,14 @@ import { youConsumerConfig } from './config';
  *
  * Review #1: Provider-specific prompt with expectedPlanNames cross-checking.
  * Review #6: Adapter-level timeout via Promise.race.
+ * WR-02: Timer cleanup in finally block.
+ * IN-03: Use config.currency instead of hardcoded 'USD'.
  */
 export class YouConsumerAdapter extends ConsumerAdapter {
   config = youConsumerConfig;
 
   async extract(html: string): Promise<ProviderExtraction> {
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
     try {
       const maxHtmlLength = 100_000;
       const truncatedHtml =
@@ -24,7 +27,7 @@ export class YouConsumerAdapter extends ConsumerAdapter {
           : html;
 
       const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(
+        timeoutId = setTimeout(
           () => reject(new Error('You.com consumer extraction timed out')),
           this.config.adapterTimeoutMs,
         );
@@ -72,7 +75,7 @@ ${truncatedHtml}`,
           freeTrialDays: plan.freeTrialDays,
           freeTrialConditions: plan.freeTrialConditions,
           keyFeatures: plan.keyFeatures,
-          currency: 'USD',
+          currency: this.config.currency ?? 'USD',
           sourceUrl: this.config.pricingUrl,
           confidence: matched ? ('likely' as const) : ('low_confidence' as const),
           extractionNotes: matched
@@ -85,6 +88,10 @@ ${truncatedHtml}`,
     } catch (error) {
       console.error('You.com consumer extraction failed:', error);
       return { models: [], promotions: [], subscriptionPlans: [] };
+    } finally {
+      if (timeoutId !== undefined) {
+        clearTimeout(timeoutId);
+      }
     }
   }
 }

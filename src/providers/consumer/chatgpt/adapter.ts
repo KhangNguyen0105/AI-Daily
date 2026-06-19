@@ -12,11 +12,14 @@ import { chatgptConsumerConfig } from './config';
  * Review #1: Provider-specific prompt with expectedPlanNames cross-checking.
  * Review #2: Maps rawPriceText and billingPeriod from extraction output.
  * Review #6: Adapter-level timeout via Promise.race.
+ * WR-02: Timer cleanup in finally block.
+ * IN-03: Use config.currency instead of hardcoded 'USD'.
  */
 export class ChatGPTConsumerAdapter extends ConsumerAdapter {
   config = chatgptConsumerConfig;
 
   async extract(html: string): Promise<ProviderExtraction> {
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
     try {
       // Truncate HTML to ~100K chars to stay within token limits
       const maxHtmlLength = 100_000;
@@ -26,8 +29,9 @@ export class ChatGPTConsumerAdapter extends ConsumerAdapter {
           : html;
 
       // Review #6: Race extraction against adapter timeout
+      // WR-02: Capture timeout ID for cleanup
       const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(
+        timeoutId = setTimeout(
           () => reject(new Error('ChatGPT consumer extraction timed out')),
           this.config.adapterTimeoutMs,
         );
@@ -76,7 +80,7 @@ ${truncatedHtml}`,
           freeTrialDays: plan.freeTrialDays,
           freeTrialConditions: plan.freeTrialConditions,
           keyFeatures: plan.keyFeatures,
-          currency: 'USD',
+          currency: this.config.currency ?? 'USD',
           sourceUrl: this.config.pricingUrl,
           confidence: matched ? ('likely' as const) : ('low_confidence' as const),
           extractionNotes: matched
@@ -98,6 +102,11 @@ ${truncatedHtml}`,
         promotions: [],
         subscriptionPlans: [],
       };
+    } finally {
+      // WR-02: Clear timeout timer to prevent leaked timers on success
+      if (timeoutId !== undefined) {
+        clearTimeout(timeoutId);
+      }
     }
   }
 }
