@@ -152,7 +152,7 @@ export default async function ModelDetailPage({
     activePromotions = promoRows.map((row) => ({
       id: row.id,
       modelPattern: row.modelPattern,
-      type: row.type,
+      type: row.type as 'free_tier' | 'promotion' | 'beta' | 'free_trial',
       description: row.description,
       credits: row.credits,
       startDate: row.startDate,

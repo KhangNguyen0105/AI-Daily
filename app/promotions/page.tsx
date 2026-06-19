@@ -43,7 +43,7 @@ export default async function PromotionsPage() {
     promos = rows.map((row) => ({
       id: row.id,
       modelPattern: row.modelPattern,
-      type: row.type,
+      type: row.type as PromotionData['type'],
       description: row.description,
       credits: row.credits,
       startDate: row.startDate ? new Date(row.startDate) : null,
