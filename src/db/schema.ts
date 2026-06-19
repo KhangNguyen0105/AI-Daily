@@ -296,11 +296,20 @@ export const exchangeRates = pgTable('exchange_rates', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
-// Promotion type enum (D-09)
+// Promotion type enum (D-09, D-04: free_trial added for subscription trials)
 export const promotionTypeEnum = pgEnum('promotion_type', [
   'free_tier',
   'promotion',
   'beta',
+  'free_trial',
+]);
+
+// Billing period enum (Phase 10, D-02: explicit billing period semantics)
+export const billingPeriodEnum = pgEnum('billing_period', [
+  'monthly',
+  'annual',
+  'one_time',
+  'unknown',
 ]);
 
 // Promotions table - free tiers, promotions, beta trials (D-09)
@@ -318,6 +327,45 @@ export const promotions = pgTable('promotions', {
   sourceUrl: text('source_url'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// Subscription plans table - consumer subscription plans (Phase 10, D-02)
+// Separate from promotions: subscription plans are persistent products, not time-limited offers.
+// Unique key: (sourceId, planName) with normalization rules:
+//   - planName MUST be lowercase, trimmed, collapsed whitespace
+//   - If monthly/annual are separate rows, include billing period in plan name
+//     (e.g., "ChatGPT Plus Monthly", "ChatGPT Plus Annual")
+//   - planSlug: lowercase, hyphenated, stable identifier for cross-crawl consistency
+export const subscriptionPlans = pgTable('subscription_plans', {
+  id: serial('id').primaryKey(),
+  sourceId: integer('source_id')
+    .references(() => sources.id)
+    .notNull(),
+  providerName: varchar('provider_name', { length: 100 }).notNull(),
+  planName: varchar('plan_name', { length: 255 }).notNull(),
+  planSlug: varchar('plan_slug', { length: 255 }), // Stable identifier: lowercase, hyphenated (e.g., "chatgpt-plus")
+  monthlyPrice: doublePrecision('monthly_price'), // USD monthly. null = "not available" or "contact sales"
+  annualPrice: doublePrecision('annual_price'), // USD annual total. null = annual pricing not available
+  annualMonthlyPrice: doublePrecision('annual_monthly_price'), // Effective monthly when billed annually. null = not derivable
+  rawPriceText: text('raw_price_text'), // Original price string from page (e.g., "$20/mo", "Starting at $20")
+  billingPeriod: billingPeriodEnum('billing_period').default('monthly'), // Explicit billing period. 'unknown' when page doesn't specify
+  freeTrialDays: integer('free_trial_days'), // Number of days. null = unknown duration, 0 = explicitly no trial
+  freeTrialConditions: text('free_trial_conditions'), // e.g., "New users only", "Credit card required"
+  keyFeatures: jsonb('key_features'), // Array of feature strings
+  currency: varchar('currency', { length: 10 }).default('USD'), // Required when any price field is non-null
+  confidence: confidenceEnum('confidence').default('likely'), // Extraction confidence: verified/likely/low_confidence
+  extractionNotes: text('extraction_notes'), // Raw evidence snippets, extraction warnings, review flags
+  sourceUrl: text('source_url'),
+  startDate: timestamp('start_date'), // Promotional campaign start date. null for standard subscription plans.
+  endDate: timestamp('end_date'), // Promotional campaign end date. null for standard subscription plans.
+  crawledAt: timestamp('crawled_at').defaultNow(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => {
+  return {
+    sourcePlanUnique: uniqueIndex('source_plan_unique').on(table.sourceId, table.planName),
+    providerIdx: index('subscription_provider_idx').on(table.providerName),
+  };
 });
 
 // Practical costs table - real-world cost examples

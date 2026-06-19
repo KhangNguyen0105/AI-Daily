@@ -20,3 +20,28 @@ export interface PricingRow {
   sourceName: string | null;
   sourceUrl: string | null;
 }
+
+/**
+ * Subscription plan data shape passed to the client component.
+ * Includes all fields needed for display, filtering, and sorting.
+ * Extracted from app/subscriptions/page.tsx to decouple client imports
+ * from server component file. (WR-04)
+ */
+export interface SubscriptionPlanData {
+  id: number;
+  providerName: string;
+  planName: string;
+  monthlyPrice: number | null;
+  annualPrice: number | null;
+  annualMonthlyPrice: number | null;
+  rawPriceText: string | null;
+  billingPeriod: string;
+  freeTrialDays: number | null;
+  freeTrialConditions: string | null;
+  keyFeatures: string[];
+  currency: string;
+  sourceUrl: string | null;
+  confidence: string;
+  extractionNotes: string | null;
+  crawledAt: Date | null;
+}

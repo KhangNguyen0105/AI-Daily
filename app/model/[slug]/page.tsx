@@ -136,7 +136,7 @@ export default async function ModelDetailPage({
   let activePromotions: Array<{
     id: number;
     modelPattern: string;
-    type: 'free_tier' | 'promotion' | 'beta';
+    type: 'free_tier' | 'promotion' | 'beta' | 'free_trial';
     description: string;
     credits: string | null;
     startDate: Date | null;
@@ -152,7 +152,7 @@ export default async function ModelDetailPage({
     activePromotions = promoRows.map((row) => ({
       id: row.id,
       modelPattern: row.modelPattern,
-      type: row.type,
+      type: row.type as 'free_tier' | 'promotion' | 'beta' | 'free_trial',
       description: row.description,
       credits: row.credits,
       startDate: row.startDate,
