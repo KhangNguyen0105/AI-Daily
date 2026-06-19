@@ -94,9 +94,31 @@ export interface PromotionResult {
   credits?: string | null;
 }
 
+/**
+ * Consumer subscription plan data extracted from consumer-facing pricing pages.
+ * Phase 10: Includes rawPriceText, billingPeriod, confidence, extractionNotes per review findings #2 and #5.
+ */
+export interface ConsumerSubscriptionPlan {
+  planName: string;
+  monthlyPrice: number | null;
+  annualPrice: number | null;
+  annualMonthlyPrice: number | null;
+  rawPriceText: string | null;
+  billingPeriod: 'monthly' | 'annual' | 'one_time' | 'unknown';
+  freeTrialDays: number;
+  freeTrialConditions: string | null;
+  keyFeatures: string[];
+  currency: string;
+  sourceUrl: string;
+  confidence: 'verified' | 'likely' | 'low_confidence';
+  extractionNotes: string | null;
+}
+
 export interface ProviderExtraction {
   models: ExtractionResult[];
   promotions: PromotionResult[];
+  /** Phase 10: Consumer subscription plans (optional, populated by consumer adapters) */
+  subscriptionPlans?: ConsumerSubscriptionPlan[];
 }
 
 /**
