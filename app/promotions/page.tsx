@@ -8,8 +8,9 @@ export const revalidate = 60;
 
 /**
  * Offset for virtual free-trial IDs projected from subscription_plans.
- * Ensures no collision with real promotion table IDs (which start from 1).
- * With ~30 plans per crawl and daily runs, safe for ~9 years.
+ * IN-05: Uses negative IDs (-(row.id + 1)) for collision-free semantics
+ * since real promotion serial IDs are always positive.
+ * Legacy constant kept for reference but no longer used for ID generation.
  * (WR-05: replaced magic number 100000 with named constant)
  */
 const VIRTUAL_TRIAL_ID_OFFSET = 100_000;
@@ -80,7 +81,8 @@ export default async function PromotionsPage() {
         return !realFreeTrialPatterns.has(pattern);
       })
       .map((row) => ({
-        id: row.id + VIRTUAL_TRIAL_ID_OFFSET,
+        // IN-05: Use negative IDs for collision-free semantics (serial IDs are always positive)
+        id: -(row.id + 1),
         modelPattern: `${row.providerName} ${row.planName}`,
         type: 'free_trial' as const,
         description: row.freeTrialConditions
