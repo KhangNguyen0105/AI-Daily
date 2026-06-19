@@ -1,1 +1,169 @@
 @import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ── Light theme (default) ─────────────────────────────────── */
+:root {
+  /* Backgrounds */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --bg-tertiary: #f3f4f6;
+
+  /* Text */
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --text-tertiary: #9ca3af;
+
+  /* Borders */
+  --border-primary: #e5e7eb;
+  --border-secondary: #d1d5db;
+
+  /* Accent */
+  --accent-blue: #2563eb;
+  --accent-green: #22c55e;
+  --accent-yellow: #eab308;
+  --accent-red: #ef4444;
+  --accent-purple: #8b5cf6;
+
+  /* Semantic: Green (success, active, published, free tier) */
+  --badge-green-bg: #dcfce7;
+  --badge-green-text: #16653d;
+  --badge-green-border: #bbf7d0;
+  --dot-green: #22c55e;
+
+  /* Semantic: Red (error, failed, low confidence) */
+  --badge-red-bg: #fef2f2;
+  --badge-red-text: #991b1b;
+  --badge-red-border: #fecaca;
+  --dot-red: #ef4444;
+
+  /* Semantic: Yellow/Amber (warning, likely) */
+  --badge-yellow-bg: #fef9c3;
+  --badge-yellow-text: #854d0e;
+  --dot-yellow: #eab308;
+
+  /* Semantic: Blue (info, active sidebar) */
+  --badge-blue-bg: #dbeafe;
+  --badge-blue-text: #1e40af;
+
+  /* Semantic: Purple (beta) */
+  --badge-purple-bg: #f3e8ff;
+  --badge-purple-text: #6b21a8;
+
+  /* Charts (unchanged across themes) */
+  --chart-1: #2563eb;
+  --chart-2: #22c55e;
+  --chart-3: #eab308;
+  --chart-4: #ef4444;
+  --chart-5: #8b5cf6;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  /* Theme transition */
+  --theme-transition: background-color 200ms ease, color 200ms ease,
+    border-color 200ms ease;
+}
+
+/* ── Dark theme overrides ──────────────────────────────────── */
+.dark {
+  /* Backgrounds */
+  --bg-primary: #111827;
+  --bg-secondary: #1f2937;
+  --bg-tertiary: #374151;
+
+  /* Text */
+  --text-primary: #f9fafb;
+  --text-secondary: #d1d5db;
+  --text-tertiary: #9ca3af;
+
+  /* Borders */
+  --border-primary: #374151;
+  --border-secondary: #4b5563;
+
+  /* Accent dark overrides */
+  --accent-blue: #3b82f6;
+  --accent-red: #f87171;
+  --accent-purple: #a78bfa;
+
+  /* Semantic: Green (success, active, published, free tier) */
+  --badge-green-bg: #064e3b;
+  --badge-green-text: #6ee7b7;
+  --badge-green-border: #065f46;
+  --dot-green: #34d399;
+
+  /* Semantic: Red (error, failed, low confidence) */
+  --badge-red-bg: #450a0a;
+  --badge-red-text: #fca5a5;
+  --badge-red-border: #7f1d1d;
+  --dot-red: #f87171;
+
+  /* Semantic: Yellow/Amber (warning, likely) */
+  --badge-yellow-bg: #422006;
+  --badge-yellow-text: #fde047;
+  --dot-yellow: #facc15;
+
+  /* Semantic: Blue (info, active sidebar) */
+  --badge-blue-bg: #1e3a5f;
+  --badge-blue-text: #93c5fd;
+
+  /* Semantic: Purple (beta) */
+  --badge-purple-bg: #3b0764;
+  --badge-purple-text: #d8b4fe;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+}
+
+/* ── Tailwind CSS 4 theme integration ─────────────────────── */
+@theme {
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-tertiary: var(--bg-tertiary);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+
+  --color-border-primary: var(--border-primary);
+  --color-border-secondary: var(--border-secondary);
+
+  --color-accent-blue: var(--accent-blue);
+  --color-accent-green: var(--accent-green);
+  --color-accent-yellow: var(--accent-yellow);
+  --color-accent-red: var(--accent-red);
+  --color-accent-purple: var(--accent-purple);
+
+  --color-badge-green-bg: var(--badge-green-bg);
+  --color-badge-green-text: var(--badge-green-text);
+  --color-badge-green-border: var(--badge-green-border);
+  --color-dot-green: var(--dot-green);
+
+  --color-badge-red-bg: var(--badge-red-bg);
+  --color-badge-red-text: var(--badge-red-text);
+  --color-badge-red-border: var(--badge-red-border);
+  --color-dot-red: var(--dot-red);
+
+  --color-badge-yellow-bg: var(--badge-yellow-bg);
+  --color-badge-yellow-text: var(--badge-yellow-text);
+  --color-dot-yellow: var(--dot-yellow);
+
+  --color-badge-blue-bg: var(--badge-blue-bg);
+  --color-badge-blue-text: var(--badge-blue-text);
+
+  --color-badge-purple-bg: var(--badge-purple-bg);
+  --color-badge-purple-text: var(--badge-purple-text);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+}
+
+/* Smooth theme transition on <html> */
+html {
+  transition: var(--theme-transition);
+}

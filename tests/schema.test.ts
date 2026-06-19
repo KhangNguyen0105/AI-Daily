@@ -117,6 +117,47 @@ describe('Database Schema', () => {
       expect(columns).toContain('updated_at');
     });
   });
+
+  describe('subscriptionPlans table', () => {
+    it('should be defined', () => {
+      expect(schema.subscriptionPlans).toBeDefined();
+    });
+
+    it('should have expected columns', () => {
+      const columns = getColumns(schema.subscriptionPlans);
+      expect(columns).toContain('id');
+      expect(columns).toContain('source_id');
+      expect(columns).toContain('provider_name');
+      expect(columns).toContain('plan_name');
+      expect(columns).toContain('monthly_price');
+      expect(columns).toContain('annual_price');
+      expect(columns).toContain('annual_monthly_price');
+      expect(columns).toContain('free_trial_days');
+      expect(columns).toContain('free_trial_conditions');
+      expect(columns).toContain('key_features');
+      expect(columns).toContain('currency');
+      expect(columns).toContain('source_url');
+      expect(columns).toContain('start_date');
+      expect(columns).toContain('end_date');
+      expect(columns).toContain('crawled_at');
+      expect(columns).toContain('created_at');
+      expect(columns).toContain('updated_at');
+      expect(columns).toContain('raw_price_text');
+      expect(columns).toContain('billing_period');
+      expect(columns).toContain('confidence');
+      expect(columns).toContain('extraction_notes');
+    });
+  });
+
+  describe('promotionTypeEnum', () => {
+    it('should include free_trial value', () => {
+      expect(schema.promotionTypeEnum.enumValues).toContain('free_trial');
+    });
+
+    it('should have values free_tier, promotion, beta, free_trial', () => {
+      expect(schema.promotionTypeEnum.enumValues).toEqual(['free_tier', 'promotion', 'beta', 'free_trial']);
+    });
+  });
 });
 
 /**

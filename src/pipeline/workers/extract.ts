@@ -3,13 +3,23 @@ import { getAdapter } from '../../providers/registry';
 import { scoreQueue } from '../queues';
 import { redisConnection } from '../connection';
 import { db } from '../../db/index';
-import { rawData, extractions, promotions } from '../../db/schema';
+import { rawData, extractions, promotions, subscriptionPlans } from '../../db/schema';
 import { eq } from 'drizzle-orm';
 import { classifyEdgeCases } from '../edge-case-classifier';
 import { buildEvidenceQuotes, captureEvidence } from '../../lib/evidence-anchor';
 import { updatePipelineStats } from '../orchestrator';
 import type { EdgeCaseFlags } from '../edge-case-classifier';
 import type { EvidenceQuotes } from '../../lib/evidence-anchor';
+
+/**
+ * Normalize plan name for consistent upsert matching.
+ * Lowercases, trims, and collapses whitespace to prevent duplicate rows
+ * from LLM returning different casing/whitespace across crawls.
+ * (CR-01: subscription plan upsert missing planName normalization)
+ */
+function normalizePlanName(name: string): string {
+  return name.toLowerCase().trim().replace(/\s+/g, ' ');
+}
 
 /**
  * Job data for the extract queue.
@@ -198,6 +208,65 @@ export function createExtractWorker(): Worker<ExtractJobData, ExtractJobResult> 
             });
           }
         });
+      }
+
+      // Phase 10: Upsert subscription plans from consumer adapters
+      // Follows the same upsert pattern as extractions (onConflictDoUpdate)
+      // Per-plan try/catch ensures one malformed plan does not block others
+      if (normalized.subscriptionPlans && normalized.subscriptionPlans.length > 0) {
+        for (const plan of normalized.subscriptionPlans) {
+          try {
+            await db
+              .insert(subscriptionPlans)
+              .values({
+                sourceId,
+                providerName,
+                planName: normalizePlanName(plan.planName),
+                planSlug: normalizePlanName(plan.planName).replace(/\s+/g, '-'),
+                monthlyPrice: plan.monthlyPrice,
+                annualPrice: plan.annualPrice,
+                annualMonthlyPrice: plan.annualMonthlyPrice,
+                rawPriceText: plan.rawPriceText,
+                billingPeriod: plan.billingPeriod,
+                freeTrialDays: plan.freeTrialDays,
+                freeTrialConditions: plan.freeTrialConditions,
+                keyFeatures: plan.keyFeatures,
+                currency: plan.currency || 'USD',
+                confidence: plan.confidence || 'likely',
+                extractionNotes: plan.extractionNotes,
+                sourceUrl: plan.sourceUrl,
+                crawledAt: new Date(),
+                updatedAt: new Date(),
+              })
+              .onConflictDoUpdate({
+                target: [subscriptionPlans.sourceId, subscriptionPlans.planName],
+                set: {
+                  providerName,
+                  planSlug: normalizePlanName(plan.planName).replace(/\s+/g, '-'),
+                  monthlyPrice: plan.monthlyPrice,
+                  annualPrice: plan.annualPrice,
+                  annualMonthlyPrice: plan.annualMonthlyPrice,
+                  rawPriceText: plan.rawPriceText,
+                  billingPeriod: plan.billingPeriod,
+                  freeTrialDays: plan.freeTrialDays,
+                  freeTrialConditions: plan.freeTrialConditions,
+                  keyFeatures: plan.keyFeatures,
+                  currency: plan.currency || 'USD',
+                  confidence: plan.confidence || 'likely',
+                  extractionNotes: plan.extractionNotes,
+                  sourceUrl: plan.sourceUrl,
+                  crawledAt: new Date(),
+                  updatedAt: new Date(),
+                },
+              });
+          } catch (planError) {
+            // Per-plan error handling: log and continue to next plan
+            console.error(
+              `[extract] Failed to upsert subscription plan "${plan.planName}" for provider "${providerName}":`,
+              planError,
+            );
+          }
+        }
       }
 
       // Chain to score stage (D-10: worker-triggered chaining)

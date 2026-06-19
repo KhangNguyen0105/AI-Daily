@@ -21,6 +21,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 6: Daily Content Engine** - Auto-generated daily articles with chronological archive
 - [x] **Phase 7: Intelligence & Analytics** - Trend charts, promotion tracker, multi-model comparison, and price alerts
 - [x] **Phase 8: Admin Operations** - Pipeline monitoring, content editing/rollback, source management, and admin auth
+- [x] **Phase 9: Dark Mode & Theme System** - CSS custom properties, theme toggle, and conversion of all hardcoded colors to semantic token classes
+- [x] **Phase 10: Consumer Pricing & Subscription Intelligence** - Consumer subscription plan collection, 10 provider adapters, /subscriptions page, and free trial surfacing
 
 ## Phase Details
 
@@ -235,29 +237,71 @@ Plans:
 
 ### Phase 9: Dark Mode & Theme System
 
-**Goal**: Users can toggle between light/dark theme, with preference persisted in localStorage.
-**Mode:** enhancement
-**Depends on**: Phase 3 (Pricing Table), Phase 8 (Admin)
-**Requirements**: UI-01 (theme toggle), UI-02 (dark styles), UI-03 (preference persistence)
-
+**Goal**: Implement a complete dark mode and theme system with CSS custom properties, React context provider, theme toggle, and convert all hardcoded color classes across the entire application to theme-aware token classes.
+**Depends on**: Phase 8
+**Requirements**: UI-01, UI-02, UI-03
 **Success Criteria** (what must be TRUE):
 
-  1. User can toggle between light and dark theme via a button in the TopNav
-  2. Theme preference is persisted in localStorage and survives page refresh
-  3. On first visit, system preference (prefers-color-scheme) is used as default
-  4. All public pages render correctly in both themes (no hardcoded white backgrounds)
-  5. Admin pages render correctly in both themes
-  6. No flash of wrong theme on page load (SSR-safe)
+  1. User can see a sun/moon toggle button in the TopNav
+  2. Clicking the toggle switches between light and dark theme
+  3. Theme preference persists across page refresh (localStorage)
+  4. On first visit, system preference (prefers-color-scheme) is used as default
+  5. No flash of wrong theme on page load
+  6. All components render correctly in both light and dark themes
 
-**Status**: Not started
-**Plans**: 0 plans
+**Status**: ✅ COMPLETE (verified 2026-06-18, 46+ files converted, 202+ theme token occurrences)
+**Plans**: 6 plans
+Plans:
+
+**Wave 1**
+
+- [x] 09-01-PLAN.md — Theme foundation: CSS custom properties, ThemeProvider, ThemeToggle, layout integration
+
+**Wave 2**
+
+- [x] 09-02-PLAN.md — Core page color conversion: HomePageClient, CostCalculator, ModelDetailClient
+- [x] 09-03-PLAN.md — PricingTable color conversion: ~48 class replacements
+- [x] 09-05-PLAN.md — Admin layout and pages: sidebar, header, login, articles, pipeline, sources
+
+**Wave 3**
+
+- [x] 09-04-PLAN.md — Public components: 16 files including DigestArticle, AlertsPageClient, charts, toggles
+- [x] 09-06-PLAN.md — Admin components + final verification: tables, forms, utility files, full-project grep
+
+**UI hint**: yes
+
+### Phase 10: Consumer Pricing & Subscription Intelligence
+
+**Goal**: Expand data collection beyond API pricing to include consumer-facing subscription plans (ChatGPT Plus/Pro, Gemini Advanced, Claude Pro/Max, Perplexity Pro, etc.) and their free trials, promotional offers, and beta programs. Users can see what consumer AI products cost and what free trials are available.
+**Depends on**: Phase 2, Phase 9
+**Requirements**: DCOL-08, DCOL-09
+**Success Criteria** (what must be TRUE):
+
+  1. System collects subscription plan pricing from at least 5 consumer AI providers (ChatGPT, Gemini, Claude, Perplexity, Copilot)
+  2. Each subscription plan captures: plan name, monthly price, annual price (if available), free trial duration, key features
+  3. Free trial and promotional offers are captured with start/end dates when available
+  4. Consumer pricing data is displayed on a dedicated page alongside API pricing
+  5. Promotions page shows subscription-based free trials alongside API free tiers
+
+**Status**: ✅ COMPLETE (verified 2026-06-19, 33/33 tests pass)
+**Plans**: 3 plans
+Plans:
+
+**Wave 1**
+
+- [x] 10-01-PLAN.md — Schema + consumer adapter infrastructure: subscription_plans table, billingPeriodEnum, free_trial enum, ConsumerAdapter base class, consumer registry
+
+**Wave 2** *(depends on Wave 1)*
+
+- [x] 10-02-PLAN.md — 10 consumer adapters + pipeline integration: Tier 1 + Tier 2 adapters with expectedPlanNames, adapter timeouts, failure isolation, extract worker upsert, orchestrator integration
+- [x] 10-03-PLAN.md — Subscriptions page + responsive nav + virtual projection: /subscriptions page with card grid, filter pills, TopNav mobile menu, virtual projection of free trials on /promotions
 
 **UI hint**: yes
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -269,4 +313,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9
 | 6. Daily Content Engine | 3/3 | Complete | 2026-06-14 |
 | 7. Intelligence & Analytics | 4/4 | Complete | 2026-06-15 |
 | 8. Admin Operations | 7/7 | Complete | 2026-06-15 |
-| 9. Dark Mode & Theme System | 0/0 | Not started | — |
+| 9. Dark Mode & Theme System | 6/6 | Complete | 2026-06-18 |
+| 10. Consumer Pricing & Subscription Intelligence | 3/3 | Complete | 2026-06-19 |
