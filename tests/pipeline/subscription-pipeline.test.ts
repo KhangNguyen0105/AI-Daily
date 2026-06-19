@@ -54,6 +54,20 @@ vi.mock('../../src/db/index', () => ({
   },
 }));
 
+// Mock API provider adapters (non-consumer)
+const mockApiAdapters = [
+  {
+    config: { name: 'openai', baseUrl: 'https://api.openai.com', pricingUrl: 'https://openai.com/pricing' },
+  },
+];
+
+// After mirrorToMainRegistry(), getAllAdapters() returns API + consumer adapters
+const mockAllAdapters = [
+  ...mockApiAdapters,
+  { config: { name: 'chatgpt-consumer', baseUrl: 'https://chatgpt.com', pricingUrl: 'https://chatgpt.com/pricing' } },
+  { config: { name: 'gemini-consumer', baseUrl: 'https://one.google.com', pricingUrl: 'https://one.google.com/about/plans' } },
+];
+
 // Mock providers registry
 vi.mock('../../src/providers/registry', () => ({
   getAdapter: vi.fn().mockReturnValue({
@@ -81,11 +95,11 @@ vi.mock('../../src/providers/registry', () => ({
     }),
     normalize: vi.fn().mockImplementation((data: any) => data),
   }),
-  getAllAdapters: vi.fn(() => []),
-  getAllTier1Adapters: vi.fn(() => []),
+  getAllAdapters: vi.fn(() => mockAllAdapters),
+  getAllTier1Adapters: vi.fn(() => mockApiAdapters),
   getAllTier2Adapters: vi.fn(() => []),
   getAllTier3Adapters: vi.fn(() => []),
-  isTier1Provider: vi.fn(() => false),
+  isTier1Provider: vi.fn((name: string) => name === 'openai'),
   isTier2Provider: vi.fn(() => false),
   isTier3Provider: vi.fn(() => false),
 }));
@@ -315,6 +329,31 @@ describe('Subscription Pipeline Behavior', () => {
       // The run should complete successfully despite consumer failures
       expect(runId).toBeDefined();
       expect(enqueueCount).toBeGreaterThan(0);
+    });
+
+    it('should not double-enqueue consumer adapters (CR-01)', async () => {
+      const { collectQueue } = await import('../../src/pipeline/queues');
+      const { orchestrateDailyRun } = await import('../../src/pipeline/orchestrator');
+
+      // Track all enqueue calls
+      const enqueuedProviders: string[] = [];
+      (collectQueue.add as any).mockImplementation(async (name: string, data: any) => {
+        enqueuedProviders.push(data.providerName);
+        return { id: `job-${enqueuedProviders.length}` };
+      });
+
+      await orchestrateDailyRun();
+
+      // Consumer adapters should appear exactly once (in the consumer loop, not the general loop)
+      const chatgptEnqueues = enqueuedProviders.filter((p) => p === 'chatgpt-consumer');
+      const geminiEnqueues = enqueuedProviders.filter((p) => p === 'gemini-consumer');
+
+      expect(chatgptEnqueues).toHaveLength(1);
+      expect(geminiEnqueues).toHaveLength(1);
+
+      // API provider should also appear exactly once
+      const openaiEnqueues = enqueuedProviders.filter((p) => p === 'openai');
+      expect(openaiEnqueues).toHaveLength(1);
     });
   });
 });
