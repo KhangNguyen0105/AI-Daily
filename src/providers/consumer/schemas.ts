@@ -1,1 +1,0 @@
-export { consumerSubscriptionSchema } from '../schemas';
