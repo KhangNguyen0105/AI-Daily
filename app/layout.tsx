@@ -15,7 +15,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
+      <body className="h-screen overflow-hidden">
         <TopNav />
         <div className="pt-14">{children}</div>
       </body>

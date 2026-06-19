@@ -63,18 +63,11 @@ function getColumnResponsiveClass(columnId: string): string {
 }
 
 /**
- * Minimum column widths to prevent excessive collapse on small screens.
+ * Minimum column widths — removed to prevent horizontal overflow.
+ * Columns auto-size based on content; table scrolls vertically only.
  */
-function getColumnMinWidth(columnId: string): string {
-  switch (columnId) {
-    case 'modelName':
-      return 'min-w-[120px]';
-    case 'inputPricePer1m':
-    case 'outputPricePer1m':
-      return 'min-w-[80px]';
-    default:
-      return '';
-  }
+function getColumnMinWidth(_columnId: string): string {
+  return '';
 }
 
 /**
@@ -412,7 +405,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
     contextWindowMax !== '';
 
   return (
-    <div>
+    <div className="h-full flex flex-col">
       {data.length === 0 ? (
         <div className="text-center py-12 bg-gray-50 rounded-lg">
           <p className="text-gray-500 text-lg">
@@ -422,7 +415,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
       ) : (
         <>
           {/* Filter bar */}
-          <div className="mb-4 space-y-3">
+          <div className="shrink-0 mb-4 space-y-3">
             {/* Top row: search + provider + free tier + clear */}
             <div className="flex flex-col md:flex-row gap-3 items-start md:items-center">
               <div className="flex-1 w-full">
@@ -570,13 +563,12 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
           </div>
 
           {/* Row count indicator */}
-          <p className="text-sm text-gray-500 mb-3">
+          <p className="shrink-0 text-sm text-gray-500 mb-3">
             Showing {filteredRowCount} of {totalRowCount} models
           </p>
 
-          {/* Table — overflow-x-clip prevents horizontal scrollbar from leaking to body.
-              Per scrollbar-fix: no maxHeight; page scrolls naturally. */}
-          <div className="overflow-x-clip">
+          {/* Table — flex-1 fills remaining space, overflow-y-auto scrolls rows internally */}
+          <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
             <table className="w-full border-collapse">
               <thead>
                 {table.getHeaderGroups().map((headerGroup) => (
@@ -627,7 +619,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
           </div>
 
           {/* Pagination controls */}
-          <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-200">
+          <div className="shrink-0 flex items-center justify-between mt-4 pt-3 border-t border-gray-200">
             <p className="text-sm text-gray-500">
               Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount() || 1}
             </p>

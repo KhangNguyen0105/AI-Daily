@@ -1,9 +1,1 @@
 @import "tailwindcss";
-
-/* Prevent page-level horizontal scrollbar.
-   Horizontal overflow is contained within table containers via overflow-x-clip.
-   Per scrollbar-fix: html/body must never show horizontal scroll. */
-html,
-body {
-  overflow-x: hidden;
-}

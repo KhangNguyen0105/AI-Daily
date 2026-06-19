@@ -70,9 +70,9 @@ export default async function HomePage() {
   }
 
   return (
-    <main className="bg-white text-gray-900">
+    <main className="h-[calc(100vh-56px)] flex flex-col bg-white text-gray-900">
       {/* AI Daily Branding */}
-      <div className="flex flex-col items-center justify-center py-5 px-4">
+      <div className="shrink-0 flex flex-col items-center justify-center py-4 px-4">
         <h1 className="text-2xl font-semibold tracking-tight">AI Daily</h1>
         <p className="mt-1 text-sm text-gray-500">
           Last updated: {lastUpdated ? lastUpdated.toISOString().replace('T', ' ').slice(0, 16) + ' UTC' : 'Unknown'}
@@ -80,7 +80,9 @@ export default async function HomePage() {
       </div>
 
       {/* Side-by-side: Pricing Table + Cost Calculator */}
-      <HomePageClient data={pricingData} exchangeRate={exchangeRate} />
+      <div className="flex-1 min-h-0">
+        <HomePageClient data={pricingData} exchangeRate={exchangeRate} />
+      </div>
     </main>
   );
 }
