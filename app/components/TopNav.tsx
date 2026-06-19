@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { ThemeToggle } from '@/app/components/ThemeToggle';
 
 /**
  * Top navigation bar — site-wide nav component.
@@ -31,11 +32,11 @@ export function TopNav() {
 
   return (
     <nav
-      className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200"
+      className="fixed top-0 left-0 right-0 z-50 bg-bg-secondary border-b border-border-primary"
       aria-label="Main navigation"
     >
       <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-        <Link href="/" className="text-lg font-bold text-gray-900">
+        <Link href="/" className="text-lg font-bold text-text-primary">
           AI Daily
         </Link>
 
@@ -53,19 +54,20 @@ export function TopNav() {
                 href={link.href}
                 className={
                   isActive
-                    ? 'text-sm font-bold text-blue-600'
-                    : 'text-sm text-gray-600 hover:text-gray-900'
+                    ? 'text-sm font-bold text-accent-blue'
+                    : 'text-sm text-text-secondary hover:text-text-primary'
                 }
               >
                 {link.label}
               </Link>
             );
           })}
+          <ThemeToggle />
         </div>
 
         {/* Hamburger button — visible on mobile only */}
         <button
-          className="md:hidden p-2 text-gray-600 hover:text-gray-900"
+          className="md:hidden p-2 text-text-secondary hover:text-text-primary"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
           aria-expanded={mobileMenuOpen}
@@ -98,7 +100,7 @@ export function TopNav() {
 
       {/* Mobile menu dropdown */}
       {mobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 right-0 bg-white border-b border-gray-200 shadow-lg">
+        <div className="md:hidden absolute top-full left-0 right-0 bg-bg-secondary border-b border-border-primary shadow-lg">
           {navLinks.map((link) => {
             const isActive =
               link.href === '/'
@@ -112,14 +114,17 @@ export function TopNav() {
                 onClick={() => setMobileMenuOpen(false)}
                 className={`block px-4 py-3 text-sm ${
                   isActive
-                    ? 'font-bold text-blue-600 bg-blue-50'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    ? 'font-bold text-accent-blue bg-badge-blue-bg'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-bg-tertiary'
                 }`}
               >
                 {link.label}
               </Link>
             );
           })}
+          <div className="px-4 py-3">
+            <ThemeToggle />
+          </div>
         </div>
       )}
     </nav>

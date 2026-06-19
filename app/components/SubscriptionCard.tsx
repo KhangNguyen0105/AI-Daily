@@ -25,31 +25,31 @@ export function SubscriptionCard({ plan }: { plan: SubscriptionPlanData }) {
   };
 
   return (
-    <article className="border rounded-lg p-4 bg-white border-gray-200 hover:shadow-md transition-shadow">
+    <article className="border rounded-lg p-4 bg-bg-primary border-border-primary hover:shadow-md transition-shadow">
       {/* Provider name + plan name row */}
       <div className="flex items-center gap-2 mb-3">
-        <span className="text-sm font-medium text-gray-500">
+        <span className="text-sm font-medium text-text-secondary">
           {capitalizeProvider(plan.providerName)}
         </span>
-        <span className="text-lg font-semibold text-gray-900">
+        <span className="text-lg font-semibold text-text-primary">
           {plan.planName}
         </span>
       </div>
 
       {/* Price display (review #2 -- handles null/ambiguous pricing) */}
       {plan.monthlyPrice !== null ? (
-        <p className="text-xl font-semibold text-gray-900">
+        <p className="text-xl font-semibold text-text-primary">
           {formatPrice(plan.monthlyPrice)}/mo
         </p>
       ) : plan.rawPriceText !== null ? (
-        <p className="text-lg font-medium text-gray-500">{plan.rawPriceText}</p>
+        <p className="text-lg font-medium text-text-secondary">{plan.rawPriceText}</p>
       ) : (
         <p className="text-sm text-gray-400">Price not available</p>
       )}
 
       {/* Annual breakdown */}
       {plan.annualPrice !== null && plan.annualMonthlyPrice !== null && (
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-text-secondary mt-1">
           {formatPrice(plan.annualPrice)}/yr ({formatPrice(plan.annualMonthlyPrice)}/mo)
         </p>
       )}
@@ -57,7 +57,7 @@ export function SubscriptionCard({ plan }: { plan: SubscriptionPlanData }) {
       {/* Free trial badge */}
       {plan.freeTrialDays !== null && plan.freeTrialDays > 0 && (
         <span
-          className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 mb-3"
+          className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-badge-green-bg text-accent-green mb-3"
           aria-label={`Free trial available for ${plan.freeTrialDays} days`}
         >
           {plan.freeTrialConditions
@@ -67,14 +67,14 @@ export function SubscriptionCard({ plan }: { plan: SubscriptionPlanData }) {
       )}
       {plan.freeTrialConditions !== null &&
         (plan.freeTrialDays === null || plan.freeTrialDays === 0) && (
-          <span className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 mb-3">
+          <span className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-badge-green-bg text-accent-green mb-3">
             Free trial: {plan.freeTrialConditions}
           </span>
         )}
 
       {/* Key features list */}
       {plan.keyFeatures.length > 0 && (
-        <ul className="text-sm text-gray-600 space-y-1 mb-3">
+        <ul className="text-sm text-text-secondary space-y-1 mb-3">
           {plan.keyFeatures.slice(0, 4).map((feature, index) => (
             <li key={index} className="flex items-start gap-1">
               <span className="text-gray-400 mt-0.5">•</span>
@@ -102,7 +102,7 @@ export function SubscriptionCard({ plan }: { plan: SubscriptionPlanData }) {
           href={plan.sourceUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-xs text-blue-600 hover:text-blue-800 underline mt-2 inline-block"
+          className="text-xs text-accent-blue hover:text-accent-blue underline mt-2 inline-block"
         >
           View details
         </a>

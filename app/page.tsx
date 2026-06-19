@@ -70,11 +70,11 @@ export default async function HomePage() {
   }
 
   return (
-    <main className="h-[calc(100vh-56px)] flex flex-col bg-white text-gray-900">
+    <main className="h-[calc(100vh-56px)] flex flex-col bg-bg-primary text-text-primary">
       {/* AI Daily Branding */}
       <div className="shrink-0 flex flex-col items-center justify-center py-4 px-4">
         <h1 className="text-2xl font-semibold tracking-tight">AI Daily</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-text-secondary">
           Last updated: {lastUpdated ? lastUpdated.toISOString().replace('T', ' ').slice(0, 16) + ' UTC' : 'Unknown'}
         </p>
       </div>

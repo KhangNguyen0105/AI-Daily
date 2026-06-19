@@ -75,9 +75,9 @@ function getColumnMinWidth(_columnId: string): string {
  */
 function SortIndicator({ column }: { column: Column<PricingRow, unknown> }) {
   const sorted = column.getIsSorted();
-  if (!sorted) return <span className="ml-1 text-gray-300">&#8597;</span>;
+  if (!sorted) return <span className="ml-1 text-text-tertiary">&#8597;</span>;
   return (
-    <span className="ml-1 text-gray-700">
+    <span className="ml-1 text-text-primary">
       {sorted === 'asc' ? '▲' : '▼'}
     </span>
   );
@@ -106,7 +106,7 @@ function ProviderLogo({ name }: { name: string }) {
   // Fallback: colored circle with initial letter
   return (
     <span
-      className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-400 text-white text-xs font-semibold mr-2 align-middle"
+      className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-text-tertiary text-bg-primary text-xs font-semibold mr-2 align-middle"
       aria-hidden="true"
     >
       {initial}
@@ -229,7 +229,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
       header: 'Provider',
       filterFn: providerColumnFilterFn as FilterFn<PricingRow>,
       cell: (info) => (
-        <span className="text-sm text-gray-700 flex items-center">
+        <span className="text-sm text-text-primary flex items-center">
           <ProviderLogo name={info.getValue() ?? 'Unknown'} />
           {sanitizeDisplayName(info.getValue() ?? 'Unknown')}
         </span>
@@ -243,7 +243,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
         return (
           <Link
             href={`/model/${slug}`}
-            className="text-sm font-semibold text-blue-600 hover:text-blue-800 hover:underline"
+            className="text-sm font-semibold text-accent-blue hover:text-blue-800 hover:underline"
           >
             {sanitizeDisplayName(info.getValue())}
           </Link>
@@ -256,7 +256,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
       id: 'family',
       header: 'Family',
       cell: (info) => (
-        <span className="text-sm text-gray-600">
+        <span className="text-sm text-text-secondary">
           {getModelFamily(info.getValue())}
         </span>
       ),
@@ -264,7 +264,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
     columnHelper.accessor('inputPricePer1m', {
       header: effectiveCurrency === 'usd' ? 'Input ($/1M)' : 'Input (₫/1M)',
       cell: (info) => (
-        <span className="text-sm text-right text-gray-700 block">
+        <span className="text-sm text-right text-text-primary block">
           {formatCurrencyPrice(info.getValue(), effectiveCurrency, exchangeRate)}
         </span>
       ),
@@ -272,7 +272,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
     columnHelper.accessor('outputPricePer1m', {
       header: effectiveCurrency === 'usd' ? 'Output ($/1M)' : 'Output (₫/1M)',
       cell: (info) => (
-        <span className="text-sm text-right text-gray-700 block">
+        <span className="text-sm text-right text-text-primary block">
           {formatCurrencyPrice(info.getValue(), effectiveCurrency, exchangeRate)}
         </span>
       ),
@@ -280,7 +280,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
     columnHelper.accessor('contextWindow', {
       header: 'Context Window',
       cell: (info) => (
-        <span className="text-sm text-right text-gray-700 block">
+        <span className="text-sm text-right text-text-primary block">
           {formatContextWindow(info.getValue())}
         </span>
       ),
@@ -289,7 +289,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
       header: 'Confidence',
       cell: (info) => {
         const val = info.getValue();
-        const solidBg = val === 'verified' ? 'bg-green-500' : val === 'likely' ? 'bg-yellow-500' : val === 'low_confidence' ? 'bg-red-500' : 'bg-gray-500';
+        const solidBg = val === 'verified' ? 'bg-accent-green' : val === 'likely' ? 'bg-accent-yellow' : val === 'low_confidence' ? 'bg-accent-red' : 'bg-bg-secondary0';
         return (
           <span
             className={`inline-block w-3 h-3 rounded-full ${solidBg}`}
@@ -310,32 +310,32 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
           try {
             const parsed = new URL(url);
             if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-              return <span className="text-sm text-gray-400">{row.sourceName ?? '—'}</span>;
+              return <span className="text-sm text-text-tertiary">{row.sourceName ?? '—'}</span>;
             }
           } catch {
-            return <span className="text-sm text-gray-400">{row.sourceName ?? '—'}</span>;
+            return <span className="text-sm text-text-tertiary">{row.sourceName ?? '—'}</span>;
           }
           return (
             <a
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-blue-600 hover:text-blue-800 underline"
+              className="text-sm text-accent-blue hover:text-blue-800 underline"
             >
               {row.sourceName ?? 'View source'}
             </a>
           );
         }
-        return <span className="text-sm text-gray-400">{'—'}</span>;
+        return <span className="text-sm text-text-tertiary">{'—'}</span>;
       },
     }),
     columnHelper.accessor('collectedAt', {
       header: 'Collected',
       cell: (info) => {
         const date = info.getValue();
-        if (!date) return <span className="text-sm text-gray-400">{'—'}</span>;
+        if (!date) return <span className="text-sm text-text-tertiary">{'—'}</span>;
         return (
-          <span className="text-sm text-gray-600">
+          <span className="text-sm text-text-secondary">
             {format(new Date(date), 'MMM d, yyyy')}
           </span>
         );
@@ -407,8 +407,8 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
   return (
     <div className="h-full flex flex-col">
       {data.length === 0 ? (
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
-          <p className="text-gray-500 text-lg">
+        <div className="text-center py-12 bg-bg-secondary rounded-lg">
+          <p className="text-text-secondary text-lg">
             No pricing data collected yet. Pipeline will run shortly.
           </p>
         </div>
@@ -424,7 +424,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                   placeholder="Search models or providers..."
                   value={globalFilter}
                   onChange={(e) => setGlobalFilter(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-border-secondary rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue focus:border-accent-blue"
                   aria-label="Search models or providers"
                 />
               </div>
@@ -435,7 +435,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
               <select
                 value={providerFilter}
                 onChange={(e) => setProviderFilter(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[160px]"
+                className="px-3 py-2 border border-border-secondary rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue focus:border-accent-blue min-w-[160px]"
                 aria-label="Filter by provider"
               >
                 <option value="">All Providers</option>
@@ -446,12 +446,12 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                 ))}
               </select>
 
-              <label className="flex items-center gap-2 text-sm text-gray-700 whitespace-nowrap cursor-pointer">
+              <label className="flex items-center gap-2 text-sm text-text-primary whitespace-nowrap cursor-pointer">
                 <input
                   type="checkbox"
                   checked={freeTierOnly}
                   onChange={(e) => setFreeTierOnly(e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-border-secondary text-accent-blue focus:ring-accent-blue"
                 />
                 Free tier only
               </label>
@@ -459,7 +459,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
               {hasActiveFilters && (
                 <button
                   onClick={clearFilters}
-                  className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors whitespace-nowrap"
+                  className="px-3 py-2 text-sm text-text-secondary hover:text-text-primary border border-border-secondary rounded-md hover:bg-bg-secondary transition-colors whitespace-nowrap"
                   aria-label="Clear all filters"
                 >
                   Clear filters
@@ -471,7 +471,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
             <button
               type="button"
               onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-              className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+              className="text-sm text-accent-blue hover:text-blue-800 flex items-center gap-1"
               aria-expanded={showAdvancedFilters}
             >
               <span className="text-xs">{showAdvancedFilters ? '▲' : '▼'}</span>
@@ -480,16 +480,16 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
 
             {/* Advanced filters: price range + context window */}
             {showAdvancedFilters && (
-              <div className="flex flex-col md:flex-row gap-3 items-start md:items-end p-3 bg-gray-50 rounded-md">
+              <div className="flex flex-col md:flex-row gap-3 items-start md:items-end p-3 bg-bg-secondary rounded-md">
                 <fieldset className="flex flex-col gap-1">
-                  <legend className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Input Price ({effectiveCurrency === 'usd' ? '$/1M' : '₫/1M'})</legend>
+                  <legend className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Input Price ({effectiveCurrency === 'usd' ? '$/1M' : '₫/1M'})</legend>
                   <div className="flex gap-2">
                     <input
                       type="number"
                       placeholder="Min"
                       value={inputPriceMin}
                       onChange={(e) => setInputPriceMin(e.target.value)}
-                      className="w-24 px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-24 px-2 py-1.5 border border-border-secondary rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue"
                       min="0"
                       step="0.01"
                       aria-label="Input price minimum"
@@ -499,7 +499,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                       placeholder="Max"
                       value={inputPriceMax}
                       onChange={(e) => setInputPriceMax(e.target.value)}
-                      className="w-24 px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-24 px-2 py-1.5 border border-border-secondary rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue"
                       min="0"
                       step="0.01"
                       aria-label="Input price maximum"
@@ -508,14 +508,14 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                 </fieldset>
 
                 <fieldset className="flex flex-col gap-1">
-                  <legend className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Output Price ({effectiveCurrency === 'usd' ? '$/1M' : '₫/1M'})</legend>
+                  <legend className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Output Price ({effectiveCurrency === 'usd' ? '$/1M' : '₫/1M'})</legend>
                   <div className="flex gap-2">
                     <input
                       type="number"
                       placeholder="Min"
                       value={outputPriceMin}
                       onChange={(e) => setOutputPriceMin(e.target.value)}
-                      className="w-24 px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-24 px-2 py-1.5 border border-border-secondary rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue"
                       min="0"
                       step="0.01"
                       aria-label="Output price minimum"
@@ -525,7 +525,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                       placeholder="Max"
                       value={outputPriceMax}
                       onChange={(e) => setOutputPriceMax(e.target.value)}
-                      className="w-24 px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-24 px-2 py-1.5 border border-border-secondary rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue"
                       min="0"
                       step="0.01"
                       aria-label="Output price maximum"
@@ -534,14 +534,14 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                 </fieldset>
 
                 <fieldset className="flex flex-col gap-1">
-                  <legend className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Context Window (tokens)</legend>
+                  <legend className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Context Window (tokens)</legend>
                   <div className="flex gap-2">
                     <input
                       type="number"
                       placeholder="Min"
                       value={contextWindowMin}
                       onChange={(e) => setContextWindowMin(e.target.value)}
-                      className="w-28 px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-28 px-2 py-1.5 border border-border-secondary rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue"
                       min="0"
                       step="1000"
                       aria-label="Context window minimum"
@@ -551,7 +551,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                       placeholder="Max"
                       value={contextWindowMax}
                       onChange={(e) => setContextWindowMax(e.target.value)}
-                      className="w-28 px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-28 px-2 py-1.5 border border-border-secondary rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue"
                       min="0"
                       step="1000"
                       aria-label="Context window maximum"
@@ -563,7 +563,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
           </div>
 
           {/* Row count indicator */}
-          <p className="shrink-0 text-sm text-gray-500 mb-3">
+          <p className="shrink-0 text-sm text-text-secondary mb-3">
             Showing {filteredRowCount} of {totalRowCount} models
           </p>
 
@@ -572,11 +572,11 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
             <table className="w-full border-collapse">
               <thead>
                 {table.getHeaderGroups().map((headerGroup) => (
-                  <tr key={headerGroup.id} className="bg-gray-50 border-b-2 border-gray-200">
+                  <tr key={headerGroup.id} className="bg-bg-secondary border-b-2 border-border-primary">
                     {headerGroup.headers.map((header) => (
                       <th
                         key={header.id}
-                        className={`px-4 py-3 text-sm font-semibold text-gray-700 cursor-pointer select-none hover:bg-gray-100 transition-colors sticky top-0 z-10 bg-gray-50 ${getColumnResponsiveClass(header.id)} ${getColumnMinWidth(header.id)} ${
+                        className={`px-4 py-3 text-sm font-semibold text-text-primary cursor-pointer select-none hover:bg-bg-tertiary transition-colors sticky top-0 z-10 bg-bg-secondary ${getColumnResponsiveClass(header.id)} ${getColumnMinWidth(header.id)} ${
                           header.id === 'inputPricePer1m' || header.id === 'outputPricePer1m' || header.id === 'contextWindow'
                             ? 'text-right'
                             : header.id === 'confidence'
@@ -596,7 +596,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                 {table.getRowModel().rows.map((row) => (
                   <tr
                     key={row.id}
-                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                    className="border-b border-border-primary hover:bg-bg-secondary transition-colors"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <td
@@ -619,22 +619,22 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
           </div>
 
           {/* Pagination controls */}
-          <div className="shrink-0 flex items-center justify-between mt-4 pt-3 border-t border-gray-200">
-            <p className="text-sm text-gray-500">
+          <div className="shrink-0 flex items-center justify-between mt-4 pt-3 border-t border-border-primary">
+            <p className="text-sm text-text-secondary">
               Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount() || 1}
             </p>
             <div className="flex gap-2">
               <button
                 onClick={() => table.previousPage()}
                 disabled={!table.getCanPreviousPage()}
-                className="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-3 py-1.5 text-sm border border-border-secondary rounded-md hover:bg-bg-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Previous
               </button>
               <button
                 onClick={() => table.nextPage()}
                 disabled={!table.getCanNextPage()}
-                className="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-3 py-1.5 text-sm border border-border-secondary rounded-md hover:bg-bg-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Next
               </button>

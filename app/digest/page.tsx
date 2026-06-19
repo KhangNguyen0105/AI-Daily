@@ -56,7 +56,7 @@ export default async function DigestArchivePage({
   }
 
   return (
-    <main className="h-[calc(100vh-56px)] overflow-y-auto bg-white text-gray-900">
+    <main className="h-[calc(100vh-56px)] overflow-y-auto bg-bg-primary text-text-primary">
       <div className="max-w-4xl mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold tracking-tight mb-8">
           Daily Digest Archive
@@ -64,13 +64,13 @@ export default async function DigestArchivePage({
 
         {dbError ? (
           <div className="text-center py-16">
-            <p className="text-red-500">
+            <p className="text-accent-red">
               Unable to load articles. Please try again later.
             </p>
           </div>
         ) : articleList.length === 0 ? (
           <div className="text-center py-16">
-            <p className="text-gray-500">
+            <p className="text-text-secondary">
               No articles yet. Check back after the first pipeline run.
             </p>
           </div>
@@ -80,9 +80,9 @@ export default async function DigestArchivePage({
               {articleList.map((article) => (
                 <article
                   key={article.date}
-                  className="border-b border-gray-200 py-6"
+                  className="border-b border-border-primary py-6"
                 >
-                  <time className="text-sm text-gray-500">
+                  <time className="text-sm text-text-secondary">
                     {(() => {
                       try {
                         return format(new Date(article.date + 'T00:00:00'), 'MMMM d, yyyy');
@@ -93,12 +93,12 @@ export default async function DigestArchivePage({
                   </time>
                   <Link
                     href={`/digest/${article.date}`}
-                    className="text-lg font-bold text-gray-900 hover:text-blue-600 mt-1 block"
+                    className="text-lg font-bold text-text-primary hover:text-accent-blue mt-1 block"
                   >
                     {article.title}
                   </Link>
                   {article.summary && (
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm text-text-secondary mt-1">
                       {article.summary}
                     </p>
                   )}
@@ -109,7 +109,7 @@ export default async function DigestArchivePage({
             {hasMore && (
               <Link
                 href={`/digest?offset=${offset + limit}`}
-                className="text-blue-600 hover:text-blue-800 text-sm mt-8 inline-block"
+                className="text-accent-blue hover:text-accent-blue text-sm mt-8 inline-block"
               >
                 Load more
               </Link>

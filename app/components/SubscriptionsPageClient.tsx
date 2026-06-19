@@ -84,10 +84,10 @@ export function SubscriptionsPageClient({
   return (
     <div className="h-[calc(100vh-56px)] overflow-y-auto max-w-6xl mx-auto px-4 py-8">
       {/* Page heading */}
-      <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+      <h1 className="text-2xl font-semibold text-text-primary mb-2">
         Consumer AI Subscriptions
       </h1>
-      <p className="text-sm text-gray-600 mb-8">
+      <p className="text-sm text-text-secondary mb-8">
         Monthly and annual subscription plans for consumer AI products, including
         free trials and promotional offers.
       </p>
@@ -100,8 +100,8 @@ export function SubscriptionsPageClient({
             onClick={() => setActiveFilter(filter.value)}
             className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
               activeFilter === filter.value
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-blue-600 text-bg-primary'
+                : 'bg-bg-tertiary text-text-primary hover:bg-gray-200'
             }`}
           >
             {filter.label}
@@ -113,7 +113,7 @@ export function SubscriptionsPageClient({
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortType)}
-            className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-200 rounded-full hover:bg-gray-200 transition-colors cursor-pointer"
+            className="px-3 py-1.5 text-sm font-medium text-text-primary bg-bg-tertiary border border-border-primary rounded-full hover:bg-gray-200 transition-colors cursor-pointer"
           >
             {sortOptions.map((option) => (
               <option key={option.value} value={option.value}>
@@ -127,10 +127,10 @@ export function SubscriptionsPageClient({
       {/* Card grid or empty state */}
       {sorted.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-lg font-medium text-gray-900 mb-2">
+          <p className="text-lg font-medium text-text-primary mb-2">
             No subscription plans found
           </p>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-text-secondary">
             Subscription plans will appear here as consumer AI providers publish
             their pricing.
           </p>
