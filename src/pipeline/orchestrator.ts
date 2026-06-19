@@ -1,4 +1,5 @@
 import { getAllAdapters, getAllTier1Adapters, getAllTier2Adapters, getAllTier3Adapters, isTier1Provider, isTier2Provider, isTier3Provider } from '../providers/registry';
+import { getAllConsumerAdapters, isConsumerTier1Provider, isConsumerTier2Provider, mirrorToMainRegistry } from '../providers/consumer/registry';
 import { collectQueue } from './queues';
 import { db } from '../db/index';
 import { pipelineRuns } from '../db/schema';
@@ -15,6 +16,7 @@ export interface PipelineStats {
   tier1ProvidersCount: number;
   tier2ProvidersCount: number;
   tier3ProvidersCount: number;
+  consumerProvidersCount: number;
   attempted: number;
   succeeded: number;
   failed: number;
@@ -24,6 +26,8 @@ export interface PipelineStats {
   tier2_failed: number;
   tier3_succeeded: number;
   tier3_failed: number;
+  consumerSuccesses: number;
+  consumerFailures: number;
   extractions: number;
   verifiedCount: number;
   likelyCount: number;
@@ -40,16 +44,25 @@ export interface PipelineStats {
  * @returns The ID of the newly created pipeline run
  */
 export async function orchestrateDailyRun(): Promise<number> {
+  // Mirror consumer adapters into main registry (lazy init to avoid circular deps)
+  let consumerMirrored = false;
+  if (!consumerMirrored) {
+    await mirrorToMainRegistry();
+    consumerMirrored = true;
+  }
+
   const adapters = getAllAdapters();
   const tier1Adapters = getAllTier1Adapters();
   const tier2Adapters = getAllTier2Adapters();
   const tier3Adapters = getAllTier3Adapters();
+  const consumerAdapters = getAllConsumerAdapters();
 
   const initialStats: PipelineStats = {
     totalProviders: adapters.length,
     tier1ProvidersCount: tier1Adapters.length,
     tier2ProvidersCount: tier2Adapters.length,
     tier3ProvidersCount: tier3Adapters.length,
+    consumerProvidersCount: consumerAdapters.length,
     attempted: 0,
     succeeded: 0,
     failed: 0,
@@ -59,6 +72,8 @@ export async function orchestrateDailyRun(): Promise<number> {
     tier2_failed: 0,
     tier3_succeeded: 0,
     tier3_failed: 0,
+    consumerSuccesses: 0,
+    consumerFailures: 0,
     extractions: 0,
     verifiedCount: 0,
     likelyCount: 0,
@@ -77,7 +92,7 @@ export async function orchestrateDailyRun(): Promise<number> {
 
   const runId = inserted[0].id;
 
-  // Enqueue a collect job for each registered provider
+  // Enqueue a collect job for each registered API provider
   // Per D-01: Tier 1 providers get highest priority
   // BullMQ: lower number = higher priority (1 is highest)
   for (const adapter of adapters) {
@@ -103,9 +118,40 @@ export async function orchestrateDailyRun(): Promise<number> {
     );
   }
 
+  // Phase 10: Enqueue collect jobs for consumer adapters with failure isolation
+  // Review #6: One adapter enqueue failure does not fail the whole run
+  let consumerFailures = 0;
+  for (const adapter of consumerAdapters) {
+    try {
+      const isT1 = isConsumerTier1Provider(adapter.config.name);
+      const isT2 = isConsumerTier2Provider(adapter.config.name);
+      const priority = isT1 ? 5 : isT2 ? 6 : 10;
+
+      await collectQueue.add(
+        'collect',
+        {
+          providerName: adapter.config.name,
+          pipelineRunId: runId,
+          isTier1: false,
+          isTier2: false,
+          isTier3: false,
+        },
+        {
+          jobId: `collect-${adapter.config.name}-${Date.now()}`,
+          priority,
+        },
+      );
+    } catch (error) {
+      // Review #6: Failure isolation — one adapter enqueue failure does not fail the whole run
+      console.error(`Failed to enqueue consumer adapter ${adapter.config.name}:`, error);
+      consumerFailures++;
+    }
+  }
+
   console.log(
-    `Orchestrator: started pipeline run ${runId} with ${adapters.length} providers ` +
-    `(${tier1Adapters.length} Tier 1, ${tier2Adapters.length} Tier 2, ${tier3Adapters.length} Tier 3)`,
+    `Orchestrator: started pipeline run ${runId} with ${adapters.length} API providers ` +
+    `(${tier1Adapters.length} Tier 1, ${tier2Adapters.length} Tier 2, ${tier3Adapters.length} Tier 3) ` +
+    `+${consumerAdapters.length} consumer adapters (${consumerFailures} enqueue failures)`,
   );
 
   return runId;
@@ -125,10 +171,10 @@ export async function orchestrateDailyRun(): Promise<number> {
 // CR-07: Allowlist of valid stats keys to prevent JSONB path injection
 const VALID_STATS_KEYS = new Set([
   'totalProviders', 'tier1ProvidersCount', 'tier2ProvidersCount',
-  'tier3ProvidersCount', 'attempted', 'succeeded', 'failed',
+  'tier3ProvidersCount', 'consumerProvidersCount', 'attempted', 'succeeded', 'failed',
   'tier1_succeeded', 'tier1_failed', 'tier2_succeeded', 'tier2_failed',
-  'tier3_succeeded', 'tier3_failed', 'extractions', 'verifiedCount',
-  'likelyCount', 'lowConfidenceCount',
+  'tier3_succeeded', 'tier3_failed', 'consumerSuccesses', 'consumerFailures',
+  'extractions', 'verifiedCount', 'likelyCount', 'lowConfidenceCount',
 ]);
 
 export async function updatePipelineStats(
