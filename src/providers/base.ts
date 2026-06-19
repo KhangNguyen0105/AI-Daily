@@ -105,7 +105,7 @@ export interface ConsumerSubscriptionPlan {
   annualMonthlyPrice: number | null;
   rawPriceText: string | null;
   billingPeriod: 'monthly' | 'annual' | 'one_time' | 'unknown';
-  freeTrialDays: number;
+  freeTrialDays: number | null;
   freeTrialConditions: string | null;
   keyFeatures: string[];
   currency: string;
