@@ -65,19 +65,32 @@ export default async function PromotionsPage() {
       .from(subscriptionPlans)
       .where(gt(subscriptionPlans.freeTrialDays, 0));
 
+    // IN-01: Build set of real free_trial modelPatterns for deduplication
+    const realFreeTrialPatterns = new Set(
+      promos
+        .filter((p) => p.type === 'free_trial')
+        .map((p) => p.modelPattern),
+    );
+
     // Map trial rows to PromotionData format
-    const trialPromos: PromotionData[] = trialRows.map((row) => ({
-      id: row.id + VIRTUAL_TRIAL_ID_OFFSET,
-      modelPattern: `${row.providerName} ${row.planName}`,
-      type: 'free_trial' as const,
-      description: row.freeTrialConditions
-        ? `Free trial: ${row.freeTrialDays} days — ${row.freeTrialConditions}`
-        : `Free trial: ${row.freeTrialDays} days`,
-      credits: null,
-      startDate: null, // Standard plans, not promotional campaigns (review #8)
-      endDate: null,   // Standard plans, not promotional campaigns (review #8)
-      sourceUrl: row.sourceUrl,
-    }));
+    // IN-01: Filter out virtual trials that duplicate real free_trial promotions
+    const trialPromos: PromotionData[] = trialRows
+      .filter((row) => {
+        const pattern = `${row.providerName} ${row.planName}`;
+        return !realFreeTrialPatterns.has(pattern);
+      })
+      .map((row) => ({
+        id: row.id + VIRTUAL_TRIAL_ID_OFFSET,
+        modelPattern: `${row.providerName} ${row.planName}`,
+        type: 'free_trial' as const,
+        description: row.freeTrialConditions
+          ? `Free trial: ${row.freeTrialDays} days — ${row.freeTrialConditions}`
+          : `Free trial: ${row.freeTrialDays} days`,
+        credits: null,
+        startDate: null, // Standard plans, not promotional campaigns (review #8)
+        endDate: null,   // Standard plans, not promotional campaigns (review #8)
+        sourceUrl: row.sourceUrl,
+      }));
 
     promos = [...promos, ...trialPromos];
   } catch (error) {
