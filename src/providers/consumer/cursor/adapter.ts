@@ -1,43 +1,20 @@
-import { generateObject } from 'ai';
 import { ConsumerAdapter } from '../base';
-import type { ProviderExtraction } from '../../base';
-import { consumerSubscriptionSchema } from '../../schemas';
-import { getAIModel } from '../../../lib/ai-client';
 import { cursorConsumerConfig } from './config';
 
 /**
  * Cursor consumer subscription adapter.
  * Extracts subscription plan data from cursor.com/pricing.
  *
- * Review #1: Provider-specific prompt with expectedPlanNames cross-checking.
- * Review #6: Adapter-level timeout via Promise.race.
- * WR-02: Timer cleanup in finally block.
- * IN-03: Use config.currency instead of hardcoded 'USD'.
+ * WR-01: Shared extraction logic moved to ConsumerAdapter base class.
+ * Overrides buildExtractionPrompt() for Cursor-specific context.
  */
 export class CursorConsumerAdapter extends ConsumerAdapter {
   config = cursorConsumerConfig;
 
-  async extract(html: string): Promise<ProviderExtraction> {
-    let timeoutId: ReturnType<typeof setTimeout> | undefined;
-    try {
-      const maxHtmlLength = 100_000;
-      const truncatedHtml =
-        html.length > maxHtmlLength
-          ? html.slice(0, maxHtmlLength) + '\n<!-- TRUNCATED -->'
-          : html;
-
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        timeoutId = setTimeout(
-          () => reject(new Error('Cursor consumer extraction timed out')),
-          this.config.adapterTimeoutMs,
-        );
-      });
-
-      const extractionPromise = generateObject({
-        model: getAIModel(),
-        schema: consumerSubscriptionSchema,
-        prompt: `Extract all consumer subscription plans from this Cursor pricing page.
-Known plans to look for: ${this.config.expectedPlanNames.join(', ')}.
+  protected buildExtractionPrompt(html: string): string {
+    const expectedNames = this.consumerConfig.expectedPlanNames;
+    return `Extract all consumer subscription plans from this Cursor pricing page.
+Known plans to look for: ${expectedNames.join(', ')}.
 Cursor is an AI-powered code editor with subscription tiers.
 
 For each plan, extract:
@@ -55,44 +32,6 @@ Return { "plans": [...] } with all fields.
 If a price is ambiguous or says "contact sales", set numeric fields to null and capture text in rawPriceText.
 
 HTML content:
-${truncatedHtml}`,
-      });
-
-      const { object } = await Promise.race([extractionPromise, timeoutPromise]);
-
-      const plans = object.plans.map((plan) => {
-        const matched = this.config.expectedPlanNames.some(
-          (expected) =>
-            plan.planName.toLowerCase().includes(expected.toLowerCase()) ||
-            expected.toLowerCase().includes(plan.planName.toLowerCase()),
-        );
-        return {
-          planName: plan.planName,
-          monthlyPrice: plan.monthlyPrice,
-          annualPrice: plan.annualPrice,
-          annualMonthlyPrice: plan.annualMonthlyPrice,
-          rawPriceText: plan.rawPriceText,
-          billingPeriod: plan.billingPeriod,
-          freeTrialDays: plan.freeTrialDays,
-          freeTrialConditions: plan.freeTrialConditions,
-          keyFeatures: plan.keyFeatures,
-          currency: this.config.currency ?? 'USD',
-          sourceUrl: this.config.pricingUrl,
-          confidence: matched ? ('likely' as const) : ('low_confidence' as const),
-          extractionNotes: matched
-            ? null
-            : `Plan name "${plan.planName}" not in expected list: ${this.config.expectedPlanNames.join(', ')}`,
-        };
-      });
-
-      return { models: [], promotions: [], subscriptionPlans: plans };
-    } catch (error) {
-      console.error('Cursor consumer extraction failed:', error);
-      return { models: [], promotions: [], subscriptionPlans: [] };
-    } finally {
-      if (timeoutId !== undefined) {
-        clearTimeout(timeoutId);
-      }
-    }
+${html}`;
   }
 }
