@@ -98,6 +98,10 @@ export async function orchestrateDailyRun(): Promise<number> {
   // Per D-01: Tier 1 providers get highest priority
   // BullMQ: lower number = higher priority (1 is highest)
   for (const adapter of adapters) {
+    // CR-01: Skip consumer adapters — they are handled by the dedicated consumer loop below
+    if (isConsumerTier1Provider(adapter.config.name) || isConsumerTier2Provider(adapter.config.name)) {
+      continue;
+    }
     const isT1 = isTier1Provider(adapter.config.name);
     const isT2 = isTier2Provider(adapter.config.name);
     const isT3 = isTier3Provider(adapter.config.name);
