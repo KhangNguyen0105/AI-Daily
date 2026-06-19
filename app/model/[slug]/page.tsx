@@ -136,7 +136,7 @@ export default async function ModelDetailPage({
   let activePromotions: Array<{
     id: number;
     modelPattern: string;
-    type: 'free_tier' | 'promotion' | 'beta';
+    type: 'free_tier' | 'promotion' | 'beta' | 'free_trial';
     description: string;
     credits: string | null;
     startDate: Date | null;

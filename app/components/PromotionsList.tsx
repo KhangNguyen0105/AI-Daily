@@ -7,7 +7,7 @@ import { PROMOTION_BADGE_STYLES } from '@/app/lib/promotion-constants';
 export interface PromotionData {
   id: number;
   modelPattern: string;
-  type: 'free_tier' | 'promotion' | 'beta';
+  type: 'free_tier' | 'promotion' | 'beta' | 'free_trial';
   description: string;
   credits: string | null;
   startDate: Date | null;
