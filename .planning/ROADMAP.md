@@ -318,7 +318,7 @@ Plans:
 **Plans**: 1 plan
 Plans:
 
-- [ ] 11-01-PLAN.md — Digest & Free Offers Enhancement: card components, provider links, structured promotions display
+- [ ] 11-01-PLAN.md — Verification, testing, and cleanup: unit tests for all Phase 11 components + API, stale /promotions cleanup, visual QA checkpoint
 
 **UI hint**: yes
 
