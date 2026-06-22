@@ -1,20 +1,20 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
+milestone: v1.2
 milestone_name: milestone
-status: complete
-stopped_at: context exhaustion at 75% (2026-06-19)
-last_updated: "2026-06-19T09:05:14.237Z"
-last_activity: 2026-06-19
-last_activity_desc: Phase 10 Consumer Pricing & Subscription Intelligence complete
+status: in_progress
+stopped_at: null
+last_updated: "2026-06-22T04:00:00.000Z"
+last_activity: 2026-06-22
+last_activity_desc: Phase 11 Digest & Free Offers Enhancement started
 progress:
-  total_phases: 10
-  completed_phases: 9
-  total_plans: 42
+  total_phases: 11
+  completed_phases: 10
+  total_plans: 43
   completed_plans: 42
-  percent: 90
-current_phase: complete
-current_phase_name: phase-10-complete
+  percent: 91
+current_phase: 11
+current_phase_name: phase-11-digest-free-offers-enhancement
 ---
 
 # Project State
@@ -24,22 +24,22 @@ current_phase_name: phase-10-complete
 See: .planning/PROJECT.md (updated 2026-06-10)
 
 **Core value:** Developers can instantly understand what AI models actually cost in real-world usage -- not per-token abstractions, but practical examples like prompts, coding tasks, document processing, and agent sessions.
-**Current focus:** v1.1 milestone complete — consumer pricing & subscription intelligence added
+**Current focus:** v1.2 milestone — Phase 11 Digest & Free Offers Enhancement
 
 ## Current Position
 
-Status: COMPLETE — all 10 phases executed and verified
-Last activity: 2026-06-19 -- Phase 10 Consumer Pricing & Subscription Intelligence complete
+Status: IN PROGRESS — Phase 11 Digest & Free Offers Enhancement
+Last activity: 2026-06-22 -- Phase 11 started
 
-Progress: [██████████] 100%
+Progress: [█████████░] 91%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 48
-- Phase 10 plans: 3
-- Phase 10 duration: ~20 min (3 plans)
+- Total plans completed: 43
+- Phase 11 plans: 1
+- Phase 11 duration: in progress
 
 **By Phase:**
 
@@ -55,11 +55,13 @@ Progress: [██████████] 100%
 | 8. Admin Operations | 7/7 | ✅ Complete |
 | 9. Dark Mode & Theme System | 6/6 | ✅ Complete |
 | 10. Consumer Pricing & Subscription Intelligence | 3/3 | ✅ Complete |
+| 11. Digest & Free Offers Enhancement | 1/1 | 🔄 In Progress |
 
 **Milestone merge history:**
 
 - 2026-06-18: All 8 phases merged to main via dev (v1.0)
 - 2026-06-19: Phase 10 Consumer Pricing & Subscription Intelligence complete (v1.1)
+- 2026-06-22: Phase 11 Digest & Free Offers Enhancement started (v1.2)
 
 ## Accumulated Context
 
@@ -76,16 +78,25 @@ Phase 10 key decisions:
 - Virtual projection on /promotions (query-time, not materialized rows)
 - TopNav responsive mobile hamburger menu for 7+ links
 
+Phase 11 key decisions:
+
+- /promotions page removed — no longer needed
+- Free offers displayed as structured cards, not text list
+- Each card links directly to provider pricing page
+- Promotions data queried from promotions table, not parsed from markdown
+- Provider URL mapping via sources table join
+
 ### Pending Todos
 
-None — v1.1 milestone complete.
+- Implement Phase 11: Digest & Free Offers Enhancement (11-01-PLAN.md)
 
 ### Blockers/Concerns
 
 None.
 
-### Next Steps (Post-v1.1)
+### Next Steps
 
+- Complete Phase 11 implementation
 - Deploy to production (Docker Compose)
 - Fix 6 pre-existing Phase 7 test gaps
 - Add remaining Tier 3-5 providers (target: 30+)
@@ -94,9 +105,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-06-19T09:05:14.224Z
-Stopped at: context exhaustion at 75% (2026-06-19)
-Resume file: none (all phases done)
+Last session: 2026-06-22T04:00:00.000Z
+Stopped at: Phase 11 in progress
+Resume file: .planning/phases/11-digest-free-offers-enhancement/11-01-PLAN.md
 
 ## Known Pre-existing Test Gaps (Non-blocking)
 

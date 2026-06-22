@@ -37,7 +37,7 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className="h-screen overflow-hidden bg-bg-primary text-text-primary">
+      <body className="min-h-screen bg-bg-primary text-text-primary">
         <ThemeProvider>
           <TopNav />
           <div className="pt-14">{children}</div>

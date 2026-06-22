@@ -1,53 +1,41 @@
 /**
- * PromotionCard component - displays a promotion/discount offer.
+ * FreeOfferCard component — displays a free model offer.
  * Phase 11: Digest & Free Offers Enhancement
  *
- * Amber card with discount badge, description, and provider link.
+ * Green card with "FREE" badge, model name, and provider link.
  * Links directly to provider pricing page.
  */
 
-interface PromotionCardProps {
+interface FreeOfferCardProps {
   modelPattern: string;
   description: string;
   providerName: string;
   providerUrl: string;
-  discount?: string;
+  credits?: string | null;
 }
 
-/**
- * Extract discount percentage from description.
- * Looks for patterns like "20% OFF", "50% off", etc.
- */
-function extractDiscount(description: string): string | null {
-  const match = description.match(/(\d+)%\s*off/i);
-  return match ? match[1] + "% OFF" : null;
-}
-
-export function PromotionCard({
+export function FreeOfferCard({
   modelPattern,
   description,
   providerName,
   providerUrl,
-  discount,
-}: PromotionCardProps) {
-  const discountBadge = discount || extractDiscount(description);
-
+  credits,
+}: FreeOfferCardProps) {
   return (
-    <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 hover:bg-amber-500/15 transition-colors">
-      {/* Discount badge */}
+    <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 hover:bg-green-500/15 transition-colors">
+      {/* FREE badge */}
       <div className="flex items-center gap-2 mb-3">
-        {discountBadge ? (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500 text-white">
-            {discountBadge}
-          </span>
-        ) : (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/50 text-amber-700 dark:text-amber-300">
-            PROMO
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-500 text-white">
+          FREE
+        </span>
+        {credits && (
+          <span className="text-xs text-green-600 dark:text-green-400">
+            {credits}
           </span>
         )}
       </div>
 
-      {/* Model/Pattern name */}
+      {/* Model name */}
       <h3 className="font-bold text-text-primary text-lg mb-2">
         {modelPattern}
       </h3>

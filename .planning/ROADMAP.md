@@ -23,6 +23,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 8: Admin Operations** - Pipeline monitoring, content editing/rollback, source management, and admin auth
 - [x] **Phase 9: Dark Mode & Theme System** - CSS custom properties, theme toggle, and conversion of all hardcoded colors to semantic token classes
 - [x] **Phase 10: Consumer Pricing & Subscription Intelligence** - Consumer subscription plan collection, 10 provider adapters, /subscriptions page, and free trial surfacing
+- [ ] **Phase 11: Digest & Free Offers Enhancement** - Redesign digest page with prominent free models cards, direct provider links, and structured promotions display
 
 ## Phase Details
 
@@ -298,10 +299,33 @@ Plans:
 
 **UI hint**: yes
 
+### Phase 11: Digest & Free Offers Enhancement
+
+**Goal**: Redesign the digest page to prominently display free models and promotions with direct provider links, replacing the current text-based approach with structured card components.
+**Mode:** enhancement
+**Depends on**: Phase 6, Phase 10
+**Requirements**: UI-04, UI-05
+**Success Criteria** (what must be TRUE):
+
+  1. Free models displayed as prominent cards with green "FREE" badge
+  2. Each card links directly to provider pricing page
+  3. Promotions section shows discounts with provider links
+  4. No raw markdown formatting visible in UI
+  5. Mobile responsive design
+  6. Works in both light and dark themes
+
+**Status**: 🔄 IN PROGRESS
+**Plans**: 1 plan
+Plans:
+
+- [ ] 11-01-PLAN.md — Digest & Free Offers Enhancement: card components, provider links, structured promotions display
+
+**UI hint**: yes
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -315,3 +339,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 8. Admin Operations | 7/7 | Complete | 2026-06-15 |
 | 9. Dark Mode & Theme System | 6/6 | Complete | 2026-06-18 |
 | 10. Consumer Pricing & Subscription Intelligence | 3/3 | Complete | 2026-06-19 |
+| 11. Digest & Free Offers Enhancement | 1/1 | In Progress | - |

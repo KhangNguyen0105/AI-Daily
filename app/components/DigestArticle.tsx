@@ -4,12 +4,17 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { format } from 'date-fns';
 import Link from 'next/link';
+import { FreeOffersSection } from './FreeOffersSection';
+import { PromotionsSection } from './PromotionsSection';
 
 /**
  * Article rendering component with react-markdown.
  * Per D-07: Content stored as Markdown, rendered to HTML.
  * Per D-19: Shows "Published: {formatted date}" timestamp.
  * Per T-06-05: react-markdown sanitizes output by default — no XSS risk.
+ *
+ * Phase 11: Uses structured card components for free offers and promotions.
+ * Queries promotions database table via /api/digest-promotions endpoint.
  *
  * Uses react-markdown `components` prop for Tailwind styling
  * (no @tailwindcss/typography plugin dependency).
@@ -30,7 +35,7 @@ export function DigestArticle({
     : new Date(article.date + 'T00:00:00');
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="max-w-5xl mx-auto px-4 py-8">
       <Link
         href="/digest"
         className="text-accent-blue hover:text-accent-blue-hover text-sm mb-4 inline-flex items-center gap-1"
@@ -50,6 +55,13 @@ export function DigestArticle({
         })()}
       </p>
 
+      {/* Free & Promotions Sections — Phase 11: Card-based layout */}
+      <div className="mt-8">
+        <FreeOffersSection date={article.date} />
+        <PromotionsSection date={article.date} />
+      </div>
+
+      {/* Article content */}
       <div className="mt-8">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
@@ -123,6 +135,24 @@ export function DigestArticle({
         >
           {article.content}
         </ReactMarkdown>
+      </div>
+
+      {/* Footer links */}
+      <div className="mt-12 pt-6 border-t border-border-primary">
+        <div className="flex flex-wrap gap-4">
+          <Link
+            href="/subscriptions"
+            className="text-sm text-accent-blue hover:text-accent-blue-hover"
+          >
+            View all subscriptions →
+          </Link>
+          <Link
+            href="/"
+            className="text-sm text-accent-blue hover:text-accent-blue-hover"
+          >
+            Compare pricing →
+          </Link>
+        </div>
       </div>
     </div>
   );

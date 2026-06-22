@@ -18,6 +18,8 @@ import { OpenRouterAdapter } from './openrouter/adapter';
 import { NebiusAdapter } from './nebius/adapter';
 import { SambaNovaAdapter } from './sambanova/adapter';
 import { LeptonAdapter } from './lepton/adapter';
+// Tier 2 providers (Wave 6)
+import { OpenModelAdapter } from './openmodel/adapter';
 
 /**
  * Explicit adapter registry.
@@ -65,6 +67,7 @@ export const TIER2_PROVIDERS = [
   'together',
   'fireworks',
   'cohere',
+  'openmodel',
 ] as const;
 
 export type Tier2ProviderName = (typeof TIER2_PROVIDERS)[number];
@@ -216,3 +219,5 @@ registerAdapter(new OpenRouterAdapter());
 registerAdapter(new NebiusAdapter());
 registerAdapter(new SambaNovaAdapter());
 registerAdapter(new LeptonAdapter());
+// Tier 2 providers (Wave 6): OpenModel
+registerAdapter(new OpenModelAdapter());

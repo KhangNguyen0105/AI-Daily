@@ -11,6 +11,39 @@ import Link from 'next/link';
 export const revalidate = 60;
 
 /**
+ * Extract free/promotion counts from article content for badge display.
+ */
+function extractBadges(content: string): { freeCount: number; promoCount: number } {
+  const lines = content.split('\n');
+  let freeCount = 0;
+  let promoCount = 0;
+
+  for (const line of lines) {
+    const lower = line.toLowerCase();
+    const isFree = (
+      lower.match(/\$\s*0[\s/]/) ||
+      lower.match(/\bis free\b/) ||
+      lower.match(/\bfree tier\b/) ||
+      lower.match(/\bfree only\b/) ||
+      lower.match(/\bfree\s+(on|now|available|event)\b/) ||
+      (lower.includes('free') && lower.includes('model'))
+    );
+    const isPromo = (
+      lower.match(/\d+%\s*off/) ||
+      lower.match(/\boff\b.*\blimited\b/) ||
+      lower.match(/\bpromotion/) ||
+      lower.match(/\bdiscount/) ||
+      lower.match(/\blimited\s+time\b/)
+    );
+
+    if (isFree) freeCount++;
+    if (isPromo) promoCount++;
+  }
+
+  return { freeCount, promoCount };
+}
+
+/**
  * Daily Digest Archive page — server component.
  * Per D-13: /digest route for the archive list.
  * Per D-14: Reverse-chronological with date, headline, and 1-line summary.
@@ -29,6 +62,7 @@ export default async function DigestArchivePage({
     date: string;
     title: string;
     summary: string | null;
+    content: string;
     publishedAt: Date | null;
   }> = [];
   let hasMore = false;
@@ -41,6 +75,7 @@ export default async function DigestArchivePage({
         date: articles.date,
         title: articles.title,
         summary: articles.summary,
+        content: articles.content,
         publishedAt: articles.publishedAt,
       })
       .from(articles)
@@ -56,7 +91,7 @@ export default async function DigestArchivePage({
   }
 
   return (
-    <main className="h-[calc(100vh-56px)] overflow-y-auto bg-bg-primary text-text-primary">
+    <main className="min-h-screen bg-bg-primary text-text-primary">
       <div className="max-w-4xl mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold tracking-tight mb-8">
           Daily Digest Archive
@@ -77,33 +112,48 @@ export default async function DigestArchivePage({
         ) : (
           <>
             <div className="space-y-0">
-              {articleList.map((article) => (
-                <article
-                  key={article.date}
-                  className="border-b border-border-primary py-6"
-                >
-                  <time className="text-sm text-text-secondary">
-                    {(() => {
-                      try {
-                        return format(new Date(article.date + 'T00:00:00'), 'MMMM d, yyyy');
-                      } catch {
-                        return article.date;
-                      }
-                    })()}
-                  </time>
-                  <Link
-                    href={`/digest/${article.date}`}
-                    className="text-lg font-bold text-text-primary hover:text-accent-blue mt-1 block"
+              {articleList.map((article) => {
+                const { freeCount, promoCount } = extractBadges(article.content);
+                return (
+                  <article
+                    key={article.date}
+                    className="border-b border-border-primary py-6"
                   >
-                    {article.title}
-                  </Link>
-                  {article.summary && (
-                    <p className="text-sm text-text-secondary mt-1">
-                      {article.summary}
-                    </p>
-                  )}
-                </article>
-              ))}
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <time className="text-sm text-text-secondary">
+                        {(() => {
+                          try {
+                            return format(new Date(article.date + 'T00:00:00'), 'MMMM d, yyyy');
+                          } catch {
+                            return article.date;
+                          }
+                        })()}
+                      </time>
+                      {freeCount > 0 && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-500/15 text-green-600 dark:text-green-400 border border-green-500/30">
+                          🎉 {freeCount} Free
+                        </span>
+                      )}
+                      {promoCount > 0 && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                          💰 {promoCount} Promos
+                        </span>
+                      )}
+                    </div>
+                    <Link
+                      href={`/digest/${article.date}`}
+                      className="text-lg font-bold text-text-primary hover:text-accent-blue mt-1 block"
+                    >
+                      {article.title}
+                    </Link>
+                    {article.summary && (
+                      <p className="text-sm text-text-secondary mt-1">
+                        {article.summary}
+                      </p>
+                    )}
+                  </article>
+                );
+              })}
             </div>
 
             {hasMore && (
