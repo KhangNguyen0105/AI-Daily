@@ -21,7 +21,8 @@ export interface DiffResult {
     newPrice: number;
     changePercent: number;
   }>;
-  newPromotions: Array<{
+  /** All active promotions (not just new ones) */
+  activePromotions: Array<{
     modelPattern: string;
     description: string;
     type: string;
@@ -212,7 +213,7 @@ export async function computeDiff(today: Date, yesterday: Date): Promise<DiffRes
   return {
     newModels,
     priceChanges,
-    newPromotions: promotionRows,
+    activePromotions: promotionRows,
     totalModelsToday: todayMap.size,
   };
 }

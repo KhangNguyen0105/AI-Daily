@@ -74,9 +74,9 @@ function buildDiffContext(diff: DiffResult): string {
     }
   }
 
-  if (diff.newPromotions.length > 0) {
-    parts.push(`\nNew promotions (${diff.newPromotions.length}):`);
-    for (const p of diff.newPromotions) {
+  if (diff.activePromotions.length > 0) {
+    parts.push(`\nActive promotions (${diff.activePromotions.length}):`);
+    for (const p of diff.activePromotions) {
       parts.push(`  - ${p.modelPattern} (${p.type}): ${p.description}`);
     }
   }
@@ -84,7 +84,7 @@ function buildDiffContext(diff: DiffResult): string {
   if (
     diff.newModels.length === 0 &&
     diff.priceChanges.length === 0 &&
-    diff.newPromotions.length === 0
+    diff.activePromotions.length === 0
   ) {
     parts.push('\nNo changes detected today. All models unchanged from yesterday.');
   }
