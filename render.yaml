@@ -14,7 +14,7 @@ databases:
   - name: ai-daily-postgres
     databaseName: aidaily
     user: aidaily
-    plan: basic          # $7/month - 256MB RAM, 1GB storage
+    plan: starter_256mb  # $6.20/month - 256MB RAM
     # Free tier available: plan: free (90 days, then deleted)
     ipAllowList: []      # Allow all internal connections
 
@@ -22,8 +22,8 @@ services:
   # Redis Instance
   - name: ai-daily-redis
     type: redis
-    plan: basic          # $7/month - 256MB RAM
-    # Free tier available: plan: free (90 days, then deleted)
+    plan: starter_256mb  # $10/month - 256MB RAM
+    # Free tier available: plan: free (limited)
     ipAllowList: []
     maxmemoryPolicy: allkeys-lru
 
@@ -31,7 +31,7 @@ services:
   - name: ai-daily-web
     type: web
     runtime: node
-    plan: basic          # $7/month - 512MB RAM
+    plan: starter        # $7/month - 512MB RAM
     # Free tier available: plan: free (750 hours/month)
     buildCommand: |
       corepack enable pnpm

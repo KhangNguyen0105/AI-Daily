@@ -76,14 +76,14 @@ If you prefer to create services manually:
 3. Name: `ai-daily-postgres`
 4. Database: `aidaily`
 5. User: `aidaily`
-6. Plan: **Basic** ($7/month) or **Free** (90 days)
+6. Plan: **starter_256mb** ($6.20/month) or **Free** (90 days)
 7. Click **Create Database**
 
 ### Step 2: Create Redis
 
 1. Go to https://dashboard.render.com/new/redis
 2. Name: `ai-daily-redis`
-3. Plan: **Basic** ($7/month) or **Free** (90 days)
+3. Plan: **starter_256mb** ($6.20/month) or **Free** (90 days)
 4. Click **Create Redis**
 
 ### Step 3: Create Web Service
@@ -104,7 +104,7 @@ If you prefer to create services manually:
      corepack enable pnpm
      node server.js
      ```
-   - **Plan:** Basic ($7/month) or Free
+   - **Plan:** starter ($7/month) or Free
 4. Add Environment Variables:
    - `DATABASE_URL` — from PostgreSQL service
    - `REDIS_HOST` — from Redis service
@@ -148,17 +148,17 @@ If you prefer to create services manually:
 
 ### Free Tier (90 days)
 - PostgreSQL: Free (256MB, 90 days)
-- Redis: Free (256MB, 90 days)
+- Redis: Free (256MB, limited)
 - Web Service: Free (750 hours/month)
 - Worker: **Not available on free tier**
 
 ### Paid Tier
-- PostgreSQL Basic: $7/month
-- Redis Basic: $7/month
-- Web Service Basic: $7/month
-- Worker Standard: $20/month
+- PostgreSQL starter_256mb: $6.20/month
+- Redis starter_256mb: $10/month
+- Web Service starter: $7/month
+- Worker standard: $20/month
 
-**Total: ~$41/month**
+**Total: ~$43/month**
 
 ---
 
