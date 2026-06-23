@@ -95,7 +95,7 @@ function buildDiffContext(diff: DiffResult): string {
 const SYSTEM_PROMPT = `You are an AI pricing analyst writing a daily digest for software developers.
 
 Rules:
-- Write in exactly 4 sections: "## Key Changes", "## Pricing Highlights", "## What to Watch"
+- Write in exactly 5 sections: "## Key Changes", "## Pricing Highlights", "## Active Promotions", "## What to Watch"
 - Precede the sections with a title line as "# {title}"
 - Use neutral, factual tone. Example: "GPT-4o input price dropped 20% to $2.50/1M tokens"
 - Keep the total article between 300-500 words
@@ -103,9 +103,11 @@ Rules:
 - On the VERY FIRST line, output a one-line summary (max 150 characters) preceded by "SUMMARY: "
 - On the SECOND line, output the article title as "# {title}"
 - When no changes are detected, write a "no changes" article: "No pricing changes detected today. {N} models tracked." followed by brief context about what the system is monitoring
-- IMPORTANT: If there are active promotions, include them in a "## Active Promotions" section
-- For free tier offers, highlight them prominently with "(FREE)" in the description
-- Include provider names and specific limits when available`;
+- IMPORTANT: The "## Active Promotions" section is MANDATORY if there are any active promotions
+- In the Active Promotions section, list ALL active promotions with provider names
+- For free tier offers, start the line with "(FREE)" and highlight the provider name
+- Include specific limits when available (e.g., "rate-limited", "100 calls/month")
+- Example format for free offers: "- (FREE) DeepSeek V4 Flash on OpenModel — normally $0.14/$0.28 per 1M tokens"`;
 
 /**
  * Generate a daily AI pricing article from a DiffResult.
