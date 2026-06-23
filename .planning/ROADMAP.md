@@ -23,7 +23,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 8: Admin Operations** - Pipeline monitoring, content editing/rollback, source management, and admin auth
 - [x] **Phase 9: Dark Mode & Theme System** - CSS custom properties, theme toggle, and conversion of all hardcoded colors to semantic token classes
 - [x] **Phase 10: Consumer Pricing & Subscription Intelligence** - Consumer subscription plan collection, 10 provider adapters, /subscriptions page, and free trial surfacing
-- [ ] **Phase 11: Digest & Free Offers Enhancement** - Redesign digest page with prominent free models cards, direct provider links, and structured promotions display
+- [x] **Phase 11: Digest & Free Offers Enhancement** - Redesign digest page with prominent free models cards, direct provider links, and structured promotions display
 
 ## Phase Details
 
@@ -314,11 +314,11 @@ Plans:
   5. Mobile responsive design
   6. Works in both light and dark themes
 
-**Status**: 🔄 IN PROGRESS
+**Status**: ✅ COMPLETE (verified 2026-06-22, 44/44 tests pass)
 **Plans**: 1 plan
 Plans:
 
-- [ ] 11-01-PLAN.md — Verification, testing, and cleanup: unit tests for all Phase 11 components + API, stale /promotions cleanup, visual QA checkpoint
+- [x] 11-01-PLAN.md — Verification, testing, and cleanup: unit tests for all Phase 11 components + API, stale /promotions cleanup, visual QA checkpoint
 
 **UI hint**: yes
 
@@ -339,4 +339,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 8. Admin Operations | 7/7 | Complete | 2026-06-15 |
 | 9. Dark Mode & Theme System | 6/6 | Complete | 2026-06-18 |
 | 10. Consumer Pricing & Subscription Intelligence | 3/3 | Complete | 2026-06-19 |
-| 11. Digest & Free Offers Enhancement | 1/1 | In Progress | - |
+| 11. Digest & Free Offers Enhancement | 1/1 | Complete | 2026-06-22 |
