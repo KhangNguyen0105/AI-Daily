@@ -1,0 +1,147 @@
+##
+# Render Blueprint
+# Deploy AI Daily with PostgreSQL, Redis, Web App, and Worker
+#
+# Services:
+# - PostgreSQL database
+# - Redis cache/queue
+# - Web application (Next.js)
+# - Worker process (BullMQ + Playwright)
+##
+
+databases:
+  # PostgreSQL Database
+  - name: ai-daily-postgres
+    databaseName: aidaily
+    user: aidaily
+    plan: starter        # $7/month - 256MB RAM, 1GB storage
+    # Free tier available: plan: free (90 days, then deleted)
+    ipAllowList: []      # Allow all internal connections
+
+services:
+  # Redis Instance
+  - name: ai-daily-redis
+    type: redis
+    plan: starter        # $7/month - 256MB RAM
+    # Free tier available: plan: free (90 days, then deleted)
+    ipAllowList: []
+    maxmemoryPolicy: allkeys-lru
+
+  # Web Application (Next.js)
+  - name: ai-daily-web
+    type: web
+    runtime: node
+    plan: starter        # $7/month - 512MB RAM
+    # Free tier available: plan: free (750 hours/month)
+    buildCommand: |
+      corepack enable pnpm
+      pnpm install --frozen-lockfile
+      pnpm build
+    startCommand: |
+      corepack enable pnpm
+      node server.js
+    healthCheckPath: /
+    envVars:
+      # Database
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ai-daily-postgres
+          property: connectionString
+
+      # Redis
+      - key: REDIS_HOST
+        fromService:
+          name: ai-daily-redis
+          type: redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          name: ai-daily-redis
+          type: redis
+          property: port
+
+      # App Config
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+
+      # Auth
+      - key: ADMIN_PASSWORD
+        sync: false          # Set manually in dashboard
+      - key: NEXTAUTH_SECRET
+        generateValue: true  # Auto-generate secret
+
+      # AI Provider
+      - key: AI_PROVIDER
+        value: mimo
+      - key: AI_FALLBACK_PROVIDER
+        value: mimo
+      - key: MIMO_API_KEY
+        sync: false          # Set manually in dashboard
+      - key: MIMO_BASE_URL
+        value: https://token-plan-sgp.xiaomimimo.com/v1
+      - key: MIMO_MODEL
+        value: mimo-v2.5-pro
+
+    # Auto-deploy from main branch
+    autoDeploy: true
+    branch: main
+
+  # Worker Process (BullMQ + Playwright)
+  - name: ai-daily-worker
+    type: worker
+    runtime: node
+    plan: standard       # $15/month - 1GB RAM (Playwright needs more memory)
+    # Worker needs more resources for browser automation
+    buildCommand: |
+      corepack enable pnpm
+      pnpm install --frozen-lockfile
+      npx playwright install chromium
+    startCommand: |
+      corepack enable pnpm
+      node --import tsx src/pipeline/worker-entry.ts
+    envVars:
+      # Database
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ai-daily-postgres
+          property: connectionString
+
+      # Redis
+      - key: REDIS_HOST
+        fromService:
+          name: ai-daily-redis
+          type: redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          name: ai-daily-redis
+          type: redis
+          property: port
+
+      # Worker Config
+      - key: NODE_ENV
+        value: production
+      - key: CRAWLEE_STORAGE_DIR
+        value: /tmp/crawlee-storage
+
+      # AI Provider
+      - key: AI_PROVIDER
+        value: mimo
+      - key: AI_FALLBACK_PROVIDER
+        value: mimo
+      - key: MIMO_API_KEY
+        sync: false
+      - key: MIMO_BASE_URL
+        value: https://token-plan-sgp.xiaomimimo.com/v1
+      - key: MIMO_MODEL
+        value: mimo-v2.5-pro
+
+    # Auto-deploy from main branch
+    autoDeploy: true
+    branch: main
+
+    # Graceful shutdown
+    - key: SIGTERM_TIMEOUT
+      value: 30
