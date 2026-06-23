@@ -218,15 +218,19 @@ export function createExtractWorker(): Worker<ExtractJobData, ExtractJobResult> 
                 .values({
                   sourceId,
                   modelPattern: promo.modelPattern,
-                  type: promo.type,
+                  type: promo.type as any,
                   description: promo.description,
-                  credits: promo.credits,
+                  credits: promo.credits || null,
+                  startDate: null,
+                  endDate: null,
+                  sourceUrl: promo.sourceUrl || null,
                 })
                 .onConflictDoUpdate({
                   target: [promotions.sourceId, promotions.modelPattern, promotions.type],
                   set: {
                     description: promo.description,
-                    credits: promo.credits,
+                    credits: promo.credits || null,
+                    sourceUrl: promo.sourceUrl || null,
                     updatedAt: new Date(),
                   },
                 });
