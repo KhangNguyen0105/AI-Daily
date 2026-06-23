@@ -76,14 +76,14 @@ If you prefer to create services manually:
 3. Name: `ai-daily-postgres`
 4. Database: `aidaily`
 5. User: `aidaily`
-6. Plan: **starter_256mb** ($6.20/month) or **Free** (90 days)
+6. Plan: **free** (256MB, expires after 90 days) or **starter_256mb** ($6.20/month)
 7. Click **Create Database**
 
 ### Step 2: Create Redis
 
 1. Go to https://dashboard.render.com/new/redis
 2. Name: `ai-daily-redis`
-3. Plan: **starter_256mb** ($6.20/month) or **Free** (90 days)
+3. Plan: **free** (25MB, limited) or **starter_256mb** ($10/month)
 4. Click **Create Redis**
 
 ### Step 3: Create Web Service
@@ -104,7 +104,7 @@ If you prefer to create services manually:
      corepack enable pnpm
      node server.js
      ```
-   - **Plan:** starter ($7/month) or Free
+   - **Plan:** free (750 hours/month) or starter ($7/month)
 4. Add Environment Variables:
    - `DATABASE_URL` — from PostgreSQL service
    - `REDIS_HOST` — from Redis service
@@ -138,7 +138,7 @@ If you prefer to create services manually:
      corepack enable pnpm
      node --import tsx src/pipeline/worker-entry.ts
      ```
-   - **Plan:** Standard ($20/month) — needs more RAM for Playwright
+   - **Plan:** free (512MB RAM, may be tight for Playwright) or Standard ($20/month) if OOM errors
 4. Add same Environment Variables as web service
 5. Click **Create Worker Service**
 
@@ -146,13 +146,21 @@ If you prefer to create services manually:
 
 ## Pricing
 
-### Free Tier (90 days)
-- PostgreSQL: Free (256MB, 90 days)
-- Redis: Free (256MB, limited)
-- Web Service: Free (750 hours/month)
-- Worker: **Not available on free tier**
+### Free Tier (All Services)
+- PostgreSQL: Free (256MB, expires after 90 days)
+- Redis: Free (25MB, limited)
+- Web Service: Free (750 hours/month, spins down after inactivity)
+- Worker: Free (512MB RAM, may be tight for Playwright)
 
-### Paid Tier
+**Total: $0/month**
+
+### Free Tier Limitations
+1. **PostgreSQL expires after 90 days** — need to recreate or upgrade
+2. **Web service spins down** after ~15 min inactivity (cold start ~30s)
+3. **Worker may run out of memory** with Playwright (512MB limit)
+4. **Redis is very limited** (25MB) — may need to upgrade for production
+
+### Paid Tier (If Needed)
 - PostgreSQL starter_256mb: $6.20/month
 - Redis starter_256mb: $10/month
 - Web Service starter: $7/month

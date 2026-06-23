@@ -10,29 +10,26 @@
 ##
 
 databases:
-  # PostgreSQL Database
+  # PostgreSQL Database (FREE - expires after 90 days)
   - name: ai-daily-postgres
     databaseName: aidaily
     user: aidaily
-    plan: starter_256mb  # $6.20/month - 256MB RAM
-    # Free tier available: plan: free (90 days, then deleted)
+    plan: free           # Free tier - 256MB RAM, expires after 90 days
     ipAllowList: []      # Allow all internal connections
 
 services:
-  # Redis Instance
+  # Redis Instance (FREE - limited)
   - name: ai-daily-redis
     type: redis
-    plan: starter_256mb  # $10/month - 256MB RAM
-    # Free tier available: plan: free (limited)
+    plan: free           # Free tier - 25MB RAM, limited
     ipAllowList: []
     maxmemoryPolicy: allkeys-lru
 
-  # Web Application (Next.js)
+  # Web Application (FREE - 750 hours/month)
   - name: ai-daily-web
     type: web
     runtime: node
-    plan: starter        # $7/month - 512MB RAM
-    # Free tier available: plan: free (750 hours/month)
+    plan: free           # Free tier - 512MB RAM, spins down after inactivity
     buildCommand: |
       corepack enable pnpm
       pnpm install --frozen-lockfile
@@ -92,8 +89,8 @@ services:
   - name: ai-daily-worker
     type: worker
     runtime: node
-    plan: standard       # $20/month - 2GB RAM (Playwright needs more memory)
-    # Worker needs more resources for browser automation
+    plan: free           # Free tier - 512MB RAM (may be tight for Playwright)
+    # Note: Playwright may need more memory, consider starter if OOM errors occur
     buildCommand: |
       corepack enable pnpm
       pnpm install --frozen-lockfile
