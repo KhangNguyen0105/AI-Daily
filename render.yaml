@@ -137,11 +137,9 @@ services:
         value: https://token-plan-sgp.xiaomimimo.com/v1
       - key: MIMO_MODEL
         value: mimo-v2.5-pro
+      - key: SIGTERM_TIMEOUT
+        value: "30"
 
     # Auto-deploy from main branch
     autoDeploy: true
     branch: main
-
-    # Graceful shutdown
-    - key: SIGTERM_TIMEOUT
-      value: 30
