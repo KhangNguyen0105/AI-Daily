@@ -46,12 +46,12 @@ export function RegenerateTrigger({ onSuccess, onError }: RegenerateTriggerProps
           type="date"
           value={selectedDate}
           onChange={(e) => setSelectedDate(e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+          className="px-3 py-2 border border-border-secondary rounded-md text-sm"
         />
         <button
           onClick={() => setIsConfirmOpen(true)}
           disabled={isLoading}
-          className="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2 bg-accent-blue text-bg-primary text-sm rounded-md hover:bg-accent-blue-hover disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Regenerate Article
         </button>

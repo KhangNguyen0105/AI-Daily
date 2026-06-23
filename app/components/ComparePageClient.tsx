@@ -75,8 +75,8 @@ export function ComparePageClient({
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       {/* Page heading */}
-      <h1 className="text-2xl font-semibold text-gray-900 mb-2">Compare Models</h1>
-      <p className="text-sm text-gray-600 mb-8">
+      <h1 className="text-2xl font-semibold text-text-primary mb-2">Compare Models</h1>
+      <p className="text-sm text-text-secondary mb-8">
         Select 2-5 models to compare pricing, context window, and practical costs side by side.
       </p>
 
@@ -93,7 +93,7 @@ export function ComparePageClient({
             {selectedModels.length > 2 && (
               <button
                 onClick={() => handleRemove(index)}
-                className="px-2 py-1 text-sm text-red-600 hover:text-red-800"
+                className="px-2 py-1 text-sm text-accent-red hover:text-accent-red-hover"
               >
                 ✕
               </button>
@@ -103,7 +103,7 @@ export function ComparePageClient({
         {selectedModels.length < 5 && (
           <button
             onClick={handleAdd}
-            className="px-4 py-2 text-sm text-blue-600 hover:text-blue-800 border border-blue-300 rounded-lg"
+            className="px-4 py-2 text-sm text-accent-blue hover:text-accent-blue-hover border border-accent-blue rounded-lg"
           >
             + Add model
           </button>
@@ -113,15 +113,15 @@ export function ComparePageClient({
       {/* Comparison cards or empty state */}
       {validModels.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-lg font-medium text-gray-900 mb-2">Select models to compare</p>
-          <p className="text-sm text-gray-600">
+          <p className="text-lg font-medium text-text-primary mb-2">Select models to compare</p>
+          <p className="text-sm text-text-secondary">
             Use the dropdowns above to select 2-5 models for side-by-side comparison.
           </p>
         </div>
       ) : validModels.length === 1 ? (
         <div className="text-center py-12">
-          <p className="text-lg font-medium text-gray-900 mb-2">Add another model</p>
-          <p className="text-sm text-gray-600">
+          <p className="text-lg font-medium text-text-primary mb-2">Add another model</p>
+          <p className="text-sm text-text-secondary">
             Select at least 2 models to see a side-by-side comparison.
           </p>
         </div>

@@ -22,6 +22,6 @@ export const grokConsumerConfig: ConsumerProviderConfig = {
       sourceType: 'pricing_page',
     },
   ],
-  expectedPlanNames: ['X Premium', 'X Premium+', 'Grok'],
+  expectedPlanNames: ['X Basic', 'X Premium', 'X Premium+'],
   adapterTimeoutMs: 45_000,
 };

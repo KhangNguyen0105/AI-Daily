@@ -22,6 +22,6 @@ export const perplexityConsumerConfig: ConsumerProviderConfig = {
       sourceType: 'pricing_page',
     },
   ],
-  expectedPlanNames: ['Perplexity Free', 'Perplexity Pro'],
+  expectedPlanNames: ['Perplexity Pro', 'Perplexity Max'],
   adapterTimeoutMs: 30_000,
 };

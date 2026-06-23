@@ -13,7 +13,6 @@ import {
   type Column,
   type FilterFn,
 } from '@tanstack/react-table';
-import { format } from 'date-fns';
 import Link from 'next/link';
 import { formatPrice, formatContextWindow, sanitizeDisplayName, getConfidenceColor, getModelFamily, formatCurrencyPrice } from '@/app/lib/pricing-utils';
 import { getProviderLogo, getUniqueProviders } from '@/app/lib/provider-metadata';
@@ -46,7 +45,6 @@ const columnHelper = createColumnHelper<PricingRow>();
  * Provider, Model, Input, Output, Confidence: always visible.
  * Family, Context Window: hidden below md.
  * Source: hidden below lg.
- * Collected: hidden below xl.
  */
 function getColumnResponsiveClass(columnId: string): string {
   switch (columnId) {
@@ -55,8 +53,6 @@ function getColumnResponsiveClass(columnId: string): string {
     case 'source':
     case 'contextWindow':
       return 'hidden md:table-cell';
-    case 'collectedAt':
-      return 'hidden xl:table-cell';
     default:
       return '';
   }
@@ -243,7 +239,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
         return (
           <Link
             href={`/model/${slug}`}
-            className="text-sm font-semibold text-accent-blue hover:text-blue-800 hover:underline"
+            className="text-sm font-semibold text-accent-blue hover:text-accent-blue-hover hover:underline"
           >
             {sanitizeDisplayName(info.getValue())}
           </Link>
@@ -320,7 +316,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-accent-blue hover:text-blue-800 underline"
+              className="text-sm text-accent-blue hover:text-accent-blue-hover underline"
             >
               {row.sourceName ?? 'View source'}
             </a>
@@ -328,19 +324,6 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
         }
         return <span className="text-sm text-text-tertiary">{'—'}</span>;
       },
-    }),
-    columnHelper.accessor('collectedAt', {
-      header: 'Collected',
-      cell: (info) => {
-        const date = info.getValue();
-        if (!date) return <span className="text-sm text-text-tertiary">{'—'}</span>;
-        return (
-          <span className="text-sm text-text-secondary">
-            {format(new Date(date), 'MMM d, yyyy')}
-          </span>
-        );
-      },
-      sortingFn: 'datetime',
     }),
   ], [providerColumnFilterFn, effectiveCurrency, exchangeRate]);
 
@@ -424,7 +407,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                   placeholder="Search models or providers..."
                   value={globalFilter}
                   onChange={(e) => setGlobalFilter(e.target.value)}
-                  className="w-full px-3 py-2 border border-border-secondary rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue focus:border-accent-blue"
+                  className="w-full px-3 py-2 border border-border-secondary rounded-md text-sm text-text-primary bg-bg-primary focus:outline-none focus:ring-2 focus:ring-accent-blue focus:border-accent-blue"
                   aria-label="Search models or providers"
                 />
               </div>
@@ -435,7 +418,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
               <select
                 value={providerFilter}
                 onChange={(e) => setProviderFilter(e.target.value)}
-                className="px-3 py-2 border border-border-secondary rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue focus:border-accent-blue min-w-[160px]"
+                className="px-3 py-2 border border-border-secondary rounded-md text-sm text-text-primary bg-bg-primary focus:outline-none focus:ring-2 focus:ring-accent-blue focus:border-accent-blue min-w-[160px]"
                 aria-label="Filter by provider"
               >
                 <option value="">All Providers</option>
@@ -471,7 +454,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
             <button
               type="button"
               onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-              className="text-sm text-accent-blue hover:text-blue-800 flex items-center gap-1"
+              className="text-sm text-accent-blue hover:text-accent-blue-hover flex items-center gap-1"
               aria-expanded={showAdvancedFilters}
             >
               <span className="text-xs">{showAdvancedFilters ? '▲' : '▼'}</span>
@@ -489,7 +472,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                       placeholder="Min"
                       value={inputPriceMin}
                       onChange={(e) => setInputPriceMin(e.target.value)}
-                      className="w-24 px-2 py-1.5 border border-border-secondary rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue"
+                      className="w-24 px-2 py-1.5 border border-border-secondary rounded text-sm text-text-primary bg-bg-primary focus:outline-none focus:ring-2 focus:ring-accent-blue"
                       min="0"
                       step="0.01"
                       aria-label="Input price minimum"
@@ -499,7 +482,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                       placeholder="Max"
                       value={inputPriceMax}
                       onChange={(e) => setInputPriceMax(e.target.value)}
-                      className="w-24 px-2 py-1.5 border border-border-secondary rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue"
+                      className="w-24 px-2 py-1.5 border border-border-secondary rounded text-sm text-text-primary bg-bg-primary focus:outline-none focus:ring-2 focus:ring-accent-blue"
                       min="0"
                       step="0.01"
                       aria-label="Input price maximum"
@@ -515,7 +498,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                       placeholder="Min"
                       value={outputPriceMin}
                       onChange={(e) => setOutputPriceMin(e.target.value)}
-                      className="w-24 px-2 py-1.5 border border-border-secondary rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue"
+                      className="w-24 px-2 py-1.5 border border-border-secondary rounded text-sm text-text-primary bg-bg-primary focus:outline-none focus:ring-2 focus:ring-accent-blue"
                       min="0"
                       step="0.01"
                       aria-label="Output price minimum"
@@ -525,7 +508,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                       placeholder="Max"
                       value={outputPriceMax}
                       onChange={(e) => setOutputPriceMax(e.target.value)}
-                      className="w-24 px-2 py-1.5 border border-border-secondary rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue"
+                      className="w-24 px-2 py-1.5 border border-border-secondary rounded text-sm text-text-primary bg-bg-primary focus:outline-none focus:ring-2 focus:ring-accent-blue"
                       min="0"
                       step="0.01"
                       aria-label="Output price maximum"
@@ -541,7 +524,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                       placeholder="Min"
                       value={contextWindowMin}
                       onChange={(e) => setContextWindowMin(e.target.value)}
-                      className="w-28 px-2 py-1.5 border border-border-secondary rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue"
+                      className="w-28 px-2 py-1.5 border border-border-secondary rounded text-sm text-text-primary bg-bg-primary focus:outline-none focus:ring-2 focus:ring-accent-blue"
                       min="0"
                       step="1000"
                       aria-label="Context window minimum"
@@ -551,7 +534,7 @@ export function PricingTable({ data, exchangeRate, currency, onCurrencyChange }:
                       placeholder="Max"
                       value={contextWindowMax}
                       onChange={(e) => setContextWindowMax(e.target.value)}
-                      className="w-28 px-2 py-1.5 border border-border-secondary rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue"
+                      className="w-28 px-2 py-1.5 border border-border-secondary rounded text-sm text-text-primary bg-bg-primary focus:outline-none focus:ring-2 focus:ring-accent-blue"
                       min="0"
                       step="1000"
                       aria-label="Context window maximum"

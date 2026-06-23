@@ -23,7 +23,7 @@ export const chatgptConsumerConfig: ConsumerProviderConfig = {
     },
   ],
   // Review #1: Known plan names for extraction cross-checking
-  expectedPlanNames: ['ChatGPT Free', 'ChatGPT Plus', 'ChatGPT Pro'],
+  expectedPlanNames: ['Free', 'Go', 'Plus', 'Pro'],
   // Review #6: Per-adapter timeout (30s for Tier 1)
   adapterTimeoutMs: 30_000,
 };

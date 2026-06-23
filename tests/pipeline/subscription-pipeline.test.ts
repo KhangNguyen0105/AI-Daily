@@ -279,9 +279,9 @@ describe('Subscription Pipeline Behavior', () => {
       expect(validPromotionTypes).toContain('free_trial');
     });
 
-    it('subscription plans with freeTrialDays > 0 are eligible for /promotions display', () => {
+    it('subscription plans with freeTrialDays > 0 are eligible for promotions display', () => {
       // Conceptual test: plans with freeTrialDays > 0 should be displayable
-      // as free_trial promotions on the /promotions page
+      // as free_trial promotions in the promotions table
       const planWithTrial = {
         planName: 'Claude Pro',
         freeTrialDays: 7,

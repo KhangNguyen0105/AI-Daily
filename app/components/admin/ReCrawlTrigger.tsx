@@ -46,7 +46,7 @@ export function ReCrawlTrigger({ providers, onSuccess, onError }: ReCrawlTrigger
         <select
           value={selectedProvider}
           onChange={(e) => setSelectedProvider(e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[180px] shadow-sm"
+          className="px-3 py-2 border border-border-secondary rounded-md text-sm text-text-primary bg-bg-primary focus:outline-none focus:ring-2 focus:ring-accent-blue focus:border-accent-blue min-w-[180px] shadow-sm"
         >
           <option value="" disabled>Select provider...</option>
           {providers.map((p) => (
@@ -56,7 +56,7 @@ export function ReCrawlTrigger({ providers, onSuccess, onError }: ReCrawlTrigger
         <button
           onClick={() => setIsConfirmOpen(true)}
           disabled={!selectedProvider || isLoading}
-          className="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2 bg-accent-blue text-bg-primary text-sm rounded-md hover:bg-accent-blue-hover disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Re-crawl Provider
         </button>

@@ -7,8 +7,8 @@ import type { ProviderConfig } from '../base';
  */
 export const anthropicConfig: ProviderConfig = {
   name: 'anthropic',
-  baseUrl: 'https://docs.anthropic.com',
-  pricingUrl: 'https://docs.anthropic.com/en/docs/about-claude/pricing',
+  baseUrl: 'https://platform.claude.com',
+  pricingUrl: 'https://platform.claude.com/docs/en/docs/about-claude/pricing',
   tier: 'tier1',
   currency: 'USD',
   crawlFrequencyHours: 4,
@@ -16,7 +16,7 @@ export const anthropicConfig: ProviderConfig = {
   modelIdFormat: 'anthropic',
   sources: [
     {
-      url: 'https://docs.anthropic.com/en/docs/about-claude/pricing',
+      url: 'https://platform.claude.com/docs/en/docs/about-claude/pricing',
       tier: 'tier1',
       sourceType: 'pricing_page',
     },

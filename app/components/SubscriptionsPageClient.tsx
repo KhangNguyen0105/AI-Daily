@@ -100,8 +100,8 @@ export function SubscriptionsPageClient({
             onClick={() => setActiveFilter(filter.value)}
             className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
               activeFilter === filter.value
-                ? 'bg-blue-600 text-bg-primary'
-                : 'bg-bg-tertiary text-text-primary hover:bg-gray-200'
+                ? 'bg-accent-blue text-bg-primary'
+                : 'bg-bg-tertiary text-text-primary hover:bg-bg-tertiary'
             }`}
           >
             {filter.label}
@@ -113,7 +113,7 @@ export function SubscriptionsPageClient({
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortType)}
-            className="px-3 py-1.5 text-sm font-medium text-text-primary bg-bg-tertiary border border-border-primary rounded-full hover:bg-gray-200 transition-colors cursor-pointer"
+            className="px-3 py-1.5 text-sm font-medium text-text-primary bg-bg-tertiary border border-border-primary rounded-full hover:bg-bg-tertiary transition-colors cursor-pointer"
           >
             {sortOptions.map((option) => (
               <option key={option.value} value={option.value}>

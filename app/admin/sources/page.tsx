@@ -65,16 +65,16 @@ export default function SourcesPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-sm text-gray-500">Loading sources...</div>
+        <div className="text-sm text-text-tertiary">Loading sources...</div>
       </div>
     );
   }
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">
+      <h1 className="text-2xl font-bold text-text-primary mb-6">
         Sources{' '}
-        <span className="text-base font-normal text-gray-500">({sources.length})</span>
+        <span className="text-base font-normal text-text-tertiary">({sources.length})</span>
       </h1>
 
       <SourcesTable sources={sources} onToggleTrust={handleToggleTrust} />

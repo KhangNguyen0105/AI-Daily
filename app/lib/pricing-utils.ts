@@ -61,13 +61,13 @@ export function sanitizeDisplayName(name: string, maxLength = 100): string {
 export function getConfidenceColor(confidence: string): string {
   switch (confidence) {
     case 'verified':
-      return 'bg-green-100 text-green-800';
+      return 'bg-badge-green-bg text-badge-green-text';
     case 'likely':
-      return 'bg-yellow-100 text-yellow-800';
+      return 'bg-badge-yellow-bg text-badge-yellow-text';
     case 'low_confidence':
-      return 'bg-red-100 text-red-800';
+      return 'bg-badge-red-bg text-badge-red-text';
     default:
-      return 'bg-gray-100 text-gray-800';
+      return 'bg-bg-tertiary text-text-primary';
   }
 }
 

@@ -10,7 +10,7 @@ import type { ProviderConfig } from '../base';
 export const openaiConfig: ProviderConfig = {
   name: 'openai',
   baseUrl: 'https://openai.com',
-  pricingUrl: 'https://openai.com/api/pricing/',
+  pricingUrl: 'https://platform.openai.com/docs/pricing',
   tier: 'tier1',
   currency: 'USD',
   crawlFrequencyHours: 4,
@@ -18,7 +18,7 @@ export const openaiConfig: ProviderConfig = {
   modelIdFormat: 'openai',
   sources: [
     {
-      url: 'https://openai.com/api/pricing/',
+      url: 'https://platform.openai.com/docs/pricing',
       tier: 'tier1',
       sourceType: 'pricing_page',
     },

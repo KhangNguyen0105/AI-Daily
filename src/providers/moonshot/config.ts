@@ -11,7 +11,7 @@ import type { ProviderConfig } from '../base';
 export const moonshotConfig: ProviderConfig = {
   name: 'moonshot',
   baseUrl: 'https://www.moonshot.cn',
-  pricingUrl: 'https://www.moonshot.cn/pricing',
+  pricingUrl: 'https://platform.moonshot.cn/docs/pricing',
   tier: 'tier1',
   currency: 'CNY',
   crawlFrequencyHours: 4,
@@ -19,7 +19,7 @@ export const moonshotConfig: ProviderConfig = {
   modelIdFormat: 'moonshot',
   sources: [
     {
-      url: 'https://www.moonshot.cn/pricing',
+      url: 'https://platform.moonshot.cn/docs/pricing',
       tier: 'tier1',
       sourceType: 'pricing_page',
     },

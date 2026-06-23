@@ -22,6 +22,6 @@ export const cursorConsumerConfig: ConsumerProviderConfig = {
       sourceType: 'pricing_page',
     },
   ],
-  expectedPlanNames: ['Cursor Free', 'Cursor Pro', 'Cursor Business'],
+  expectedPlanNames: ['Hobby', 'Pro', 'Pro+', 'Ultra', 'Teams'],
   adapterTimeoutMs: 45_000,
 };

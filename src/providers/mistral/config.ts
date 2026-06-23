@@ -8,7 +8,7 @@ import type { ProviderConfig } from '../base';
 export const mistralConfig: ProviderConfig = {
   name: 'mistral',
   baseUrl: 'https://mistral.ai',
-  pricingUrl: 'https://mistral.ai/products/la-plateforme#pricing',
+  pricingUrl: 'https://mistral.ai/pricing/',
   tier: 'tier1',
   currency: 'USD',
   crawlFrequencyHours: 4,
@@ -16,7 +16,7 @@ export const mistralConfig: ProviderConfig = {
   modelIdFormat: 'mistral',
   sources: [
     {
-      url: 'https://mistral.ai/products/la-plateforme#pricing',
+      url: 'https://mistral.ai/pricing/',
       tier: 'tier1',
       sourceType: 'pricing_page',
     },

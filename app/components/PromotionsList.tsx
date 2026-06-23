@@ -60,7 +60,7 @@ export function PromotionsList({
             <div className="flex items-center gap-2 mb-2">
               <span
                 className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
-                  PROMOTION_BADGE_STYLES[promo.type] ?? 'bg-bg-tertiary text-gray-800'
+                  PROMOTION_BADGE_STYLES[promo.type] ?? 'bg-bg-tertiary text-text-primary'
                 }`}
               >
                 {promo.type}

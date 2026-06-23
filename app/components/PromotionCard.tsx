@@ -1,91 +1,85 @@
-'use client';
+/**
+ * PromotionCard component - displays a promotion/discount offer.
+ * Phase 11: Digest & Free Offers Enhancement
+ *
+ * Amber card with discount badge, description, and provider link.
+ * Links directly to provider pricing page.
+ */
 
-import { format } from 'date-fns';
-import { isSafeUrl } from '@/app/lib/url-utils';
-import { PromotionData } from '@/app/components/PromotionsList';
-import { PROMOTION_BADGE_STYLES, PROMOTION_TYPE_LABELS } from '@/app/lib/promotion-constants';
+interface PromotionCardProps {
+  modelPattern: string;
+  description: string;
+  providerName: string;
+  providerUrl: string;
+  discount?: string;
+}
 
 /**
- * Individual promotion card component.
- * Per D-07: card grid layout with type badge, expiration, description.
- * Per D-08: show all promos, gray out expired ones.
+ * Extract discount percentage from description.
+ * Looks for patterns like "20% OFF", "50% off", etc.
  */
-export function PromotionCard({ promo }: { promo: PromotionData }) {
-  // Compute isActive: if endDate is null, active = true; otherwise endDate > now
-  // Use Date.now() for timezone consistency per Pitfall 4
-  const isActive = promo.endDate === null || new Date(promo.endDate).getTime() > Date.now();
+function extractDiscount(description: string): string | null {
+  const match = description.match(/(\d+)%\s*off/i);
+  return match ? match[1] + "% OFF" : null;
+}
 
-  // Compute days remaining
-  const getDaysRemaining = (): string => {
-    if (!promo.endDate) return '';
-
-    const now = Date.now();
-    const endTime = new Date(promo.endDate).getTime();
-    const diffMs = endTime - now;
-    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-
-    if (diffDays < 0) return 'Expired';
-    if (diffDays === 0) return 'Expires today';
-    if (diffDays === 1) return 'Expires tomorrow';
-    return `${diffDays} days remaining`;
-  };
-
-  const daysRemaining = getDaysRemaining();
+export function PromotionCard({
+  modelPattern,
+  description,
+  providerName,
+  providerUrl,
+  discount,
+}: PromotionCardProps) {
+  const discountBadge = discount || extractDiscount(description);
 
   return (
-    <div
-      className={`border rounded-lg p-4 ${
-        isActive
-          ? 'bg-white border-gray-200'
-          : 'bg-gray-50 border-gray-200 opacity-60'
-      }`}
-    >
-      {/* Top row: type badge + days remaining */}
-      <div className="flex items-center justify-between mb-3">
-        <span
-          className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
-            PROMOTION_BADGE_STYLES[promo.type] ?? 'bg-gray-100 text-gray-800'
-          }`}
-        >
-          {PROMOTION_TYPE_LABELS[promo.type] ?? promo.type}
-        </span>
-        {daysRemaining && (
-          <span className="text-xs text-gray-500">{daysRemaining}</span>
+    <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 hover:bg-amber-500/15 transition-colors">
+      {/* Discount badge */}
+      <div className="flex items-center gap-2 mb-3">
+        {discountBadge ? (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500 text-white">
+            {discountBadge}
+          </span>
+        ) : (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/50 text-amber-700 dark:text-amber-300">
+            PROMO
+          </span>
         )}
       </div>
 
+      {/* Model/Pattern name */}
+      <h3 className="font-bold text-text-primary text-lg mb-2">
+        {modelPattern}
+      </h3>
+
       {/* Description */}
-      <p className="text-sm text-gray-900 mb-2">{promo.description}</p>
+      <p className="text-text-secondary text-sm mb-4 line-clamp-3">
+        {description}
+      </p>
 
-      {/* Credits */}
-      {promo.credits && (
-        <p className="text-xs text-gray-600 mb-2">Credits: {promo.credits}</p>
-      )}
-
-      {/* Date range */}
-      {(promo.startDate || promo.endDate) && (
-        <p className="text-xs text-gray-500 mb-3">
-          {promo.startDate && format(new Date(promo.startDate), 'MMM d, yyyy')}
-          {promo.startDate && promo.endDate && ' - '}
-          {promo.endDate
-            ? format(new Date(promo.endDate), 'MMM d, yyyy')
-            : promo.startDate
-              ? ' - Ongoing'
-              : ''}
-        </p>
-      )}
-
-      {/* Source link */}
-      {promo.sourceUrl && isSafeUrl(promo.sourceUrl) && (
-        <a
-          href={promo.sourceUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-xs text-blue-600 hover:text-blue-800 underline"
+      {/* Provider link */}
+      <a
+        href={providerUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-accent-blue hover:text-accent-blue-hover transition-colors"
+      >
+        {providerName}
+        <svg
+          className="w-3.5 h-3.5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
         >
-          View details
-        </a>
-      )}
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+          />
+        </svg>
+      </a>
     </div>
   );
 }

@@ -31,46 +31,46 @@ export default async function AdminArticlesPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-text-primary">
           Articles{' '}
-          <span className="text-base font-normal text-gray-500">({articlesList.length})</span>
+          <span className="text-base font-normal text-text-tertiary">({articlesList.length})</span>
         </h1>
       </div>
 
       {articlesList.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-sm text-gray-500">No articles yet</p>
-          <p className="text-xs text-gray-400 mt-1">
+          <p className="text-sm text-text-tertiary">No articles yet</p>
+          <p className="text-xs text-text-tertiary mt-1">
             Articles will appear here once the daily content engine publishes its first digest.
           </p>
         </div>
       ) : (
-        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+        <div className="bg-bg-primary border border-border-primary rounded-lg overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-200 bg-gray-50">
-                <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500">Date</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500">Title</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500">Status</th>
-                <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500">Action</th>
+              <tr className="border-b border-border-primary bg-bg-secondary">
+                <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-text-tertiary">Date</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-text-tertiary">Title</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-text-tertiary">Status</th>
+                <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-text-tertiary">Action</th>
               </tr>
             </thead>
             <tbody>
               {articlesList.map((article) => (
-                <tr key={article.id} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="px-4 py-3 text-gray-600">
+                <tr key={article.id} className="border-b border-border-primary hover:bg-bg-secondary">
+                  <td className="px-4 py-3 text-text-secondary">
                     {format(new Date(article.date), 'MMM d, yyyy')}
                   </td>
-                  <td className="px-4 py-3 text-gray-900 max-w-xs truncate">
+                  <td className="px-4 py-3 text-text-primary max-w-xs truncate">
                     {article.title.length > 60 ? `${article.title.slice(0, 60)}...` : article.title}
                   </td>
                   <td className="px-4 py-3">
                     {article.publishedAt ? (
-                      <span className="inline-block px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded">
+                      <span className="inline-block px-2 py-0.5 text-xs font-medium bg-badge-green-bg text-badge-green-text rounded">
                         Published
                       </span>
                     ) : (
-                      <span className="inline-block px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded">
+                      <span className="inline-block px-2 py-0.5 text-xs font-medium bg-bg-tertiary text-text-secondary rounded">
                         Draft
                       </span>
                     )}
@@ -78,7 +78,7 @@ export default async function AdminArticlesPage() {
                   <td className="px-4 py-3 text-right">
                     <Link
                       href={`/admin/articles/${article.id}/edit`}
-                      className="text-sm text-blue-600 hover:text-blue-800"
+                      className="text-sm text-accent-blue hover:text-accent-blue-hover"
                     >
                       Edit Article
                     </Link>

@@ -24,8 +24,8 @@ export function TrendsPageClient({ models }: { models: TrendModelData[] }) {
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       {/* Page heading */}
-      <h1 className="text-2xl font-semibold text-gray-900 mb-2">Pricing Trends</h1>
-      <p className="text-sm text-gray-600 mb-8">
+      <h1 className="text-2xl font-semibold text-text-primary mb-2">Pricing Trends</h1>
+      <p className="text-sm text-text-secondary mb-8">
         Track how AI model prices change over time.
       </p>
 
@@ -33,7 +33,7 @@ export function TrendsPageClient({ models }: { models: TrendModelData[] }) {
       {selectedModel && (
         <button
           onClick={() => setSelectedModelIndex(null)}
-          className="text-sm text-blue-600 hover:text-blue-800 mb-6"
+          className="text-sm text-accent-blue hover:text-accent-blue-hover mb-6"
         >
           ← Back to all models
         </button>
@@ -43,8 +43,8 @@ export function TrendsPageClient({ models }: { models: TrendModelData[] }) {
       {!selectedModel ? (
         models.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-lg font-medium text-gray-900 mb-2">No trend data yet</p>
-            <p className="text-sm text-gray-600">
+            <p className="text-lg font-medium text-text-primary mb-2">No trend data yet</p>
+            <p className="text-sm text-text-secondary">
               Pricing trends will appear after the pipeline collects data over multiple days.
             </p>
           </div>
@@ -54,15 +54,15 @@ export function TrendsPageClient({ models }: { models: TrendModelData[] }) {
               <button
                 key={`${model.modelName}-${model.sourceId}`}
                 onClick={() => setSelectedModelIndex(index)}
-                className="bg-white border border-gray-200 rounded-lg p-4 text-left hover:border-blue-300 hover:shadow-sm transition-all"
+                className="bg-bg-primary border border-border-primary rounded-lg p-4 text-left hover:border-accent-blue hover:shadow-sm transition-all"
               >
-                <p className="text-sm font-medium text-gray-900">
+                <p className="text-sm font-medium text-text-primary">
                   {sanitizeDisplayName(model.modelName)}
                 </p>
                 {model.sourceName && (
-                  <p className="text-xs text-gray-500 mt-1">{model.sourceName}</p>
+                  <p className="text-xs text-text-tertiary mt-1">{model.sourceName}</p>
                 )}
-                <p className="text-xs text-gray-400 mt-2">
+                <p className="text-xs text-text-tertiary mt-2">
                   {model.history.length} data point{model.history.length !== 1 ? 's' : ''}
                 </p>
               </button>

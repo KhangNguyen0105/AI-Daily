@@ -44,7 +44,7 @@ export function SubscriptionCard({ plan }: { plan: SubscriptionPlanData }) {
       ) : plan.rawPriceText !== null ? (
         <p className="text-lg font-medium text-text-secondary">{plan.rawPriceText}</p>
       ) : (
-        <p className="text-sm text-gray-400">Price not available</p>
+        <p className="text-sm text-text-tertiary">Price not available</p>
       )}
 
       {/* Annual breakdown */}
@@ -77,12 +77,12 @@ export function SubscriptionCard({ plan }: { plan: SubscriptionPlanData }) {
         <ul className="text-sm text-text-secondary space-y-1 mb-3">
           {plan.keyFeatures.slice(0, 4).map((feature, index) => (
             <li key={index} className="flex items-start gap-1">
-              <span className="text-gray-400 mt-0.5">•</span>
+              <span className="text-text-tertiary mt-0.5">•</span>
               <span>{feature}</span>
             </li>
           ))}
           {plan.keyFeatures.length > 4 && (
-            <li className="text-xs text-gray-400">
+            <li className="text-xs text-text-tertiary">
               +{plan.keyFeatures.length - 4} more
             </li>
           )}
@@ -91,7 +91,7 @@ export function SubscriptionCard({ plan }: { plan: SubscriptionPlanData }) {
 
       {/* Last checked timestamp (review suggestion -- freshness indicator) */}
       {plan.crawledAt !== null && (
-        <p className="text-xs text-gray-400 mt-2">
+        <p className="text-xs text-text-tertiary mt-2">
           Last checked: {format(plan.crawledAt, 'MMM d, yyyy')}
         </p>
       )}

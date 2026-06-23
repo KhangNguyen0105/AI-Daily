@@ -74,20 +74,20 @@ export function ModelSelector({
         }}
         onFocus={() => setOpen(true)}
         placeholder={placeholder}
-        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        className="w-full px-3 py-2 border border-border-secondary rounded-lg text-sm text-text-primary bg-bg-primary focus:outline-none focus:ring-2 focus:ring-accent-blue focus:border-transparent"
       />
 
       {open && filtered.length > 0 && (
-        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
+        <div className="absolute z-10 w-full mt-1 bg-bg-primary border border-border-primary rounded-lg shadow-lg max-h-60 overflow-auto">
           {filtered.map((model) => (
             <button
               key={`${model.modelName}-${model.sourceId}`}
               onClick={() => handleSelect(model)}
-              className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+              className="w-full px-3 py-2 text-left text-sm hover:bg-bg-secondary flex items-center gap-2"
             >
               <span className="font-medium">{model.modelName}</span>
               {model.sourceName && (
-                <span className="text-gray-500 text-xs">{model.sourceName}</span>
+                <span className="text-text-tertiary text-xs">{model.sourceName}</span>
               )}
             </button>
           ))}

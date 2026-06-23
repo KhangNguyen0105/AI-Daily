@@ -55,7 +55,7 @@ export function SourcesTable({ sources, onToggleTrust }: SourcesTableProps) {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-white"
+          className="px-3 py-2 border border-border-secondary rounded-md text-sm text-text-primary bg-bg-primary"
         >
           <option value="all">All Status</option>
           <option value="active">Active</option>
@@ -64,7 +64,7 @@ export function SourcesTable({ sources, onToggleTrust }: SourcesTableProps) {
         <select
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-white"
+          className="px-3 py-2 border border-border-secondary rounded-md text-sm text-text-primary bg-bg-primary"
         >
           <option value="all">All Types</option>
           {uniqueTypes.map((type) => (
@@ -76,8 +76,8 @@ export function SourcesTable({ sources, onToggleTrust }: SourcesTableProps) {
       {/* Empty state */}
       {filtered.length === 0 && (
         <div className="text-center py-8">
-          <p className="text-sm text-gray-500">No sources found</p>
-          <p className="text-xs text-gray-400 mt-1">
+          <p className="text-sm text-text-tertiary">No sources found</p>
+          <p className="text-xs text-text-tertiary mt-1">
             {sources.length === 0
               ? 'No sources have been configured yet. Check that providers have been configured.'
               : 'Try adjusting your filters to see more sources.'}
@@ -87,15 +87,15 @@ export function SourcesTable({ sources, onToggleTrust }: SourcesTableProps) {
 
       {/* Table */}
       {filtered.length > 0 && (
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+      <div className="bg-bg-primary border border-border-primary rounded-lg overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-200 bg-gray-50">
-              <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500">Name</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500">Type</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500">Status</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500">Last</th>
-              <th className="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500">Trust</th>
+            <tr className="border-b border-border-primary bg-bg-secondary">
+              <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-text-tertiary">Name</th>
+              <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-text-tertiary">Type</th>
+              <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-text-tertiary">Status</th>
+              <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-text-tertiary">Last</th>
+              <th className="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wide text-text-tertiary">Trust</th>
             </tr>
           </thead>
           <tbody>
@@ -105,24 +105,24 @@ export function SourcesTable({ sources, onToggleTrust }: SourcesTableProps) {
                 <Fragment key={source.id}>
                   <tr
                     onClick={() => setExpandedRowId(isExpanded ? null : source.id)}
-                    className={`border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${
-                      isExpanded ? 'bg-gray-50' : ''
+                    className={`border-b border-border-primary cursor-pointer hover:bg-bg-secondary transition-colors ${
+                      isExpanded ? 'bg-bg-secondary' : ''
                     }`}
                   >
-                    <td className="px-4 py-3 text-gray-900">{source.name}</td>
-                    <td className="px-4 py-3 text-gray-600">{source.providerType}</td>
+                    <td className="px-4 py-3 text-text-primary">{source.name}</td>
+                    <td className="px-4 py-3 text-text-secondary">{source.providerType}</td>
                     <td className="px-4 py-3">
                       {source.isActive === 1 ? (
-                        <span className="inline-block px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded">
+                        <span className="inline-block px-2 py-0.5 text-xs font-medium bg-badge-green-bg text-badge-green-text rounded">
                           Active
                         </span>
                       ) : (
-                        <span className="inline-block px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded">
+                        <span className="inline-block px-2 py-0.5 text-xs font-medium bg-bg-tertiary text-text-secondary rounded">
                           Inactive
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-gray-600">
+                    <td className="px-4 py-3 text-text-secondary">
                       {format(new Date(source.updatedAt), 'MMM d, yyyy')}
                     </td>
                     <td className="px-4 py-3 text-center">
@@ -135,11 +135,11 @@ export function SourcesTable({ sources, onToggleTrust }: SourcesTableProps) {
                         }}
                         disabled={loadingToggleId === source.id}
                         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                          source.isActive === 1 ? 'bg-blue-600' : 'bg-gray-300'
+                          source.isActive === 1 ? 'bg-accent-blue' : 'bg-bg-tertiary'
                         } ${loadingToggleId === source.id ? 'opacity-50' : ''}`}
                       >
                         <span
-                          className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
+                          className={`inline-block h-5 w-5 transform rounded-full bg-bg-primary shadow transition-transform ${
                             source.isActive === 1 ? 'translate-x-5' : 'translate-x-0'
                           }`}
                         />
@@ -150,24 +150,24 @@ export function SourcesTable({ sources, onToggleTrust }: SourcesTableProps) {
                   {/* Expanded details */}
                   {isExpanded && (
                     <tr>
-                      <td colSpan={5} className="p-0 border-b border-gray-200">
-                        <div className="px-4 py-4 bg-gray-50/80 shadow-inner">
+                      <td colSpan={5} className="p-0 border-b border-border-primary">
+                        <div className="px-4 py-4 bg-bg-secondary/80 shadow-inner">
                           <div className="text-sm space-y-2">
                             <p className="flex items-center">
-                              <span className="text-gray-500 w-24">URL:</span>
+                              <span className="text-text-tertiary w-24">URL:</span>
                               <a
                                 href={source.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-blue-600 hover:text-blue-800 hover:underline"
+                                className="text-accent-blue hover:text-accent-blue-hover hover:underline"
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 {source.url}
                               </a>
                             </p>
                             <p className="flex items-center">
-                              <span className="text-gray-500 w-24">Last updated:</span>
-                              <span className="text-gray-900 font-medium">
+                              <span className="text-text-tertiary w-24">Last updated:</span>
+                              <span className="text-text-primary font-medium">
                                 {format(new Date(source.updatedAt), 'MMM d, yyyy h:mm a')}
                               </span>
                             </p>

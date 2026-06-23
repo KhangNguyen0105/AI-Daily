@@ -99,13 +99,13 @@ export function EditArticleClient({ article, initialVersions, initialExtractions
   return (
     <div>
       {/* Tab bar */}
-      <div className="flex items-center gap-4 mb-6 border-b border-gray-200">
+      <div className="flex items-center gap-4 mb-6 border-b border-border-primary">
         <button
           onClick={() => setActiveTab('edit')}
           className={`pb-3 text-sm ${
             activeTab === 'edit'
-              ? 'text-blue-600 border-b-2 border-blue-600 font-semibold'
-              : 'text-gray-500'
+              ? 'text-accent-blue border-b-2 border-accent-blue font-semibold'
+              : 'text-text-tertiary'
           }`}
         >
           Edit
@@ -114,8 +114,8 @@ export function EditArticleClient({ article, initialVersions, initialExtractions
           onClick={() => setActiveTab('preview')}
           className={`pb-3 text-sm ${
             activeTab === 'preview'
-              ? 'text-blue-600 border-b-2 border-blue-600 font-semibold'
-              : 'text-gray-500'
+              ? 'text-accent-blue border-b-2 border-accent-blue font-semibold'
+              : 'text-text-tertiary'
           }`}
         >
           Preview
@@ -124,8 +124,8 @@ export function EditArticleClient({ article, initialVersions, initialExtractions
           onClick={() => setActiveTab('sources')}
           className={`pb-3 text-sm ${
             activeTab === 'sources'
-              ? 'text-blue-600 border-b-2 border-blue-600 font-semibold'
-              : 'text-gray-500'
+              ? 'text-accent-blue border-b-2 border-accent-blue font-semibold'
+              : 'text-text-tertiary'
           }`}
         >
           Sources
@@ -140,11 +140,11 @@ export function EditArticleClient({ article, initialVersions, initialExtractions
       {/* Preview tab */}
       {activeTab === 'preview' && (
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">{article.title}</h1>
-          {article.summary && <p className="text-sm text-gray-500 mb-6">{article.summary}</p>}
+          <h1 className="text-2xl font-bold text-text-primary mb-2">{article.title}</h1>
+          {article.summary && <p className="text-sm text-text-tertiary mb-6">{article.summary}</p>}
           <div className="prose prose-sm max-w-none">
             {/* Preview is handled by ArticleEditForm, but we show it standalone here too */}
-            <p className="text-sm text-gray-500">Switch to Edit tab and use the Preview button within the form.</p>
+            <p className="text-sm text-text-tertiary">Switch to Edit tab and use the Preview button within the form.</p>
           </div>
         </div>
       )}
@@ -154,42 +154,42 @@ export function EditArticleClient({ article, initialVersions, initialExtractions
         <div>
           {initialExtractions.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-sm text-gray-500">No source data found for this article&apos;s date.</p>
+              <p className="text-sm text-text-tertiary">No source data found for this article&apos;s date.</p>
             </div>
           ) : (
-            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+            <div className="bg-bg-primary border border-border-primary rounded-lg overflow-hidden">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 bg-gray-50">
-                    <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500">Model</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500">Source</th>
-                    <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500">Input Price</th>
-                    <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500">Output Price</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500">Confidence</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500">Collected</th>
+                  <tr className="border-b border-border-primary bg-bg-secondary">
+                    <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-text-tertiary">Model</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-text-tertiary">Source</th>
+                    <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-text-tertiary">Input Price</th>
+                    <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-text-tertiary">Output Price</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-text-tertiary">Confidence</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-text-tertiary">Collected</th>
                   </tr>
                 </thead>
                 <tbody>
                   {initialExtractions.map((ext) => (
-                    <tr key={ext.id} className="border-b border-gray-100">
-                      <td className="px-4 py-3 text-gray-900">{ext.modelName}</td>
+                    <tr key={ext.id} className="border-b border-border-primary">
+                      <td className="px-4 py-3 text-text-primary">{ext.modelName}</td>
                       <td className="px-4 py-3">
                         {ext.sourceUrl ? (
-                          <a href={ext.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 text-sm">
+                          <a href={ext.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-accent-blue hover:text-accent-blue-hover text-sm">
                             {ext.sourceName ?? 'Link'}
                           </a>
                         ) : (
-                          <span className="text-gray-600">{ext.sourceName ?? 'Unknown'}</span>
+                          <span className="text-text-secondary">{ext.sourceName ?? 'Unknown'}</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-right text-gray-600">
+                      <td className="px-4 py-3 text-right text-text-secondary">
                         {ext.inputPricePer1m !== null ? `$${ext.inputPricePer1m.toFixed(2)}` : '-'}
                       </td>
-                      <td className="px-4 py-3 text-right text-gray-600">
+                      <td className="px-4 py-3 text-right text-text-secondary">
                         {ext.outputPricePer1m !== null ? `$${ext.outputPricePer1m.toFixed(2)}` : '-'}
                       </td>
-                      <td className="px-4 py-3 text-gray-600 capitalize">{ext.confidence.replace('_', ' ')}</td>
-                      <td className="px-4 py-3 text-gray-600">
+                      <td className="px-4 py-3 text-text-secondary capitalize">{ext.confidence.replace('_', ' ')}</td>
+                      <td className="px-4 py-3 text-text-secondary">
                         {format(new Date(ext.collectedAt), 'MMM d, yyyy h:mm a')}
                       </td>
                     </tr>
@@ -203,7 +203,7 @@ export function EditArticleClient({ article, initialVersions, initialExtractions
 
       {/* Version History */}
       <div className="mt-8">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Version History</h2>
+        <h2 className="text-lg font-semibold text-text-primary mb-4">Version History</h2>
         <VersionHistoryTable
           versions={versions}
           onRollback={(versionId) => setRollbackTarget(versionId)}
