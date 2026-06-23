@@ -15,11 +15,14 @@ const envSchema = z.object({
   MIMO_API_KEY: z.string().optional(),
   MIMO_BASE_URL: z.string().default('https://token-plan-sgp.xiaomimimo.com/v1'),
   MIMO_MODEL: z.string().default('mimo-v2.5-pro'),
+  OPENMODEL_API_KEY: z.string().optional(),
+  OPENMODEL_BASE_URL: z.string().default('https://api.openmodel.ai/v1'),
+  OPENMODEL_MODEL: z.string().default('mimo-v2.5-pro'),
   NODE_ENV: z
     .enum(['development', 'production', 'test'])
     .default('development'),
-  AI_PROVIDER: z.enum(['anthropic', 'openai', 'mimo']).default('anthropic'),
-  AI_FALLBACK_PROVIDER: z.enum(['anthropic', 'openai', 'mimo']).default('openai'),
+  AI_PROVIDER: z.enum(['anthropic', 'openai', 'mimo', 'openmodel']).default('anthropic'),
+  AI_FALLBACK_PROVIDER: z.enum(['anthropic', 'openai', 'mimo', 'openmodel']).default('openai'),
   // WR-06: Reject empty strings (which are truthy but useless for auth)
   ADMIN_PASSWORD: z.string().min(1).optional(),
   NEXTAUTH_SECRET: z.string().min(1).optional(),

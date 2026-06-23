@@ -69,16 +69,24 @@ services:
       - key: NEXTAUTH_SECRET
         generateValue: true  # Auto-generate secret
 
-      # AI Provider
+      # AI Provider (MIMO)
       - key: AI_PROVIDER
         value: mimo
       - key: AI_FALLBACK_PROVIDER
-        value: mimo
+        value: openmodel
       - key: MIMO_API_KEY
         sync: false          # Set manually in dashboard
       - key: MIMO_BASE_URL
         value: https://token-plan-sgp.xiaomimimo.com/v1
       - key: MIMO_MODEL
+        value: mimo-v2.5-pro
+
+      # AI Provider (OpenModel - fallback)
+      - key: OPENMODEL_API_KEY
+        sync: false          # Set manually in dashboard
+      - key: OPENMODEL_BASE_URL
+        value: https://api.openmodel.ai/v1
+      - key: OPENMODEL_MODEL
         value: mimo-v2.5-pro
 
     # Auto-deploy from main branch
@@ -123,17 +131,26 @@ services:
       - key: CRAWLEE_STORAGE_DIR
         value: /tmp/crawlee-storage
 
-      # AI Provider
+      # AI Provider (MIMO)
       - key: AI_PROVIDER
         value: mimo
       - key: AI_FALLBACK_PROVIDER
-        value: mimo
+        value: openmodel
       - key: MIMO_API_KEY
         sync: false
       - key: MIMO_BASE_URL
         value: https://token-plan-sgp.xiaomimimo.com/v1
       - key: MIMO_MODEL
         value: mimo-v2.5-pro
+
+      # AI Provider (OpenModel - fallback)
+      - key: OPENMODEL_API_KEY
+        sync: false
+      - key: OPENMODEL_BASE_URL
+        value: https://api.openmodel.ai/v1
+      - key: OPENMODEL_MODEL
+        value: mimo-v2.5-pro
+
       - key: SIGTERM_TIMEOUT
         value: "30"
 

@@ -5,9 +5,9 @@ import { env } from './env';
 /**
  * Shared AI client for extraction and generation.
  *
- * Uses Mimo (Xiaomi) if MIMO_API_KEY is set, otherwise falls back to OpenAI
- * or Anthropic. Mimo's API is OpenAI-compatible, so we use @ai-sdk/openai
- * with a custom base URL.
+ * Supports multiple providers: MIMO, OpenModel, OpenAI, Anthropic.
+ * MIMO and OpenModel APIs are OpenAI-compatible, so we use @ai-sdk/openai
+ * with custom base URLs.
  */
 
 function resolveProvider() {
@@ -17,6 +17,12 @@ function resolveProvider() {
       baseURL: env.MIMO_BASE_URL,
     });
   }
+  if (env.OPENMODEL_API_KEY) {
+    return createOpenAI({
+      apiKey: env.OPENMODEL_API_KEY,
+      baseURL: env.OPENMODEL_BASE_URL,
+    });
+  }
   if (env.OPENAI_API_KEY) {
     return createOpenAI({ apiKey: env.OPENAI_API_KEY });
   }
@@ -24,7 +30,7 @@ function resolveProvider() {
     return createAnthropic({ apiKey: env.ANTHROPIC_API_KEY });
   }
   throw new Error(
-    'No AI provider configured. Set MIMO_API_KEY, OPENAI_API_KEY, or ANTHROPIC_API_KEY in .env'
+    'No AI provider configured. Set MIMO_API_KEY, OPENMODEL_API_KEY, OPENAI_API_KEY, or ANTHROPIC_API_KEY in .env'
   );
 }
 
@@ -42,6 +48,13 @@ export function getAIModel() {
     });
     return provider.chat(env.MIMO_MODEL);
   }
+  if (env.OPENMODEL_API_KEY) {
+    const provider = createOpenAI({
+      apiKey: env.OPENMODEL_API_KEY,
+      baseURL: env.OPENMODEL_BASE_URL,
+    });
+    return provider.chat(env.OPENMODEL_MODEL);
+  }
   if (env.OPENAI_API_KEY) {
     const provider = createOpenAI({ apiKey: env.OPENAI_API_KEY });
     return provider.chat('gpt-4o');
@@ -51,6 +64,6 @@ export function getAIModel() {
     return provider.chat('claude-sonnet-4-20250514');
   }
   throw new Error(
-    'No AI provider configured. Set MIMO_API_KEY, OPENAI_API_KEY, or ANTHROPIC_API_KEY in .env'
+    'No AI provider configured. Set MIMO_API_KEY, OPENMODEL_API_KEY, OPENAI_API_KEY, or ANTHROPIC_API_KEY in .env'
   );
 }
