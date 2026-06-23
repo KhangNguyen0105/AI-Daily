@@ -213,6 +213,7 @@ export function createExtractWorker(): Worker<ExtractJobData, ExtractJobResult> 
           // Upsert valid promotions (don't delete existing ones)
           for (const promo of validPromotions) {
             try {
+              // First try to insert
               await db
                 .insert(promotions)
                 .values({
@@ -224,21 +225,38 @@ export function createExtractWorker(): Worker<ExtractJobData, ExtractJobResult> 
                   startDate: null,
                   endDate: null,
                   sourceUrl: promo.sourceUrl || null,
-                })
-                .onConflictDoUpdate({
-                  target: [promotions.sourceId, promotions.modelPattern, promotions.type],
-                  set: {
-                    description: promo.description,
-                    credits: promo.credits || null,
-                    sourceUrl: promo.sourceUrl || null,
-                    updatedAt: new Date(),
-                  },
                 });
-            } catch (promoError) {
-              console.error(
-                `[extract] Failed to upsert promotion "${promo.modelPattern}" for provider "${providerName}":`,
-                promoError,
-              );
+            } catch (insertError: any) {
+              // If duplicate key error, try to update
+              if (insertError?.code === '23505') {
+                try {
+                  await db
+                    .update(promotions)
+                    .set({
+                      description: promo.description,
+                      credits: promo.credits || null,
+                      sourceUrl: promo.sourceUrl || null,
+                      updatedAt: new Date(),
+                    })
+                    .where(
+                      and(
+                        eq(promotions.sourceId, sourceId),
+                        eq(promotions.modelPattern, promo.modelPattern),
+                        eq(promotions.type, promo.type as any),
+                      ),
+                    );
+                } catch (updateError) {
+                  console.error(
+                    `[extract] Failed to update promotion "${promo.modelPattern}" for provider "${providerName}":`,
+                    updateError,
+                  );
+                }
+              } else {
+                console.error(
+                  `[extract] Failed to insert promotion "${promo.modelPattern}" for provider "${providerName}":`,
+                  insertError,
+                );
+              }
             }
           }
         }
