@@ -1,6 +1,6 @@
 import { db } from '@/src/db/index';
 import { extractions, promotions, sources } from '@/src/db/schema';
-import { and, gte, lt, eq } from 'drizzle-orm';
+import { and, gte, lt, eq, or, isNull } from 'drizzle-orm';
 
 /**
  * Diff result comparing today's extractions with yesterday's.
@@ -119,9 +119,16 @@ export async function computeDiff(today: Date, yesterday: Date): Promise<DiffRes
       })
       .from(promotions)
       .where(
-        and(
-          gte(promotions.createdAt, todayRange.start),
-          lt(promotions.createdAt, todayRange.end),
+        or(
+          // Promotions created today
+          and(
+            gte(promotions.createdAt, todayRange.start),
+            lt(promotions.createdAt, todayRange.end),
+          ),
+          // Active promotions without end date (always active)
+          isNull(promotions.endDate),
+          // Promotions with end date in the future
+          gte(promotions.endDate, todayRange.start),
         ),
       ),
   ]);
