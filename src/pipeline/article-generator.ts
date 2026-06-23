@@ -102,7 +102,10 @@ Rules:
 - Return ONLY the article content, no preamble or wrapping
 - On the VERY FIRST line, output a one-line summary (max 150 characters) preceded by "SUMMARY: "
 - On the SECOND line, output the article title as "# {title}"
-- When no changes are detected, write a "no changes" article: "No pricing changes detected today. {N} models tracked." followed by brief context about what the system is monitoring`;
+- When no changes are detected, write a "no changes" article: "No pricing changes detected today. {N} models tracked." followed by brief context about what the system is monitoring
+- IMPORTANT: If there are active promotions, include them in a "## Active Promotions" section
+- For free tier offers, highlight them prominently with "(FREE)" in the description
+- Include provider names and specific limits when available`;
 
 /**
  * Generate a daily AI pricing article from a DiffResult.
