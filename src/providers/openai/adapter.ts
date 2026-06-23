@@ -44,8 +44,15 @@ export class OpenAIAdapter extends ProviderAdapter {
 Return an array of models with their name, input price per 1M tokens, output price per 1M tokens, and context window size.
 Only extract models that have explicit pricing listed. Skip models marked as "contact sales" or without pricing.
 Extract every single model listed with explicit pricing, including both the very latest state-of-the-art models and any legacy models.
-Also extract any news or promotional offers like free trials, free token tiers, or beta access.
 
+IMPORTANT RULES FOR PROMOTIONS:
+- ONLY extract promotions that are EXPLICITLY mentioned on the page
+- DO NOT hallucinate or infer promotions that are not clearly stated
+- For free tier offers, you MUST see explicit text like "free tier", "free of charge", "$0", or "free" next to the model
+- For discounts, you MUST see explicit percentage or dollar amounts
+- If no promotions are mentioned, return an empty array: "promotions": []
+- Include specific limits when mentioned (e.g., "100 calls/month", "$5 credits", "rate-limited")
+- Include expiration dates if mentioned (e.g., "first 2 months", "until Dec 2026")
 
 IMPORTANT: You MUST return a JSON object with EXACTLY these keys and formats:
 {
@@ -59,15 +66,17 @@ IMPORTANT: You MUST return a JSON object with EXACTLY these keys and formats:
   ],
   "promotions": [
     {
-      "modelPattern": "string",
+      "modelPattern": "string (exact model name or pattern from the page)",
       "type": "free_tier", // must be "free_tier", "promotion", or "beta"
-      "description": "string",
-      "credits": "string (optional)"
+      "description": "string (exact text from the page about this promotion)",
+      "credits": "string (optional - specific limits like '100 calls/month' or '$5 credits')"
     }
   ]
 }
 DO NOT use different keys like "model_name" or "model_pricing".
-DO NOT return strings for numbers.\nReturn ONLY valid JSON and absolutely no other text before or after the JSON. No markdown formatting, no backticks.
+DO NOT return strings for numbers.
+DO NOT make up promotions that are not explicitly stated on the page.
+Return ONLY valid JSON and absolutely no other text before or after the JSON. No markdown formatting, no backticks.
 
 HTML content:
 ${truncatedHtml}`,

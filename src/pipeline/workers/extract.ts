@@ -4,10 +4,11 @@ import { scoreQueue } from '../queues';
 import { redisConnection } from '../connection';
 import { db } from '../../db/index';
 import { rawData, extractions, promotions, subscriptionPlans } from '../../db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and, or, isNull } from 'drizzle-orm';
 import { classifyEdgeCases } from '../edge-case-classifier';
 import { buildEvidenceQuotes, captureEvidence } from '../../lib/evidence-anchor';
 import { updatePipelineStats } from '../orchestrator';
+import { verifyPromotions, isPromotionExpired } from '../../lib/promotion-verifier';
 import type { EdgeCaseFlags } from '../edge-case-classifier';
 import type { EvidenceQuotes } from '../../lib/evidence-anchor';
 
@@ -194,20 +195,92 @@ export function createExtractWorker(): Worker<ExtractJobData, ExtractJobResult> 
         allEvidenceQuotes[extractionId] = evidenceQuotes;
       }
 
-      // WR-04: Update promotions atomically to prevent data loss on crash
+      // WR-04: Update promotions with verification
+      // Phase 11: Verify promotions before storing to prevent hallucinated data
       if (normalized.promotions && normalized.promotions.length > 0) {
-        await db.transaction(async (tx) => {
-          await tx.delete(promotions).where(eq(promotions.sourceId, sourceId));
-          for (const promo of normalized.promotions) {
-            await tx.insert(promotions).values({
-              sourceId,
-              modelPattern: promo.modelPattern,
-              type: promo.type,
-              description: promo.description,
-              credits: promo.credits,
-            });
+        // Verify promotions before storing
+        const { valid: validPromotions, rejected: rejectedPromotions } =
+          await verifyPromotions(normalized.promotions, sourceId);
+
+        if (rejectedPromotions.length > 0) {
+          console.warn(
+            `[extract] Rejected ${rejectedPromotions.length} promotions for provider "${providerName}":`,
+            rejectedPromotions.map(r => `${r.promotion.modelPattern}: ${r.reason}`),
+          );
+        }
+
+        if (validPromotions.length > 0) {
+          // Upsert valid promotions (don't delete existing ones)
+          for (const promo of validPromotions) {
+            try {
+              await db
+                .insert(promotions)
+                .values({
+                  sourceId,
+                  modelPattern: promo.modelPattern,
+                  type: promo.type,
+                  description: promo.description,
+                  credits: promo.credits,
+                })
+                .onConflictDoUpdate({
+                  target: [promotions.sourceId, promotions.modelPattern, promotions.type],
+                  set: {
+                    description: promo.description,
+                    credits: promo.credits,
+                    updatedAt: new Date(),
+                  },
+                });
+            } catch (promoError) {
+              console.error(
+                `[extract] Failed to upsert promotion "${promo.modelPattern}" for provider "${providerName}":`,
+                promoError,
+              );
+            }
           }
-        });
+        }
+      }
+
+      // Clean up expired promotions
+      // Phase 11: Remove promotions that have passed their expiration date
+      try {
+        const allPromotions = await db
+          .select()
+          .from(promotions)
+          .where(eq(promotions.sourceId, sourceId));
+
+        for (const promo of allPromotions) {
+          if (promo.type === 'free_tier' && promo.description) {
+            // Check for time-limited indicators in description
+            const timeLimitedPatterns = [
+              /first (\d+) months?/i,
+              /for (\d+) days?/i,
+              /until (\w+ \d+,? \d{4})/i,
+              /expires? (\w+ \d+,? \d{4})/i,
+              /limited time/i,
+            ];
+
+            for (const pattern of timeLimitedPatterns) {
+              const match = promo.description.match(pattern);
+              if (match) {
+                // For "first X months" patterns, check if it's been more than X months
+                if (pattern.source.includes('months')) {
+                  const months = parseInt(match[1]);
+                  const createdAt = promo.createdAt;
+                  const expirationDate = new Date(createdAt);
+                  expirationDate.setMonth(expirationDate.getMonth() + months);
+
+                  if (new Date() > expirationDate) {
+                    await db.delete(promotions).where(eq(promotions.id, promo.id));
+                    console.log(`[extract] Removed expired promotion: ${promo.modelPattern} (${promo.description})`);
+                  }
+                }
+                break;
+              }
+            }
+          }
+        }
+      } catch (cleanupError) {
+        console.error(`[extract] Error cleaning up expired promotions for provider "${providerName}":`, cleanupError);
       }
 
       // Phase 10: Upsert subscription plans from consumer adapters

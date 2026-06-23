@@ -9,6 +9,7 @@ import {
   pgEnum,
   doublePrecision,
   uniqueIndex,
+  unique,
   uuid,
   date,
   index,
@@ -327,7 +328,10 @@ export const promotions = pgTable('promotions', {
   sourceUrl: text('source_url'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
+}, (t) => [
+  // Phase 11: Unique constraint for upsert support
+  unique('promotions_source_model_type_unique').on(t.sourceId, t.modelPattern, t.type),
+]);
 
 // Subscription plans table - consumer subscription plans (Phase 10, D-02)
 // Separate from promotions: subscription plans are persistent products, not time-limited offers.

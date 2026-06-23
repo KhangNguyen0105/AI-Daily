@@ -17,10 +17,14 @@ export const pricingSchema = z.object({
   ),
   promotions: z.array(
     z.object({
-      modelPattern: z.string().describe("The name or pattern of the models the promotion applies to"),
+      modelPattern: z.string().describe("The exact model name or pattern as shown on the page"),
       type: z.enum(['free_tier', 'promotion', 'beta']).describe("The type of the promotion"),
-      description: z.string().describe("A brief description of the promotion, e.g. 'Free trial for 14 days'"),
-      credits: z.string().nullable().optional().describe("Any free credits or tokens provided, e.g. '$50' or '1M tokens'"),
+      description: z.string().describe("Exact text from the page about this promotion - DO NOT make up or infer"),
+      credits: z.string().nullable().optional().describe("Specific limits if mentioned, e.g. '100 calls/month', '$5 credits', 'rate-limited'"),
+      sourceUrl: z.string().nullable().optional().describe("URL where this promotion was found, if different from main page"),
+      isTimeLimited: z.boolean().optional().describe("Whether the promotion has an expiration date"),
+      expiresAt: z.string().nullable().optional().describe("Expiration date if time-limited, e.g. '2026-12-31' or 'first 2 months'"),
+      limits: z.string().nullable().optional().describe("Specific usage limits, e.g. '100 API calls/month', '10K tokens/day'"),
     })
   ).optional(),
 });

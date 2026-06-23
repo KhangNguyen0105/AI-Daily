@@ -92,6 +92,14 @@ export interface PromotionResult {
   type: 'free_tier' | 'promotion' | 'beta';
   description: string;
   credits?: string | null;
+  /** Source URL where the promotion was found */
+  sourceUrl?: string | null;
+  /** Whether the promotion is time-limited */
+  isTimeLimited?: boolean;
+  /** Expiration date if time-limited */
+  expiresAt?: string | null;
+  /** Specific limits (e.g., "100 calls/month", "$5 credits") */
+  limits?: string | null;
 }
 
 /**
