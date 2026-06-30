@@ -56,10 +56,13 @@ services:
       MIMO_API_KEY: ${MIMO_API_KEY:-}
       MIMO_BASE_URL: ${MIMO_BASE_URL:-}
       MIMO_MODEL: ${MIMO_MODEL:-}
-      AI_PROVIDER: mimo
-      AI_FALLBACK_PROVIDER: openai
+      AI_PROVIDER: ${AI_PROVIDER:-mimo}
+      AI_FALLBACK_PROVIDER: ${AI_FALLBACK_PROVIDER:-openmodel}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENMODEL_API_KEY: ${OPENMODEL_API_KEY:-}
+      OPENMODEL_BASE_URL: ${OPENMODEL_BASE_URL:-https://api.openmodel.ai/v1}
+      OPENMODEL_MODEL: ${OPENMODEL_MODEL:-deepseek-v4-flash}
     depends_on:
       postgres:
         condition: service_healthy
